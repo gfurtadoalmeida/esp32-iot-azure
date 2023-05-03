@@ -9,6 +9,13 @@ extern "C"
 {
 #endif
 
+    /**
+     * @brief Run the Azure IoT Hub example.
+     * @param[in] iot_hub_hostname IoT Hub hostname.
+     * @param[in] device_id Device Id.
+     * @param[in] device_symmetric_key Device symmetric key.
+     * @return Success or failure.
+     */
     bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
                              const utf8_string_t *device_id,
                              const utf8_string_t *device_symmetric_key);

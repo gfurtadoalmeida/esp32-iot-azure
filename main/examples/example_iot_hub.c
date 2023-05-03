@@ -183,11 +183,11 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
 
             if (device_report_state_changed(iot, version, new_value) == eAzureIoTSuccess)
             {
-                ESP_LOGI(TAG_EX_IOT, "response status sent");
+                ESP_LOGI(TAG_EX_IOT, "state change reported");
             }
             else
             {
-                ESP_LOGE(TAG_EX_IOT, "failure sending response status");
+                ESP_LOGE(TAG_EX_IOT, "failure reporting state change");
             }
         }
         else
@@ -356,7 +356,7 @@ static AzureIoTResult_t device_report_state_changed(azure_iot_hub_context_t *iot
 
     payload.length = AzureIoTJSONWriter_GetBytesUsed(&json_writer);
 
-    if ((AZ_CHECK_RESULT_VAR = azure_iot_hub_send_properties_reported(iot_client, &payload, NULL)) != eAzureIoTSuccess)
+    if ((AZ_CHECK_RESULT_VAR = azure_iot_hub_send_properties_reported(iot, &payload, NULL)) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure reporting properties: 0x%08x", AZ_CHECK_RESULT_VAR);
     }
