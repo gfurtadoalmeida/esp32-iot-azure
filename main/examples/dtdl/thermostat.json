@@ -1,0 +1,74 @@
+[
+  {
+    "@context": [
+      "dtmi:dtdl:context;3"
+    ],
+    "@id": "dtmi:com:esp32iotazure:Thermostat;1",
+    "@type": "Interface",
+    "displayName": "Thermostat",
+    "contents": [
+      {
+        "@type": "Property",
+        "name": "deviceStatus",
+        "displayName": "Device Status",
+        "schema": "string",
+        "writable": false
+      },
+      {
+        "@type": "Command",
+        "name": "restart",
+        "displayName": "Restart",
+        "request": {
+          "name": "delay",
+          "schema": "integer"
+        }
+      },
+      {
+        "@type": "Component",
+        "name": "temperatureSensor",
+        "schema": "dtmi:com:esp32iotazure:TemperatureSensor;1"
+      },
+      {
+        "@type": "Component",
+        "name": "display",
+        "schema": "dtmi:com:esp32iotazure:Display;1"
+      }
+    ]
+  },
+  {
+    "@context": [
+      "dtmi:dtdl:context;3",
+      "dtmi:dtdl:extension:quantitativeTypes;1"
+    ],
+    "@id": "dtmi:com:esp32iotazure:TemperatureSensor;1",
+    "@type": "Interface",
+    "contents": [
+      {
+        "@type": [
+          "Telemetry",
+          "Temperature"
+        ],
+        "name": "temp",
+        "displayName": "Temperature",
+        "schema": "integer",
+        "unit": "degreeCelsius"
+      }
+    ]
+  },
+  {
+    "@context": [
+      "dtmi:dtdl:context;3"
+    ],
+    "@id": "dtmi:com:esp32iotazure:Display;1",
+    "@type": "Interface",
+    "contents": [
+      {
+        "@type": "Property",
+        "name": "brightness",
+        "displayName": "Brightness",
+        "schema": "integer",
+        "writable": true
+      }
+    ]
+  }
+]

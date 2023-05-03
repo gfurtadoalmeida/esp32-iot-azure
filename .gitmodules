@@ -1,0 +1,3 @@
+[submodule "components/esp32_iot_azure/.sdk/azure-iot-middleware-freertos"]
+	path = components/esp32_iot_azure/.sdk/azure-iot-middleware-freertos
+	url = https://github.com/Azure/azure-iot-middleware-freertos.git

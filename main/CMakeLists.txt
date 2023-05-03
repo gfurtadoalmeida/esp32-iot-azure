@@ -1,7 +1,13 @@
+file(GLOB_RECURSE MAIN_EXAMPLES "examples/*.c")
+
 idf_component_register(
-    SRCS "main.c"
-    INCLUDE_DIRS ""
+    SRCS
+        "main.c"
+        ${MAIN_EXAMPLES}
+    INCLUDE_DIRS
+        "examples"
     REQUIRES
         freertos
-        component_name
+        esp32_iot_azure
+        nvs_flash
 )

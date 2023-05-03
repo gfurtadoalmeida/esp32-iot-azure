@@ -1,0 +1,240 @@
+menu "ESP32 IoT Azure Configuration"
+
+    menu "Azure IoT Hub"
+
+        config ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED
+            bool "Enable Azure Device Provising Service"
+            default y
+            help
+                Enables Azure Device Provisioning Service (DPS) feature.
+
+        config ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED
+            bool "Enable Azure Device Update"
+            default y
+            help
+                Enables Azure Device Update feature.
+
+        config ESP32_IOT_AZURE_HUB_SERVER_HOSTNAME
+            string "Hostname"
+            default ""
+            help
+                Azure IoT Hub server hostname.
+
+        config ESP32_IOT_AZURE_HUB_SERVER_PORT
+            int "Port"
+            default 8883
+            help
+                Azure IoT Hub server port.
+
+        config ESP32_IOT_AZURE_HUB_CONNECT_TIMEOUT_MS
+            int "Connection timeout (ms)"
+            range 500 10000
+            default 5000
+            help
+                Connection timeout, in milliseconds.
+
+        config ESP32_IOT_AZURE_HUB_LOOP_TIMEOUT_MS
+            int "Loop timeout (ms)"
+            range 500 10000
+            default 500
+            help
+                Loop timeout, in milliseconds.
+
+        config ESP32_IOT_AZURE_HUB_SUBSCRIBE_TIMEOUT_MS
+            int "Subscription timeout (ms)"
+            range 500 10000
+            default 5000
+            help
+                Subscription timeout, in milliseconds.
+
+    endmenu
+
+    menu "Azure Device"
+
+        config ESP32_IOT_AZURE_DEVICE_MODEL_ID
+            string "Model Id"
+            default ""
+            help
+                Device model id.
+
+        config ESP32_IOT_AZURE_DEVICE_USER_AGENT
+            string "User agent"
+            default "esp32-iot-azure"
+            help
+                Device "User-Agent" value.
+
+    endmenu
+
+    if ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED
+
+        menu "Azure Device Provisioning Service (DPS)"
+
+            config ESP32_IOT_AZURE_DPS_SERVER_HOSTNAME
+                string "Hostname"
+                default "global.azure-devices-provisioning.net"
+                help
+                    Azure DPS server hostname.
+
+            config ESP32_IOT_AZURE_DPS_SCOPE_ID
+                string "Scope Id"
+                default ""
+                help
+                    This id is assigned to a Device Provisioning Service when it is
+                    created by the user and is used to uniquely identify the specific
+                    provisioning service the device will register through.
+
+            config ESP32_IOT_AZURE_DPS_CONNECT_TIMEOUT_MS
+                int "Connection timeout (ms)"
+                range 500 10000
+                default 5000
+                help
+                    Connection timeout, in milliseconds.
+
+            config ESP32_IOT_AZURE_DPS_REGISTRATION_TIMEOUT_MS
+                int "Registration timeout (ms)"
+                range 500 10000
+                default 5000
+                help
+                    Registration timeout, in milliseconds.
+
+        endmenu
+
+    endif
+
+    if ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED
+
+        menu "Azure Device Update"
+
+            config ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER
+                string "Device manufacturer"
+                default ""
+
+            config ESP32_IOT_AZURE_DU_DEVICE_MODEL
+                string "Device model"
+                default ""
+
+            config ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE
+                int "Download chunck size"
+                default 4096
+
+            config ESP32_IOT_AZURE_DU_UPDATE_PROVIDER
+                string "Update provider"
+                default ""
+
+            config ESP32_IOT_AZURE_DU_UPDATE_NAME
+                string "Update name"
+                default ""
+
+            config ESP32_IOT_AZURE_DU_UPDATE_VERSION
+                string "Update version"
+                default "v1.0"
+        endmenu
+
+    endif
+
+    menu "Transport"
+
+        config ESP32_IOT_AZURE_TRANSPORT_BACKOFF_BASE_MS
+            int "Back-off delay (ms)"
+            range 100 1000
+            default 500
+            help
+                The base back-off delay, in milliseconds,
+                to use for network operation retry attempts.
+
+        config ESP32_IOT_AZURE_TRANSPORT_BACKOFF_MAX_DELAY_MS
+            int "Max back-off delay (ms)"
+            range 1000 10000
+            default 1000
+            help
+                The maximum back-off delay, in milliseconds, for
+                retrying failed operation with the server.
+
+        config ESP32_IOT_AZURE_TRANSPORT_BACKOFF_RETRY_MAX_ATTEMPTS
+            int "Retry atteampts"
+            range 1 10
+            default 5
+            help
+                Number of retries for network operation with the server.
+
+        config ESP32_IOT_AZURE_TRANSPORT_SEND_TIMEOUT_MS
+            int "Send timeout (ms)"
+            range 100 10000
+            default 1000
+            help
+                Send timeout, in milliseconds.
+
+        config ESP32_IOT_AZURE_TRANSPORT_RECEIVE_TIMEOUT_MS
+            int "Receive timeout (ms)"
+            range 100 10000
+            default 1000
+            help
+                Receive timeout, in milliseconds.
+
+        config ESP32_IOT_AZURE_TRANSPORT_SHOW_ADVANCED_CONFIG
+            bool "Show advanced configurations"
+            default n
+            help
+                Shows advanced HTTP and MQTT configurations.
+
+    endmenu
+
+    if ESP32_IOT_AZURE_TRANSPORT_SHOW_ADVANCED_CONFIG
+
+        menu "HTTP"
+
+            config ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES
+                int "Max response header size (bytes)"
+                default 2048
+                range 1024 5120
+                help
+                    Maximum size, in bytes, of headers allowed from the server.
+
+            config ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS
+                int "Max receive retry timeout (ms)"
+                default 10
+                range 10 1000
+                help
+                    The transport receive function may be called multiple times until the end of
+                    the response is detected by the parser. This timeout represents the maximum
+                    duration that is allowed without any data reception from the network for the
+                    incoming response.
+
+            config ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS
+                int "Max send retry timeout (ms)"
+                default 10
+                range 10 1000
+                help
+                    When sending an HTTP request, the transport send function may be called multiple
+                    times until all of the required number of bytes are sent.
+                    This timeout represents the maximum duration that is allowed for no data
+                    transmission over the network through the transport send function.
+
+        endmenu
+
+        menu "MQTT"
+
+            config ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE
+                int "Buffer size"
+                default 5120
+                help
+                    Size of the network buffer for MQTT packets.
+
+            config ESP32_IOT_AZURE_TRANSPORT_MQTT_STATE_ARRAY_MAX_COUNT
+                int "Max PUBLISH messages pending"
+                default 10
+                range 5 20
+                help
+                    Maximum number of MQTT PUBLISH messages that may be pending
+                    acknowledgement at any time.
+                    QoS 1 and 2 MQTT PUBLISHes require acknowledgment from the server before
+                    they can be completed. While they are awaiting the acknowledgment, the
+                    client must maintain information about their state. The value of this
+                    macro sets the limit on how many simultaneous PUBLISH states an MQTT
+                    context maintains.
+        endmenu
+
+    endif
+
+endmenu
+

@@ -8,6 +8,7 @@ test/build/
 test/sdkconfig
 test/sdkconfig.old
 dependencies.lock
+components/esp32_iot_azure/.sdk/azure-iot-middleware-freertos
 
 # Prerequisites
 *.d

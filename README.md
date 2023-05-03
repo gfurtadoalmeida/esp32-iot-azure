@@ -1,27 +1,80 @@
-# ESP32 - Project Template
+# ESP32 IoT Azure
 
-![GitHub Build Status](https://github.com/gfurtadoalmeida/esp32-project-template/actions/workflows/build.yml/badge.svg) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=esp32_project_template&metric=bugs)](https://sonarcloud.io/summary/new_code?id=esp32_project_template) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=esp32_project_template&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=esp32_project_template) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_project_template&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=esp32_project_template) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_project_template&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=esp32_project_template)  
-ESP32 project template with build pipeline, enhanced VS Code support and more.  
+![GitHub Build Status](https://github.com/gfurtadoalmeida/esp32-iot-azure/actions/workflows/build.yml/badge.svg) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=bugs)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure)  
+ESP32 library access [Azure IoT Services](https://azure.microsoft.com/en-us/solutions/iot), in a easier way.  
+Just clone, configure through [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html) and use!  
 
 ## Characteristics
 
 * ESP-IDF: [v4.4.4](https://docs.espressif.com/projects/esp-idf/en/v4.4.4/esp32/index.html)
-* Build pipelines with [Sonar Cloud](https://sonarcloud.io/) integration: 🚀
-  * Azure DevOps
-  * GitHub Action
-* [VS Code task](https://code.visualstudio.com/docs/editor/tasks) for tests (requires [ESP-IDF extension](https://marketplace.visualstudio.com/items?itemName=espressif.esp-idf-extension)): 🧪
-  * Build test
-  * Flash test
-  * Monitor test
-  * Build, flash and start a monitor for the tests
-* [Newlib nano formating](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/performance/size.html?#newlib-nano-formatting) enabled for `printf/scanf`, with the following advantages:
-  * Binary size reduction (25KB~50KB) as they are already in ESP32 ROM.
-  * Stack usage reduction for functions that call string formating functions.
-  * Increased performance as functions in ROM run faster than functions from flash. 
-  * Functions in ROM can run when flash instruction cache is disabled.
-* Sample [Kconfig](/components/component_name/Kconfig) file for component configuration through [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html).
-* Watchdogs disabled when testing.
+* API: covers all functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos), plus some extensions.
+* Azure services supported:
+  * [IoT Central](https://learn.microsoft.com/en-us/azure/iot-central/)
+  * [IoT Hub](https://learn.microsoft.com/en-us/azure/iot-hub/)
+  * [Device Provisioning Service (DPS)](https://learn.microsoft.com/en-us/azure/iot-dps/)
+  * [Device Update](https://learn.microsoft.com/en-us/azure/iot-hub-device-update/) _(in progress)_
+  * [Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/)
+* Azure libraries used: 
+  * [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
+  * [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c)
+* Transport: 
+  * Socket: [esp_tls](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/esp_tls.html) with built-in connection retries and updated Azure certificates.
+  * HTTP: [FreeRTOS coreHTTP](https://github.com/FreeRTOS/coreHTTP)
+  * MQTT: [FreeRTOS coreMQTT](https://github.com/FreeRTOS/coreMQTT)
+* Cryptography: [mbedtls](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/mbedtls.html)
+* Configurable: using [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html)
 
 ## Documentation
 
-Everything is on the [wiki](https://github.com/gfurtadoalmeida/esp32-project-template/wiki).
+* Everything is on the [wiki](https://github.com/gfurtadoalmeida/esp32-project-template/wiki).
+* Examples: [main/examples](/main/examples/).
+
+## Todo
+
+- [] Compile DPS sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED == 1`.
+- [] Compile Device Update sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`.
+- [] Compile coreHTTP only when compiling Device Update (`CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`).
+- [] Create `CONFIG_ESP32_IOT_AZURE_DEVICE_AUTH_MODE` and compile only the needed auth methods.
+- [] Create separe buffer configs for IoT Hub and Device Provisioning.
+
+## Example: Getting Device and Hub Info from DPS
+
+```cpp
+#include "esp32_iot_azure/azure_iot_sdk.h"
+#include "esp32_iot_azure/azure_iot_provisioning.h"
+#include "esp32_iot_azure/extension/azure_iot_provisioning_extension.h"
+
+void app_main(void)
+{
+    // 1. Configure this library via menuconfig.
+    // 2. Connect to WiFi.
+    // 3. Set up SNTP.
+
+    utf8_string_t symmetric_key = UTF8_STRING_FROM_LITERAL("you_device_enrollment_symmetric_key");
+    utf8_string_t registration_id = UTF8_STRING_FROM_LITERAL("your_device_registration_id");
+
+    utf8_string_t registration_payload = UTF8_STRING_FOR_DPS_BASIC_PAYLOAD();
+    utf8_string_t hostname = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_CONST_HOSTNAME_MAX_LENGTH);
+    utf8_string_t device_id = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_CONST_DEVICE_ID_MAX_LENGTH);
+
+    azure_iot_sdk_init();
+
+    AzureIoTProvisioningClientOptions_t *dps_client_options = NULL;
+
+    azure_dps_context_t *dps = azure_dps_create();
+    azure_dps_options_init(dps, &dps_client_options);
+    azure_dps_init(dps, &registration_id);
+    azure_dps_auth_set_symmetric_key(dps, &symmetric_key);
+    azure_dps_create_basic_registration_payload(&registration_payload);
+    azure_dps_set_registration_payload(dps, &registration_payload);
+    azure_dps_register(dps);
+    azure_dps_get_device_and_hub(dps, &hostname, &device_id);
+    azure_dps_deinit(dps);
+    azure_dps_free(dps);
+
+    azure_iot_sdk_deinit();
+
+    ESP_LOGI(TAG, "hostname: %.*s", hostname.length, (char *)hostname.buffer);
+    ESP_LOGI(TAG, "device_id: %.*s", device_id.length, (char *)device_id.buffer);
+}
+```
