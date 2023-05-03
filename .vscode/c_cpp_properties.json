@@ -1,0 +1,29 @@
+{
+  "configurations": [
+    {
+      "name": "Win32",
+      "includePath": [
+        "${config:idf.espIdfPath}/components/**",
+        "${config:idf.espIdfPathWin}/components/**",
+        "${workspaceFolder}/**"
+      ],
+      "browse": {
+        "path": [
+          "${config:idf.espIdfPath}/components",
+          "${config:idf.espIdfPathWin}/components",
+          "${workspaceFolder}"
+        ],
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "clang_format_style": "Visual Studio",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "configurationProvider": "ms-vscode.cmake-tools",
+      "intelliSenseEngine": "default",
+      "intelliSenseEngineFallback": "enabled",
+      "intelliSenseMode": "windows-gcc-x86"
+    }
+  ],
+  "version": 4
+}
