@@ -1,6 +1,6 @@
 # ESP32 IoT Azure
 
-![GitHub Build Status](https://github.com/gfurtadoalmeida/esp32-iot-azure/actions/workflows/build.yml/badge.svg) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=bugs)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure)  
+![GitHub Build Status](https://github.com/gfurtadoalmeida/esp32-iot-azure/actions/workflows/build.yml/badge.svg) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=bugs)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure)  
 ESP32 library access [Azure IoT Services](https://azure.microsoft.com/en-us/solutions/iot), in a easier way.  
 Just clone, configure through [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html) and use!  
 
@@ -29,13 +29,13 @@ Just clone, configure through [menuconfig](https://docs.espressif.com/projects/e
 * Everything is on the [wiki](https://github.com/gfurtadoalmeida/esp32-project-template/wiki).
 * Examples: [main/examples](/main/examples/).
 
-## Todo
+## To Do
 
-- [] Compile DPS sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED == 1`.
-- [] Compile Device Update sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`.
-- [] Compile coreHTTP only when compiling Device Update (`CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`).
-- [] Create `CONFIG_ESP32_IOT_AZURE_DEVICE_AUTH_MODE` and compile only the needed auth methods.
-- [] Create separe buffer configs for IoT Hub and Device Provisioning.
+- [ ] Compile DPS sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED == 1`.
+- [ ] Compile Device Update sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`.
+- [ ] Compile coreHTTP only when compiling Device Update (`CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`).
+- [ ] Create `CONFIG_ESP32_IOT_AZURE_DEVICE_AUTH_MODE` and compile only the needed auth methods.
+- [ ] Create separe buffer configs for IoT Hub and Device Provisioning.
 
 ## Example: Getting Device and Hub Info from DPS
 
