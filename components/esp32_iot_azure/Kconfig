@@ -1,4 +1,4 @@
-menu "ESP32 IoT Azure Configuration"
+menu "ESP32 IoT Azure"
 
     menu "Azure IoT Hub"
 

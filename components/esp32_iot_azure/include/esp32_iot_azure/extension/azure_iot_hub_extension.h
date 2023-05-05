@@ -9,7 +9,8 @@ extern "C"
 #endif
 
     /**
-     * @brief Initialize the Azure IoT Hub Client with a given device id, on a default server.
+     * @brief Initialize the Azure IoT Hub Client with a given device id, on the server
+     * configured via menuconfig.
      * @note The hostname MUST BE configured in @ref CONFIG_ESP32_IOT_AZURE_HUB_SERVER_HOSTNAME.
      * @param[in] context IoT context.
      * @param[in] device_id Device id.
