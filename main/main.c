@@ -6,8 +6,9 @@
 #include "helper/dns_helper.h"
 #include "helper/sntp_helper.h"
 
-#include "example_provisioning.h"
-#include "example_iot_hub.h"
+#include "examples/provisioning/example_provisioning.h"
+#include "examples/iot_hub/example_iot_hub.h"
+#include "examples/adu/example_adu.h"
 
 #include "esp32_iot_azure/azure_iot_sdk.h"
 

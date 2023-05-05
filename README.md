@@ -65,7 +65,7 @@ void app_main(void)
     azure_dps_options_init(dps, &dps_client_options);
     azure_dps_init(dps, &registration_id);
     azure_dps_auth_set_symmetric_key(dps, &symmetric_key);
-    azure_dps_create_basic_registration_payload(&registration_payload);
+    azure_dps_create_pnp_registration_payload(&registration_payload);
     azure_dps_set_registration_payload(dps, &registration_payload);
     azure_dps_register(dps);
     azure_dps_get_device_and_hub(dps, &hostname, &device_id);
