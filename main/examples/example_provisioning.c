@@ -34,9 +34,9 @@ bool example_dps_run(const utf8_string_t *device_symmetric_key,
         goto CLEAN_UP;
     }
 
-    if (azure_dps_create_basic_registration_payload(&registration_payload) != eAzureIoTSuccess)
+    if (azure_dps_create_pnp_registration_payload(&registration_payload) != eAzureIoTSuccess)
     {
-        ESP_LOGE(TAG_EX_DPS, "failure creating basic registration payload");
+        ESP_LOGE(TAG_EX_DPS, "failure creating PnP registration payload");
         goto CLEAN_UP;
     }
 

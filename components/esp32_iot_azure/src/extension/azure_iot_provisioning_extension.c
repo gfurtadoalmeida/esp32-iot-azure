@@ -4,7 +4,7 @@
 
 static const char TAG_AZ_DPS_EXT[] = "AZ_DPS_EXT";
 
-AzureIoTResult_t azure_dps_create_basic_registration_payload(utf8_string_t *registration_payload)
+AzureIoTResult_t azure_dps_create_pnp_registration_payload(utf8_string_t *registration_payload)
 {
     CMP_CHECK(TAG_AZ_DPS_EXT,
               registration_payload->length >= AZURE_DPS_BASIC_REGISTRATION_PAYLOAD_NEEDED_BYTES,
