@@ -8,7 +8,6 @@
 
 #include "examples/provisioning/example_provisioning.h"
 #include "examples/iot_hub/example_iot_hub.h"
-#include "examples/adu/example_adu.h"
 
 #include "esp32_iot_azure/azure_iot_sdk.h"
 
