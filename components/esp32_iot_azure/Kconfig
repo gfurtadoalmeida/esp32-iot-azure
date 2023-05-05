@@ -53,7 +53,7 @@ menu "ESP32 IoT Azure"
 
         config ESP32_IOT_AZURE_DEVICE_MODEL_ID
             string "Model Id"
-            default ""
+            default "dtmi:com:esp32iotazure:TemperatureController;1"
             help
                 Device model id.
 

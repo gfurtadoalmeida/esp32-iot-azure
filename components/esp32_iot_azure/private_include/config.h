@@ -74,7 +74,7 @@ extern "C"
 /**
  * @brief Device model Id.
  */
-#define CONFIG_ESP32_IOT_AZURE_DEVICE_MODEL_ID ""
+#define CONFIG_ESP32_IOT_AZURE_DEVICE_MODEL_ID "dtmi:com:esp32iotazure:TemperatureController;1"
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DEVICE_USER_AGENT
