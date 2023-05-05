@@ -23,12 +23,13 @@ extern "C"
 #define UTF8_STRING_FOR_DPS_BASIC_PAYLOAD() UTF8_STRING_WITH_FIXED_LENGTH((AZURE_DPS_BASIC_REGISTRATION_PAYLOAD_NEEDED_BYTES))
 
     /**
-     * @brief Create a basic registration payload, with just the device model id, that can be passed
+     * @brief Create an Azure IoT Plug and Play registration payload, with just the device model id, that can be passed
      * to @ref azure_dps_set_registration_payload function.
-     * @param[in, out] registration_payload Registration payload with a buffer with at least AZURE_DPS_BASIC_REGISTRATION_PAYLOAD_NEEDED_BYTES.
+     * @note About: https://learn.microsoft.com/en-us/azure/iot-develop/concepts-developer-guide-device?pivots=programming-language-ansi-c#dps-payload
+     * @param[in,out] registration_payload Registration payload with a buffer with at least AZURE_DPS_BASIC_REGISTRATION_PAYLOAD_NEEDED_BYTES.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
-    AzureIoTResult_t azure_dps_create_basic_registration_payload(utf8_string_t *registration_payload);
+    AzureIoTResult_t azure_dps_create_pnp_registration_payload(utf8_string_t *registration_payload);
 
 #ifdef __cplusplus
 }
