@@ -7,13 +7,12 @@ Just clone, configure through [menuconfig](https://docs.espressif.com/projects/e
 ## Characteristics
 
 * ESP-IDF: [v4.4.4](https://docs.espressif.com/projects/esp-idf/en/v4.4.4/esp32/index.html)
-* API: covers all functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos), plus some extensions.
-* Azure services supported:
-  * [IoT Central](https://learn.microsoft.com/en-us/azure/iot-central/)
-  * [IoT Hub](https://learn.microsoft.com/en-us/azure/iot-hub/)
-  * [Device Provisioning Service (DPS)](https://learn.microsoft.com/en-us/azure/iot-dps/)
-  * [Device Update](https://learn.microsoft.com/en-us/azure/iot-hub-device-update/) _(in progress)_
-  * [Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/)
+* API: all functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos), plus custom extensions.
+* Features supported ([IoT Hub](https://learn.microsoft.com/en-us/azure/iot-hub/)/[IoT Central](https://learn.microsoft.com/en-us/azure/iot-central/)):
+    * [Device Provisioning Service (DPS)](https://learn.microsoft.com/en-us/azure/iot-dps/)
+    * [Device Update](https://learn.microsoft.com/en-us/azure/iot-hub-device-update/) _(in progress)_
+    * [Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/)
+    * [IoT Plug and Play](https://learn.microsoft.com/en-us/azure/iot-develop/overview-iot-plug-and-play)
 * Azure libraries used: 
   * [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
   * [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c)
@@ -27,7 +26,10 @@ Just clone, configure through [menuconfig](https://docs.espressif.com/projects/e
 ## Documentation
 
 * Everything is on the [wiki](https://github.com/gfurtadoalmeida/esp32-project-template/wiki).
-* Examples: [main/examples](/main/examples/).
+* Examples:
+  * Azure IoT Hub: [examples/iot_hub](/main/examples/iot_hub)
+  * Azure Device Provisioning Service: [examples/provisioning](/main/examples/provisioning)
+  * Azure Device Update: _(in progress)_
 
 ## To Do
 
