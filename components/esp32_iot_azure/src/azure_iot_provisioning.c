@@ -74,7 +74,7 @@ AzureIoTResult_t azure_dps_auth_set_symmetric_key(azure_dps_context_t *context, 
     AzureIoTResult_t result = AzureIoTProvisioningClient_SetSymmetricKey(&context->dps_client,
                                                                          symmetric_key->buffer,
                                                                          symmetric_key->length,
-                                                                         &crypto_hmac_256);
+                                                                         &crypto_hash_hmac_256);
     if (result != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_DPS, "failure setting symmetric key: %d", result);

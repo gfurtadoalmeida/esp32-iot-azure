@@ -81,7 +81,7 @@ AzureIoTResult_t azure_iot_hub_auth_set_symmetric_key(azure_iot_hub_context_t *c
     AzureIoTResult_t result = AzureIoTHubClient_SetSymmetricKey(&context->iot_client,
                                                                 symmetric_key->buffer,
                                                                 symmetric_key->length,
-                                                                &crypto_hmac_256);
+                                                                &crypto_hash_hmac_256);
     if (result != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_IOT, "failure setting symmetric key: %d", result);

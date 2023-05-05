@@ -22,13 +22,13 @@ extern "C"
      * @return 0 on success, 1 on failure.
      * @link https://en.wikipedia.org/wiki/HMAC
      */
-    uint32_t crypto_hmac_256(const uint8_t *key,
-                             uint32_t key_length,
-                             const uint8_t *data,
-                             uint32_t data_length,
-                             uint8_t *output_buffer,
-                             uint32_t output_buffer_length,
-                             uint32_t *bytes_copied);
+    uint32_t crypto_hash_hmac_256(const uint8_t *key,
+                                  uint32_t key_length,
+                                  const uint8_t *data,
+                                  uint32_t data_length,
+                                  uint8_t *output_buffer,
+                                  uint32_t output_buffer_length,
+                                  uint32_t *bytes_copied);
 #endif
 #ifdef __cplusplus
 }

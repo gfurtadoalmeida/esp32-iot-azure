@@ -4,13 +4,13 @@
 
 static const char TAG_CRYPTO[] = "AZ_CRYPTO";
 
-uint32_t crypto_hmac_256(const uint8_t *key,
-                         uint32_t key_length,
-                         const uint8_t *data,
-                         uint32_t data_length,
-                         uint8_t *output_buffer,
-                         uint32_t output_buffer_length,
-                         uint32_t *bytes_copied)
+uint32_t crypto_hash_hmac_256(const uint8_t *key,
+                              uint32_t key_length,
+                              const uint8_t *data,
+                              uint32_t data_length,
+                              uint8_t *output_buffer,
+                              uint32_t output_buffer_length,
+                              uint32_t *bytes_copied)
 {
     CMP_CHECK(TAG_CRYPTO, (output_buffer_length > 32), "invalid output buffer length", 1)
 
