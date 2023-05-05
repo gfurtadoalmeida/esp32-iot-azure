@@ -3,9 +3,11 @@
     "@context": [
       "dtmi:dtdl:context;3"
     ],
-    "@id": "dtmi:com:esp32iotazure:Thermostat;1",
+    "@id": "dtmi:com:esp32iotazure:TemperatureController;1",
     "@type": "Interface",
-    "displayName": "Thermostat",
+    "extends": "dtmi:azure:iot:deviceUpdateContractModel;2",
+    "displayName": "Temperature Controller",
+    "description": "Device with a thermostat, display and remote reboot.",
     "contents": [
       {
         "@type": "Property",
@@ -18,19 +20,24 @@
         "@type": "Command",
         "name": "restart",
         "displayName": "Restart",
+        "description": "Restart the device after waiting the number of seconds specified.",
         "request": {
           "name": "delay",
+          "displayName": "Delay",
+          "description": "Number of seconds to wait before rebooting the device.",
           "schema": "integer"
         }
       },
       {
         "@type": "Component",
-        "name": "temperatureSensor",
-        "schema": "dtmi:com:esp32iotazure:TemperatureSensor;1"
+        "name": "thermostat",
+        "displayName": "Thermostat",
+        "schema": "dtmi:com:esp32iotazure:Thermostat;1"
       },
       {
         "@type": "Component",
         "name": "display",
+        "displayName": "Display",
         "schema": "dtmi:com:esp32iotazure:Display;1"
       }
     ]
@@ -40,7 +47,7 @@
       "dtmi:dtdl:context;3",
       "dtmi:dtdl:extension:quantitativeTypes;1"
     ],
-    "@id": "dtmi:com:esp32iotazure:TemperatureSensor;1",
+    "@id": "dtmi:com:esp32iotazure:Thermostat;1",
     "@type": "Interface",
     "contents": [
       {
@@ -50,6 +57,7 @@
         ],
         "name": "temp",
         "displayName": "Temperature",
+        "description": "Temperature in degree celsius.",
         "schema": "integer",
         "unit": "degreeCelsius"
       }
@@ -66,6 +74,7 @@
         "@type": "Property",
         "name": "brightness",
         "displayName": "Brightness",
+        "description": "Brightness from 0% to 100%.",
         "schema": "integer",
         "writable": true
       }

@@ -35,7 +35,7 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
         goto CLEAN_UP;
     }
 
-    iot_client_options->pxComponentList = (AzureIoTHubClientComponent_t[2]){azureiothubCREATE_COMPONENT("temperatureSensor"), azureiothubCREATE_COMPONENT("display")};
+    iot_client_options->pxComponentList = (AzureIoTHubClientComponent_t[2]){azureiothubCREATE_COMPONENT("thermostat"), azureiothubCREATE_COMPONENT("display")};
     iot_client_options->ulComponentListLength = 2;
 
     if (azure_iot_hub_init(iot, iot_hub_hostname, device_id) != eAzureIoTSuccess)
@@ -86,8 +86,8 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
         goto CLEAN_UP;
     }
 
-    utf8_string_t telemetry_payload = UTF8_STRING_WITH_FIXED_LENGTH(20);
-    utf8_string_t component_name = UTF8_STRING_FROM_LITERAL("temperatureSensor");
+    utf8_string_t telemetry_payload = UTF8_STRING_WITH_FIXED_LENGTH(15);
+    utf8_string_t component_name = UTF8_STRING_FROM_LITERAL("thermostat");
 
     while (!s_turn_off_command_called)
     {
@@ -128,7 +128,9 @@ static void callback_cloud_command_subscription(const AzureIoTHubClientCommandRe
 
     azure_iot_hub_context_t *iot = (azure_iot_hub_context_t *)callback_context;
 
-    if (strncasecmp("restart", (const char *)message->pucCommandName, sizeof("restart") - 1) == 0)
+    // The "restart" command belongs to the root interface (TemperatureController),
+    // therefore no component name must be sent.
+    if (message->usComponentNameLength == 0 && strncasecmp("restart", (const char *)message->pucCommandName, sizeof("restart") - 1) == 0)
     {
         ESP_LOGW(TAG_EX_IOT, "restarting device");
 
@@ -219,7 +221,7 @@ static AzureIoTResult_t device_report_initial_state(azure_iot_hub_context_t *iot
                                                     uint8_t temperature,
                                                     uint8_t display_brigthness)
 {
-    utf8_string_t payload = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_JSON_OBJECT_MIN_NEEDED_BYTES + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("deviceStatus", 10) + AZURE_JSON_CALC_CLIENT_PROPERTY_MIN_COMPONENT_OBJECT_NEEDED_BYTES("temperatureSensor") + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("temp", 2) + AZURE_JSON_CALC_CLIENT_PROPERTY_MIN_COMPONENT_OBJECT_NEEDED_BYTES("display") + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("brightness", 3));
+    utf8_string_t payload = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_JSON_OBJECT_MIN_NEEDED_BYTES + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("deviceStatus", 10) + AZURE_JSON_CALC_CLIENT_PROPERTY_MIN_COMPONENT_OBJECT_NEEDED_BYTES("thermostat") + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("temp", 2) + AZURE_JSON_CALC_CLIENT_PROPERTY_MIN_COMPONENT_OBJECT_NEEDED_BYTES("display") + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("brightness", 3));
 
     AzureIoTJSONWriter_t json_writer;
     AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(iot);
@@ -231,11 +233,11 @@ static AzureIoTResult_t device_report_initial_state(azure_iot_hub_context_t *iot
                                                               (uint8_t *)"deviceStatus",
                                                               sizeof("deviceStatus") - 1,
                                                               (uint8_t *)"active",
-                                                              sizeof("active")))
+                                                              sizeof("active") - 1))
     AZ_CHECK(AzureIoTHubClientProperties_BuilderBeginComponent(iot_client,
                                                                &json_writer,
-                                                               (uint8_t *)"temperatureSensor",
-                                                               sizeof("temperatureSensor") - 1))
+                                                               (uint8_t *)"thermostat",
+                                                               sizeof("thermostat") - 1))
     AZ_CHECK(AzureIoTJSONWriter_AppendPropertyWithInt32Value(&json_writer,
                                                              (uint8_t *)"temp",
                                                              sizeof("temp") - 1,
