@@ -24,6 +24,7 @@ extern "C"
 
     /**
      * @brief Initialize the \p context internal Azure IoT Provisioning Options.
+     * @note The following fields will be filled with values from configuration: pucUserAgent, ulUserAgentLength.
      * @param[in] context DPS context.
      * @param[out] client_options Pointer to a @ref AzureIoTProvisioningClientOptions_t pointer used by the \p context.
      * Can be null if there is no need to change its fields.
