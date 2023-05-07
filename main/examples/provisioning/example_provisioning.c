@@ -12,7 +12,7 @@ bool example_dps_run(const utf8_string_t *device_symmetric_key,
     bool success = false;
 
     AzureIoTProvisioningClientOptions_t *dps_client_options = NULL;
-    utf8_string_t registration_payload = UTF8_STRING_FOR_DPS_BASIC_PAYLOAD();
+    utf8_string_t registration_payload = UTF8_STRING_FOR_DPS_PNP_REGISTRATION_PAYLOAD();
 
     azure_dps_context_t *dps = azure_dps_create();
 

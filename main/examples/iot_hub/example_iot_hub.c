@@ -221,7 +221,7 @@ static AzureIoTResult_t device_report_initial_state(azure_iot_hub_context_t *iot
                                                     uint8_t temperature,
                                                     uint8_t display_brigthness)
 {
-    utf8_string_t payload = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_JSON_OBJECT_MIN_NEEDED_BYTES + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("deviceStatus", 10) + AZURE_JSON_CALC_CLIENT_PROPERTY_MIN_COMPONENT_OBJECT_NEEDED_BYTES("thermostat") + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("temp", 2) + AZURE_JSON_CALC_CLIENT_PROPERTY_MIN_COMPONENT_OBJECT_NEEDED_BYTES("display") + AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES("brightness", 3));
+    utf8_string_t payload = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_JSON_SIZEOF_OBJECT_EMPTY + AZURE_JSON_SIZEOF_OBJECT_PROPERTY("deviceStatus", 10) + AZURE_JSON_SIZEOF_IOTHUB_CLIENT_PROPERTY_BUILDER_COMPONENT("thermostat") + AZURE_JSON_SIZEOF_OBJECT_PROPERTY("temp", 2) + AZURE_JSON_SIZEOF_IOTHUB_CLIENT_PROPERTY_BUILDER_COMPONENT("display") + AZURE_JSON_SIZEOF_OBJECT_PROPERTY("brightness", 3));
 
     AzureIoTJSONWriter_t json_writer;
     AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(iot);
@@ -333,7 +333,7 @@ static AzureIoTResult_t device_change_state(azure_iot_hub_context_t *iot,
 
 static AzureIoTResult_t device_report_state_changed(azure_iot_hub_context_t *iot, uint32_t version, uint16_t display_brightness)
 {
-    utf8_string_t payload = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_JSON_OBJECT_MIN_NEEDED_BYTES + AZURE_JSON_CALC_CLIENT_PROPERTY_MIN_COMPONENT_OBJECT_NEEDED_BYTES("display") + AZURE_JSON_CALC_CLIENT_PROPERTY_MIN_RESPONSE_STATUS_PROPERTY_NEEDED_BYTES("brightness", NULL, 3));
+    utf8_string_t payload = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_JSON_SIZEOF_OBJECT_EMPTY + AZURE_JSON_SIZEOF_IOTHUB_CLIENT_PROPERTY_BUILDER_COMPONENT("display") + AZURE_JSON_SIZEOF_IOTHUB_CLIENT_PROPERTY_BUILDER_RESPONSE_STATUS("brightness", sizeof("success") - 1, 3));
 
     AzureIoTJSONWriter_t json_writer;
     AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(iot);

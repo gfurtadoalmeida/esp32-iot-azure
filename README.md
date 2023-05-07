@@ -55,7 +55,7 @@ void app_main(void)
     utf8_string_t symmetric_key = UTF8_STRING_FROM_LITERAL("you_device_enrollment_symmetric_key");
     utf8_string_t registration_id = UTF8_STRING_FROM_LITERAL("your_device_registration_id");
 
-    utf8_string_t registration_payload = UTF8_STRING_FOR_DPS_BASIC_PAYLOAD();
+    utf8_string_t registration_payload = UTF8_STRING_FOR_DPS_PNP_REGISTRATION_PAYLOAD();
     utf8_string_t hostname = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_CONST_HOSTNAME_MAX_LENGTH);
     utf8_string_t device_id = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_CONST_DEVICE_ID_MAX_LENGTH);
 

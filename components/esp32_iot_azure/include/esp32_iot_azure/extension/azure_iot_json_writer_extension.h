@@ -33,7 +33,7 @@ extern "C"
  * rather than one character at a time, whenever the input data is dynamic in size.
  * @return Space need in bytes.
  */
-#define AZURE_JSON_OBJECT_MIN_NEEDED_BYTES (sizeof("{}") - 1 + 64)
+#define AZURE_JSON_SIZEOF_OBJECT_EMPTY (sizeof("{}") - 1 + 64)
 
 /**
  * @brief Calculate the space needed by a JSON property.
@@ -42,7 +42,7 @@ extern "C"
  * @param value_max_chars Property value maximum characters.
  * @return Space need in bytes.
  */
-#define AZURE_JSON_CALC_PROPERTY_NEEDED_BYTES(name, value_max_chars) (sizeof("\"\":\"\",") + sizeof(name) + value_max_chars - 2)
+#define AZURE_JSON_SIZEOF_OBJECT_PROPERTY(name, value_max_chars) (sizeof("\"" name "\":\"\",") - 1 + value_max_chars)
 
 #ifdef __cplusplus
 }
