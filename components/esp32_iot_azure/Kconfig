@@ -12,7 +12,7 @@ menu "ESP32 IoT Azure"
             bool "Enable Azure Device Update"
             default y
             help
-                Enables Azure Device Update feature.
+                Enables Azure Device Update (DU) feature.
 
         config ESP32_IOT_AZURE_HUB_SERVER_HOSTNAME
             string "Hostname"
@@ -55,7 +55,8 @@ menu "ESP32 IoT Azure"
             string "Model Id"
             default "dtmi:com:esp32iotazure:TemperatureController;1"
             help
-                Device model id.
+                IoT Plug and Play device or module id implemented.
+                Can be empty if not used.
 
         config ESP32_IOT_AZURE_DEVICE_USER_AGENT
             string "User agent"
@@ -108,26 +109,38 @@ menu "ESP32 IoT Azure"
             config ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER
                 string "Device manufacturer"
                 default ""
+                help
+                    Company name of the device manufacturer. This could be the same
+                    as the name of the original equipment manufacturer (OEM). Ex: Contoso.
 
             config ESP32_IOT_AZURE_DU_DEVICE_MODEL
                 string "Device model"
                 default ""
+                help
+                    Device model name or ID. Ex: Surface Book 2.
 
             config ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE
                 int "Download chunck size"
                 default 4096
 
-            config ESP32_IOT_AZURE_DU_UPDATE_PROVIDER
-                string "Update provider"
-                default ""
+            menu "Update Id"
 
-            config ESP32_IOT_AZURE_DU_UPDATE_NAME
-                string "Update name"
-                default ""
+                config ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER
+                    string "Update provider"
+                    default ""
+                    help
+                        Entity who is creating or directly responsible for the update.
+                        It will often be a company name.
 
-            config ESP32_IOT_AZURE_DU_UPDATE_VERSION
-                string "Update version"
-                default "v1.0"
+                config ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
+                    string "Update name"
+                    default ""
+                    help
+                        Identifier for a class of updates. It will often be a device
+                        class or model name.
+
+            endmenu
+
         endmenu
 
     endif

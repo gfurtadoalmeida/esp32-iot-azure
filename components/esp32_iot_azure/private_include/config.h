@@ -72,7 +72,8 @@ extern "C"
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DEVICE_MODEL_ID
 /**
- * @brief Device model Id.
+ * @brief IoT Plug and Play device or module id implemented.
+ * Can be empty if not used.
  */
 #define CONFIG_ESP32_IOT_AZURE_DEVICE_MODEL_ID "dtmi:com:esp32iotazure:TemperatureController;1"
 #endif
@@ -122,44 +123,41 @@ extern "C"
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER
 /**
- * @brief Azure Device Update manufacturer.
+ * @brief Azure DU company name of the device manufacturer.
+ * This could be the same as the name of the original
+ * equipment manufacturer (OEM). Ex: Contoso.
  */
 #define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER ""
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL
 /**
- * @brief Azure Device Update model.
+ * @brief Azure DU device model name or ID. Ex: Surface Book 2.
  */
 #define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL ""
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE
 /**
- * @brief Azure Device Update download chunck size.
+ * @brief Azure DU download chunck size.
  */
 #define CONFIG_ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE 4096U
 #endif
 
-#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_PROVIDER
+#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER
 /**
- * @brief Azure Device Update provider.
+ * @brief Azure DU Entity who is creating or directly responsible
+ * for the update. It will often be a company name.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_PROVIDER ""
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER ""
 #endif
 
-#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_NAME
+#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
 /**
- * @brief Azure Device Update name.
+ * @brief Azure DU identifier for a class of updates.
+ * It will often be a device class or model name.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_NAME ""
-#endif
-
-#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_VERSION
-/**
- * @brief Azure Device Update version.
- */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_VERSION "v1.0"
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME ""
 #endif
 
    // ==================
