@@ -2,20 +2,23 @@
 
 ![GitHub Build Status](https://github.com/gfurtadoalmeida/esp32-iot-azure/actions/workflows/build.yml/badge.svg) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=bugs)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure)  
 ESP32 library to access [Azure IoT Services](https://azure.microsoft.com/en-us/solutions/iot), in a easier way.  
-Just clone, configure through [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html) and use!  
+Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html) and use!  
 
 ## Characteristics
 
 * ESP-IDF: [v4.4.4](https://docs.espressif.com/projects/esp-idf/en/v4.4.4/esp32/index.html)
-* API: all functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos), plus [custom extensions](/components/esp32_iot_azure/include/esp32_iot_azure/extension/).
+* Written in **C** using:
+   * [ESP-IDF Framework](https://github.com/espressif/esp-idf)
+   * [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
+   * [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c)
+* APIs: 
+   * All functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
+   * [Custom extensions](/components/esp32_iot_azure/include/esp32_iot_azure/extension/)
 * Features supported ([IoT Hub](https://learn.microsoft.com/en-us/azure/iot-hub/)/[IoT Central](https://learn.microsoft.com/en-us/azure/iot-central/)):
     * [Device Provisioning Service (DPS)](https://learn.microsoft.com/en-us/azure/iot-dps/)
     * [Device Update](https://learn.microsoft.com/en-us/azure/iot-hub-device-update/)
     * [Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/)
     * [IoT Plug and Play](https://learn.microsoft.com/en-us/azure/iot-develop/overview-iot-plug-and-play)
-* Azure libraries used: 
-  * [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
-  * [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c)
 * Transport: 
   * Socket: [esp_tls](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/esp_tls.html) with built-in connection retries and updated Azure certificates.
   * HTTP: [FreeRTOS coreHTTP](https://github.com/FreeRTOS/coreHTTP)

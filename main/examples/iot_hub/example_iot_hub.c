@@ -35,7 +35,9 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
         goto CLEAN_UP;
     }
 
-    iot_client_options->pxComponentList = (AzureIoTHubClientComponent_t[2]){azureiothubCREATE_COMPONENT("thermostat"), azureiothubCREATE_COMPONENT("display")};
+    iot_client_options->pxComponentList = (AzureIoTHubClientComponent_t[2]){
+        azureiothubCREATE_COMPONENT("thermostat"),
+        azureiothubCREATE_COMPONENT("display")};
     iot_client_options->ulComponentListLength = 2;
 
     if (azure_iot_hub_init(iot, iot_hub_hostname, device_id) != eAzureIoTSuccess)
