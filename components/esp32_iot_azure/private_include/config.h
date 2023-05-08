@@ -125,16 +125,16 @@ extern "C"
 /**
  * @brief Azure DU company name of the device manufacturer.
  * This could be the same as the name of the original
- * equipment manufacturer (OEM). Ex: Contoso.
+ * equipment manufacturer (OEM). Ex: Dell.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER ""
+#define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER "Contoso Inc"
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL
 /**
- * @brief Azure DU device model name or ID. Ex: Surface Book 2.
+ * @brief Azure DU device model name or ID. Ex: Alienware m15 R7.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL ""
+#define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL "Library Tester"
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE
@@ -147,17 +147,27 @@ extern "C"
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER
 /**
  * @brief Azure DU Entity who is creating or directly responsible
- * for the update. It will often be a company name.
+ * for the update. It will often be a company name. Example: Microsoft.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER ""
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER "Contoso Software"
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
 /**
  * @brief Azure DU identifier for a class of updates.
- * It will often be a device class or model name.
+ * It will often be a device class or model name. Example: Windows 11.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME ""
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME "Azure Library Tester"
+#endif
+
+#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
+/**
+ * @brief Azure DU, two- to four-part dot-separated numerical
+ * version numbers.
+ * @note Each part must be a number between 0 and 2147483647
+ * and leading zeroes will be dropped. Examples: "1.0", "2021.11.8".
+ */
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION "1.0"
 #endif
 
    // ==================

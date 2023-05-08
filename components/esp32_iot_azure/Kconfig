@@ -108,16 +108,16 @@ menu "ESP32 IoT Azure"
 
             config ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER
                 string "Device manufacturer"
-                default ""
+                default "Contoso Inc"
                 help
                     Company name of the device manufacturer. This could be the same
-                    as the name of the original equipment manufacturer (OEM). Ex: Contoso.
+                    as the name of the original equipment manufacturer (OEM). Ex: Dell.
 
             config ESP32_IOT_AZURE_DU_DEVICE_MODEL
                 string "Device model"
-                default ""
+                default "Library Tester"
                 help
-                    Device model name or ID. Ex: Surface Book 2.
+                    Device model name or ID. Ex: Alienware m15 R7.
 
             config ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE
                 int "Download chunck size"
@@ -127,17 +127,25 @@ menu "ESP32 IoT Azure"
 
                 config ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER
                     string "Update provider"
-                    default ""
+                    default "Contoso Software"
                     help
                         Entity who is creating or directly responsible for the update.
-                        It will often be a company name.
+                        It will often be a company name. Example: Microsoft.
 
                 config ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
                     string "Update name"
-                    default ""
+                    default "Azure Library Tester"
                     help
                         Identifier for a class of updates. It will often be a device
-                        class or model name.
+                        class or model name. Example: Windows 11.
+
+                config ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
+                    string "Update version"
+                    default "1.0"
+                    help
+                        Two- to four-part dot-separated numerical version numbers. Each part must be a
+                        number between 0 and 2147483647 and leading zeroes will be dropped.
+                        Examples: "1.0", "2021.11.8"
 
             endmenu
 

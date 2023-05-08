@@ -42,7 +42,10 @@ extern "C"
 
     /**
      * @brief Initialize the Azure IoT Device Properties with default values.
-     * @note The following fields will be filled with values from configuration: ucManufacturer, ulManufacturerLength, ucModel, ulModelLength.
+     * @note The following fields will be filled with values from configuration:
+     * ucManufacturer, ulManufacturerLength, ucModel, ulModelLength, ucCurrentUpdateId, ucCurrentUpdateLength.
+     * @note About: https://learn.microsoft.com/en-us/azure/iot-hub-device-update/import-concepts#update-identity
+     * @note Contract: https://learn.microsoft.com/en-us/azure/iot-hub-device-update/import-schema#updateid-object
      * @param[out] device_properties The @ref AzureIoTADUClientDeviceProperties_t instance to set with default values.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
@@ -107,8 +110,7 @@ extern "C"
      * @param[in] agent_state The current @ref AzureIoTADUAgentState_t.
      * @param[in] update_results The current @ref AzureIoTADUClientInstallResult_t. This can be `NULL` if there aren't any
      * results from an update.
-     * @param[out] pucBuffer The buffer into which the generated payload will be placed. Length will be
-     * updated with the written bytes count.
+     * @param[out] pucBuffer The buffer into which the generated payload will be placed.
      * @param[in] request_id Pointer to request id to use for the operation.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */

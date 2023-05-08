@@ -4,6 +4,8 @@
 #include "assertion.h"
 #include "log.h"
 
+#define UPDATE_ID "{\"provider\":\"" CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER "\",\"name\":\"" CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME "\",\"version\":\"" CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION "\"}"
+
 static const char TAG_AZ_ADU[] = "AZ_ADU";
 
 struct azure_adu_context_t
@@ -57,6 +59,8 @@ AzureIoTResult_t azure_adu_device_properties_init(AzureIoTADUClientDevicePropert
     device_properties->ulManufacturerLength = sizeof(CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER) - 1;
     device_properties->ucModel = (const uint8_t *)CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL;
     device_properties->ulModelLength = sizeof(CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL) - 1;
+    device_properties->ucCurrentUpdateId = (const uint8_t *)UPDATE_ID;
+    device_properties->ulCurrentUpdateIdLength = sizeof(UPDATE_ID) - 1;
 
     return result;
 }
