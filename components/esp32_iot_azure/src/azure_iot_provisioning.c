@@ -29,8 +29,11 @@ azure_dps_context_t *azure_dps_create()
     context->transport = transport_create_azure();
     context->mqtt_buffer = (uint8_t *)malloc(CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE);
 
+    memset(context->mqtt_buffer, 0, CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE);
+
     return context;
 }
+
 AzureIoTResult_t azure_dps_options_init(azure_dps_context_t *context, AzureIoTProvisioningClientOptions_t **client_options)
 {
     AzureIoTResult_t result = AzureIoTProvisioningClient_OptionsInit(&context->dps_client_options);
@@ -45,6 +48,7 @@ AzureIoTResult_t azure_dps_options_init(azure_dps_context_t *context, AzureIoTPr
 
     return result;
 }
+
 AzureIoTResult_t azure_dps_init(azure_dps_context_t *context, const utf8_string_t *registration_id)
 {
     azure_transport_interface_init(context->transport, &context->transport_interface);

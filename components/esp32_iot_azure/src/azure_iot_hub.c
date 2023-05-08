@@ -27,6 +27,8 @@ azure_iot_hub_context_t *azure_iot_hub_create()
     context->transport = transport_create_azure();
     context->mqtt_buffer = (uint8_t *)malloc(CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE);
 
+    memset(context->mqtt_buffer, 0, CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE);
+
     return context;
 }
 
