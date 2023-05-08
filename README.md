@@ -7,10 +7,10 @@ Just clone, configure through [menuconfig](https://docs.espressif.com/projects/e
 ## Characteristics
 
 * ESP-IDF: [v4.4.4](https://docs.espressif.com/projects/esp-idf/en/v4.4.4/esp32/index.html)
-* API: all functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos), plus custom extensions.
+* API: all functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos), plus [custom extensions](/components/esp32_iot_azure/include/esp32_iot_azure/extension/).
 * Features supported ([IoT Hub](https://learn.microsoft.com/en-us/azure/iot-hub/)/[IoT Central](https://learn.microsoft.com/en-us/azure/iot-central/)):
     * [Device Provisioning Service (DPS)](https://learn.microsoft.com/en-us/azure/iot-dps/)
-    * [Device Update](https://learn.microsoft.com/en-us/azure/iot-hub-device-update/) _(in progress)_
+    * [Device Update](https://learn.microsoft.com/en-us/azure/iot-hub-device-update/)
     * [Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/)
     * [IoT Plug and Play](https://learn.microsoft.com/en-us/azure/iot-develop/overview-iot-plug-and-play)
 * Azure libraries used: 

@@ -1,8 +1,6 @@
 [
   {
-    "@context": [
-      "dtmi:dtdl:context;3"
-    ],
+    "@context": "dtmi:dtdl:context;2",
     "@id": "dtmi:com:esp32iotazure:TemperatureController;1",
     "@type": "Interface",
     "extends": "dtmi:azure:iot:deviceUpdateContractModel;2",
@@ -44,7 +42,7 @@
   },
   {
     "@context": [
-      "dtmi:dtdl:context;3",
+      "dtmi:dtdl:context;2",
       "dtmi:dtdl:extension:quantitativeTypes;1"
     ],
     "@id": "dtmi:com:esp32iotazure:Thermostat;1",
@@ -64,9 +62,7 @@
     ]
   },
   {
-    "@context": [
-      "dtmi:dtdl:context;3"
-    ],
+    "@context": "dtmi:dtdl:context;2",
     "@id": "dtmi:com:esp32iotazure:Display;1",
     "@type": "Interface",
     "contents": [

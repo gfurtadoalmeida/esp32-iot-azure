@@ -90,6 +90,7 @@ idf_component_register(
         ${CORE_HTTP_SOURCES}
     INCLUDE_DIRS
         "include"
+        "include/esp32_iot_azure/port"
         ${AZURE_IOT_MIDDLEWARE_FREERTOS_INCLUDE_DIRS}
         ${AZURE_IOT_MIDDLEWARE_FREERTOS_CONFIGS}
         ${AZURE_SDK_FOR_C_INCLUDE_DIRS}
@@ -101,4 +102,5 @@ idf_component_register(
         freertos
         mbedtls
         tcp_transport
+        app_update
 )
