@@ -1,7 +1,7 @@
 #ifndef __ESP32_IOT_AZURE_ADU_H__
 #define __ESP32_IOT_AZURE_ADU_H__
 
-#include "esp32_iot_azure/azure_iot_common.h"
+#include <stdint.h>
 #include "esp32_iot_azure/azure_iot_hub.h"
 #include "azure_iot_adu_client.h"
 
@@ -28,7 +28,7 @@ extern "C"
      * @brief Initialize the \p context internal Azure IoT Device Update Options.
      * @param[in] context ADU context.
      * @param[out] client_options Pointer to a @ref AzureIoTADUClientOptions_t pointer used by the \p context.
-     * Can be null if there is no need to change its fields.
+     * Can be `NULL` if there is no need to change its fields.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
     AzureIoTResult_t azure_adu_options_init(azure_adu_context_t *context, AzureIoTADUClientOptions_t **client_options);
@@ -54,14 +54,17 @@ extern "C"
     /**
      * @brief Returns whether the component is the ADU component.
      * @note If it is, user should follow by parsing the component with the
-     *       AzureIoTHubClient_ADUProcessComponent() call. The properties will be
+     *       @ref AzureIoTHubClient_ADUProcessComponent() call. The properties will be
      *       processed into the AzureIoTADUClient.
      * @param[in] context ADU context.
-     * @param[in] component_name Name of writable properties component to be checked.
+     * @param[in] component_name Name of writable property component to be checked.
+     * @param[in] component_name_length Name of writable property component length.
      * @return A boolean value indicating if the writable properties component
      *         is from ADU service.
      */
-    bool azure_adu_is_adu_component(azure_adu_context_t *context, const utf8_string_t *component_name);
+    bool azure_adu_is_adu_component(azure_adu_context_t *context,
+                                    const uint8_t *component_name,
+                                    uint32_t component_name_length);
 
     /**
      * @brief Parse the ADU update request into the requisite structure.
@@ -79,7 +82,7 @@ extern "C"
     /**
      * @brief Updates the ADU Agent Client with ADU service device update properties.
      * @remark It must be called whenever writable properties are received containing
-     *         ADU service properties (verified with AzureIoTADUClient_IsADUComponent).
+     *         ADU service properties (verified with @ref azure_adu_is_adu_component()).
      *         It effectively parses the properties (aka, the device update request)
      *         from ADU and sets the state machine to perform the update process if the
      *         the update request is applicable (e.g., if the version is not already
@@ -89,16 +92,17 @@ extern "C"
      * @param[in] adu_context ADU context.
      * @param[in] request_decision The @ref #AzureIoTADURequestDecision_t for this response.
      * @param[in] property_version Version of the writable properties.
-     * @param[in,out] response_buffer A pointer to the memory buffer where to write
-     * the resulting Azure Plug-and-Play properties acknowledgement payload. Length will be
-     * updated with the written bytes count.
+     * @param[in] response_buffer A pointer to the memory buffer where to write
+     * the resulting Azure Plug-and-Play properties acknowledgement payload.
+     * @param[in] response_buffer_length Response buffer length.
      * @param[in] request_id Pointer to request id to use for the operation.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
     AzureIoTResult_t azure_adu_send_response(azure_adu_context_t *adu_context,
                                              AzureIoTADURequestDecision_t request_decision,
                                              uint32_t property_version,
-                                             utf8_string_t *response_buffer,
+                                             uint8_t *response_buffer,
+                                             uint32_t response_buffer_length,
                                              uint32_t *request_id);
 
     /**
@@ -110,7 +114,8 @@ extern "C"
      * @param[in] agent_state The current @ref AzureIoTADUAgentState_t.
      * @param[in] update_results The current @ref AzureIoTADUClientInstallResult_t. This can be `NULL` if there aren't any
      * results from an update.
-     * @param[out] pucBuffer The buffer into which the generated payload will be placed.
+     * @param[out] buffer The buffer into which the generated payload will be placed.
+     * @param[out] buffer_length Buffer length.
      * @param[in] request_id Pointer to request id to use for the operation.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
@@ -119,7 +124,8 @@ extern "C"
                                                 AzureIoTADUUpdateRequest_t *update_request,
                                                 AzureIoTADUAgentState_t agent_state,
                                                 AzureIoTADUClientInstallResult_t *update_results,
-                                                utf8_string_t *buffer,
+                                                uint8_t *buffer,
+                                                uint32_t buffer_length,
                                                 uint32_t *request_id);
 
     /**

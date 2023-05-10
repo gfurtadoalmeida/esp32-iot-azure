@@ -22,25 +22,25 @@ bool example_dps_run(const utf8_string_t *device_symmetric_key,
         goto CLEAN_UP;
     }
 
-    if (azure_dps_init(dps, device_registration_id) != eAzureIoTSuccess)
+    if (azure_dps_init(dps, device_registration_id->buffer, device_registration_id->length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_DPS, "failure initializing");
         goto CLEAN_UP;
     }
 
-    if (azure_dps_auth_set_symmetric_key(dps, device_symmetric_key) != eAzureIoTSuccess)
+    if (azure_dps_auth_set_symmetric_key(dps, device_symmetric_key->buffer, device_symmetric_key->length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_DPS, "failure setting symmetric key");
         goto CLEAN_UP;
     }
 
-    if (azure_dps_create_pnp_registration_payload(&registration_payload) != eAzureIoTSuccess)
+    if (azure_dps_create_pnp_registration_payload(registration_payload.buffer, &registration_payload.length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_DPS, "failure creating PnP registration payload");
         goto CLEAN_UP;
     }
 
-    if (azure_dps_set_registration_payload(dps, &registration_payload) != eAzureIoTSuccess)
+    if (azure_dps_set_registration_payload(dps, registration_payload.buffer, registration_payload.length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_DPS, "failure setting registration payload");
         goto CLEAN_UP;
@@ -52,7 +52,11 @@ bool example_dps_run(const utf8_string_t *device_symmetric_key,
         goto CLEAN_UP;
     }
 
-    if (azure_dps_get_device_and_hub(dps, iot_hub_hostname, device_id) != eAzureIoTSuccess)
+    if (azure_dps_get_device_and_hub(dps,
+                                     iot_hub_hostname->buffer,
+                                     &iot_hub_hostname->length,
+                                     device_id->buffer,
+                                     &device_id->length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_DPS, "failure getting device and hub");
         goto CLEAN_UP;

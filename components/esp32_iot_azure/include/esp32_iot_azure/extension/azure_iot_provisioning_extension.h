@@ -31,9 +31,11 @@ extern "C"
      * to @ref azure_dps_set_registration_payload function.
      * @note About: https://learn.microsoft.com/en-us/azure/iot-develop/concepts-developer-guide-device?pivots=programming-language-ansi-c#dps-payload
      * @param[in,out] registration_payload Registration payload with a buffer with at least AZURE_DPS_SIZEOF_PNP_REGISTRATION_PAYLOAD.
+     * @param[in,out] registration_payload_length Registration payload length. Will be updated with the created registration payload length.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
-    AzureIoTResult_t azure_dps_create_pnp_registration_payload(utf8_string_t *registration_payload);
+    AzureIoTResult_t azure_dps_create_pnp_registration_payload(uint8_t *registration_payload,
+                                                               uint32_t *registration_payload_length);
 
 #ifdef __cplusplus
 }

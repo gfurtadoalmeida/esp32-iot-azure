@@ -23,3 +23,15 @@ AzureIoTResult_t AzureIoTJSONReader_GetTokenUInt16(AzureIoTJSONReader_t *json_re
 
     AZ_CHECK_RETURN_LAST()
 }
+
+AzureIoTResult_t AzureIoTJSONReader_GetTokenUInt8(AzureIoTJSONReader_t *json_reader, uint8_t *value)
+{
+    int32_t int32_value = 0;
+
+    AZ_CHECK_BEGIN()
+    AZ_CHECK(AzureIoTJSONReader_GetTokenInt32(json_reader, &int32_value))
+
+    *value = (uint8_t)int32_value;
+
+    AZ_CHECK_RETURN_LAST()
+}

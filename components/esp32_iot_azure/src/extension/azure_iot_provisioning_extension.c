@@ -4,10 +4,11 @@
 
 static const char TAG_AZ_DPS_EXT[] = "AZ_DPS_EXT";
 
-AzureIoTResult_t azure_dps_create_pnp_registration_payload(utf8_string_t *registration_payload)
+AzureIoTResult_t azure_dps_create_pnp_registration_payload(uint8_t *registration_payload,
+                                                           uint32_t *registration_payload_length)
 {
     CMP_CHECK(TAG_AZ_DPS_EXT,
-              registration_payload->length >= AZURE_DPS_SIZEOF_PNP_REGISTRATION_PAYLOAD,
+              *registration_payload_length >= AZURE_DPS_SIZEOF_PNP_REGISTRATION_PAYLOAD,
               "small registration_payload buffer",
               eAzureIoTErrorOutOfMemory)
 
@@ -15,7 +16,7 @@ AzureIoTResult_t azure_dps_create_pnp_registration_payload(utf8_string_t *regist
 
     AzureIoTJSONWriter_t json_writer;
 
-    AZ_CHECK(AzureIoTJSONWriter_Init(&json_writer, registration_payload->buffer, registration_payload->length))
+    AZ_CHECK(AzureIoTJSONWriter_Init(&json_writer, registration_payload, *registration_payload_length))
     AZ_CHECK(AzureIoTJSONWriter_AppendBeginObject(&json_writer))
     AZ_CHECK(AzureIoTJSONWriter_AppendPropertyWithStringValue(&json_writer,
                                                               (uint8_t *)"modelId",
@@ -24,7 +25,7 @@ AzureIoTResult_t azure_dps_create_pnp_registration_payload(utf8_string_t *regist
                                                               sizeof(CONFIG_ESP32_IOT_AZURE_DEVICE_MODEL_ID) - 1))
     AZ_CHECK(AzureIoTJSONWriter_AppendEndObject(&json_writer))
 
-    registration_payload->length = (uint32_t)AzureIoTJSONWriter_GetBytesUsed(&json_writer);
+    *registration_payload_length = (uint32_t)AzureIoTJSONWriter_GetBytesUsed(&json_writer);
 
     AZ_CHECK_RETURN_LAST()
 }

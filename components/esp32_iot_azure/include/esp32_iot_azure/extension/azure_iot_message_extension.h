@@ -1,7 +1,6 @@
 #ifndef __ESP32_IOT_AZURE_MESSAGE_EXT_H__
 #define __ESP32_IOT_AZURE_MESSAGE_EXT_H__
 
-#include "esp32_iot_azure/azure_iot_common.h"
 #include "azure_iot_message.h"
 
 #ifdef __cplusplus
@@ -16,12 +15,14 @@ extern "C"
      * they must be percent-encoded (RFC3986) as follows: - `/` : `%2F` - `%` : `%25` - `#` : `%23` - `&` : `%26`.
      * Only these characters would have to be encoded. If you would like to avoid the need to encode the names/values,
      * avoid using these characters in names and values.
-     * @param[in] message_properties @ref AzureIoTMessageProperties_t* to use for the operation.
+     * @param[in] message_properties @ref AzureIoTMessageProperties_t to use for the operation.
      * @param[in] component_name Component name.
+     * @param[in] component_name_length Component name length.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
     AzureIoTResult_t AzureIoTMessage_PropertiesAppendComponentName(AzureIoTMessageProperties_t *message_properties,
-                                                                   const utf8_string_t *component_name);
+                                                                   const uint8_t *component_name,
+                                                                   uint32_t component_name_length);
 
 #ifdef __cplusplus
 }

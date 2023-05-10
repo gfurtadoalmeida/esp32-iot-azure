@@ -1,6 +1,7 @@
 #ifndef __ESP32_IOT_AZURE_PROVISIONING_H__
 #define __ESP32_IOT_AZURE_PROVISIONING_H__
 
+#include <stdint.h>
 #include "esp32_iot_azure/azure_iot_common.h"
 #include "azure_iot_provisioning_client.h"
 
@@ -37,18 +38,24 @@ extern "C"
      * given registration id.
      * @param[in] context DPS context.
      * @param[in] registration_id Device registration id.
+     * @param[in] registration_id_length Device registration id length.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
-    AzureIoTResult_t azure_dps_init(azure_dps_context_t *context, const utf8_string_t *registration_id);
+    AzureIoTResult_t azure_dps_init(azure_dps_context_t *context,
+                                    const uint8_t *registration_id,
+                                    uint32_t registration_id_length);
 
     /**
      * @brief Set the device derived or individual symmetric key to use for authentication.
      * @note Derived Key: https://learn.microsoft.com/en-us/azure/iot-dps/concepts-symmetric-key-attestation?tabs=windows#group-enrollments
      * @param[in] context DPS context.
      * @param[in] symmetric_key Device symmetric key.
+     * @param[in] symmetric_key_length Device symmetric key, length.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
-    AzureIoTResult_t azure_dps_auth_set_symmetric_key(azure_dps_context_t *context, const utf8_string_t *symmetric_key);
+    AzureIoTResult_t azure_dps_auth_set_symmetric_key(azure_dps_context_t *context,
+                                                      const uint8_t *symmetric_key,
+                                                      uint32_t symmetric_key_length);
 
     /**
      * @brief Set the client certificate to use for authentication.
@@ -56,7 +63,8 @@ extern "C"
      * @param[in] context DPS context.
      * @param[in] certificate Device client certificate.
      */
-    void azure_dps_auth_set_client_certificate(azure_dps_context_t *context, const client_certificate_t *certificate);
+    void azure_dps_auth_set_client_certificate(azure_dps_context_t *context,
+                                               const client_certificate_t *certificate);
 
     /**
      * @brief Set registration payload. Used by custom allocation policies, IoT Plug and Play and IoT Central devices.
@@ -64,9 +72,12 @@ extern "C"
      * @note About: https://learn.microsoft.com/en-us/azure/iot-dps/how-to-send-additional-data#when-to-use-it
      * @param[in] context DPS context.
      * @param[in] payload User defined JSON registration payload.
+     * @param[in] payload_length Payload length.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
-    AzureIoTResult_t azure_dps_set_registration_payload(azure_dps_context_t *context, const utf8_string_t *payload);
+    AzureIoTResult_t azure_dps_set_registration_payload(azure_dps_context_t *context,
+                                                        const uint8_t *payload,
+                                                        uint32_t payload_length);
 
     /**
      * @brief Begin the provisioning process and wait until the device is registered or fail.
@@ -86,12 +97,16 @@ extern "C"
      * registration has been completed.
      * @param[in] context DPS context.
      * @param[out] hostname IoT Hub hostname buffer with capacity for @ref AZURE_CONST_HOSTNAME_MAX_LENGTH chars.
+     * @param[in,out] hostname_length Hostname buffer length. Will be updated with the retrieved hostname length.
      * @param[out] device_id Device Id buffer with capacity for @ref AZURE_CONST_DEVICE_ID_MAX_LENGTH chars.
+     * @param[in,out] device_id_length Device Id buffer length. Will be updated with the retrieved device id length.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
     AzureIoTResult_t azure_dps_get_device_and_hub(azure_dps_context_t *context,
-                                                  utf8_string_t *hostname,
-                                                  utf8_string_t *device_id);
+                                                  uint8_t *hostname,
+                                                  uint32_t *hostname_length,
+                                                  uint8_t *device_id,
+                                                  uint32_t *device_id_length);
 
     /**
      * @brief Get extended code for Provisioning failure.

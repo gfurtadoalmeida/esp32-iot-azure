@@ -23,6 +23,14 @@ extern "C"
      */
     AzureIoTResult_t AzureIoTJSONReader_GetTokenUInt16(AzureIoTJSONReader_t *json_reader, uint16_t *value);
 
+    /**
+     * @brief Get the JSON token's number as a 8-bit unsigned integer.
+     * @param[in] json_reader A pointer to an @ref AzureIoTJSONReader_t.
+     * @param[out] value A pointer to a variable to receive the value.
+     * @return @ref AzureIoTResult_t with the result of the operation.
+     */
+    AzureIoTResult_t AzureIoTJSONReader_GetTokenUInt8(AzureIoTJSONReader_t *json_reader, uint8_t *value);
+
 #ifdef __cplusplus
 }
 #endif

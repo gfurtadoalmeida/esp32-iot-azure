@@ -55,44 +55,37 @@ AzureIoTResult_t azure_iot_hub_options_init(azure_iot_hub_context_t *context, Az
 }
 
 AzureIoTResult_t azure_iot_hub_init(azure_iot_hub_context_t *context,
-                                    const utf8_string_t *hostname,
-                                    const utf8_string_t *device_id)
+                                    const uint8_t *hostname,
+                                    uint16_t hostname_length,
+                                    const uint8_t *device_id,
+                                    uint16_t device_id_length)
 {
     azure_transport_interface_init(context->transport, &context->transport_interface);
 
-    AzureIoTResult_t result = AzureIoTHubClient_Init(&context->iot_client,
-                                                     hostname->buffer,
-                                                     (uint16_t)hostname->length,
-                                                     device_id->buffer,
-                                                     (uint16_t)device_id->length,
-                                                     &context->iot_client_options,
-                                                     context->mqtt_buffer,
-                                                     CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE,
-                                                     &time_get_unix,
-                                                     &context->transport_interface);
-    if (result != eAzureIoTSuccess)
-    {
-        CMP_LOGE(TAG_AZ_IOT, "failure initializing: %d", result);
-    }
-
-    return result;
+    return AzureIoTHubClient_Init(&context->iot_client,
+                                  hostname,
+                                  hostname_length,
+                                  device_id,
+                                  device_id_length,
+                                  &context->iot_client_options,
+                                  context->mqtt_buffer,
+                                  CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE,
+                                  &time_get_unix,
+                                  &context->transport_interface);
 }
 
-AzureIoTResult_t azure_iot_hub_auth_set_symmetric_key(azure_iot_hub_context_t *context, const utf8_string_t *symmetric_key)
+AzureIoTResult_t azure_iot_hub_auth_set_symmetric_key(azure_iot_hub_context_t *context,
+                                                      const uint8_t *symmetric_key,
+                                                      uint32_t symmetric_key_length)
 {
-    AzureIoTResult_t result = AzureIoTHubClient_SetSymmetricKey(&context->iot_client,
-                                                                symmetric_key->buffer,
-                                                                symmetric_key->length,
-                                                                &crypto_hash_hmac_256);
-    if (result != eAzureIoTSuccess)
-    {
-        CMP_LOGE(TAG_AZ_IOT, "failure setting symmetric key: %d", result);
-    }
-
-    return result;
+    return AzureIoTHubClient_SetSymmetricKey(&context->iot_client,
+                                             symmetric_key,
+                                             symmetric_key_length,
+                                             &crypto_hash_hmac_256);
 }
 
-void azure_iot_hub_auth_set_client_certificate(azure_iot_hub_context_t *context, const client_certificate_t *certificate)
+void azure_iot_hub_auth_set_client_certificate(azure_iot_hub_context_t *context,
+                                               const client_certificate_t *certificate)
 {
     transport_set_client_certificate(context->transport, certificate);
 }
@@ -176,7 +169,8 @@ AzureIoTResult_t azure_iot_hub_unsubscribe_properties(azure_iot_hub_context_t *c
 
 AzureIoTResult_t azure_iot_hub_send_command_response(azure_iot_hub_context_t *context,
                                                      const AzureIoTHubClientCommandRequest_t *command_request,
-                                                     const utf8_string_t *payload,
+                                                     const uint8_t *payload,
+                                                     uint32_t payload_length,
                                                      uint32_t status_code)
 {
     if (payload == NULL)
@@ -192,8 +186,8 @@ AzureIoTResult_t azure_iot_hub_send_command_response(azure_iot_hub_context_t *co
         return AzureIoTHubClient_SendCommandResponse(&context->iot_client,
                                                      command_request,
                                                      status_code,
-                                                     payload->buffer,
-                                                     payload->length);
+                                                     payload,
+                                                     payload_length);
     }
 }
 
@@ -203,24 +197,26 @@ AzureIoTResult_t azure_iot_hub_request_properties_async(azure_iot_hub_context_t 
 }
 
 AzureIoTResult_t azure_iot_hub_send_properties_reported(azure_iot_hub_context_t *context,
-                                                        const utf8_string_t *payload,
+                                                        const uint8_t *payload,
+                                                        uint32_t payload_length,
                                                         uint32_t *request_id)
 {
     return AzureIoTHubClient_SendPropertiesReported(&context->iot_client,
-                                                    payload->buffer,
-                                                    payload->length,
+                                                    payload,
+                                                    payload_length,
                                                     request_id);
 }
 
 AzureIoTResult_t azure_iot_hub_send_telemetry(azure_iot_hub_context_t *context,
-                                              const utf8_string_t *payload,
+                                              const uint8_t *payload,
+                                              uint32_t payload_length,
                                               AzureIoTMessageProperties_t *properties,
                                               AzureIoTHubMessageQoS_t qos,
                                               uint16_t *packet_id)
 {
     return AzureIoTHubClient_SendTelemetry(&context->iot_client,
-                                           payload->buffer,
-                                           payload->length,
+                                           payload,
+                                           payload_length,
                                            properties,
                                            qos,
                                            packet_id);

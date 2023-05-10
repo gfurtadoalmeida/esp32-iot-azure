@@ -7,18 +7,33 @@
 #include "esp32_iot_azure/extension/azure_iot_hub_client_properties_extension.h"
 #include "esp32_iot_azure/extension/azure_iot_json_writer_extension.h"
 #include "esp32_iot_azure/extension/azure_iot_json_reader_extension.h"
+#include "dtdl/temperaturecontroller.h"
+
+typedef struct
+{
+    azure_iot_hub_context_t *iot_hub;
+    utf8_string_t scratch_buffer;
+    temperature_controller_status_t device_status;
+    uint8_t display_brightness;
+    bool restart_command_called;
+} example_context_t;
 
 static const char TAG_EX_IOT[] = "EX_IOT_HUB";
 
-static volatile bool s_turn_off_command_called = false;
+static example_context_t EXAMPLE_CONTEXT = {
+    .iot_hub = NULL,
+    .scratch_buffer = UTF8_STRING_WITH_FIXED_LENGTH(700),
+    .device_status = TEMP_CONTROLLER_STATUS_NORMAL,
+    .display_brightness = 50,
+    .restart_command_called = false};
 
 static void callback_cloud_to_device_subscription(const AzureIoTHubClientCloudToDeviceMessageRequest_t *message, const void *callback_context);
 static void callback_cloud_command_subscription(const AzureIoTHubClientCommandRequest_t *message, void *callback_context);
 static void callback_cloud_properties_subscription(const AzureIoTHubClientPropertiesResponse_t *message, void *callback_context);
 
-static AzureIoTResult_t device_report_initial_state(azure_iot_hub_context_t *iot, uint8_t temperature, uint8_t display_brigthness);
-static AzureIoTResult_t device_change_state(azure_iot_hub_context_t *iot, const AzureIoTHubClientPropertiesResponse_t *message, uint32_t *version, uint16_t *new_display_brightness);
-static AzureIoTResult_t device_report_state_changed(azure_iot_hub_context_t *iot, uint32_t version, uint16_t display_brightness);
+static AzureIoTResult_t device_report_initial_state(example_context_t *context);
+static AzureIoTResult_t device_change_state(example_context_t *context, const AzureIoTHubClientPropertiesResponse_t *message, uint32_t *version);
+static AzureIoTResult_t device_report_state_changed(example_context_t *context, uint32_t version);
 
 bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
                          const utf8_string_t *device_id,
@@ -26,8 +41,10 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
 {
     bool success = false;
     AzureIoTHubClientOptions_t *iot_client_options = NULL;
-
     azure_iot_hub_context_t *iot = azure_iot_hub_create();
+
+    example_context_t *example_context = &EXAMPLE_CONTEXT;
+    example_context->iot_hub = iot;
 
     if (azure_iot_hub_options_init(iot, &iot_client_options) != eAzureIoTSuccess)
     {
@@ -36,17 +53,21 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
     }
 
     iot_client_options->pxComponentList = (AzureIoTHubClientComponent_t[2]){
-        azureiothubCREATE_COMPONENT("thermostat"),
-        azureiothubCREATE_COMPONENT("display")};
+        azureiothubCREATE_COMPONENT(TEMP_CTRL_CMP_DISPLAY_NAME),
+        azureiothubCREATE_COMPONENT(TEMP_CTRL_CMP_THERMOSTAT_NAME)};
     iot_client_options->ulComponentListLength = 2;
 
-    if (azure_iot_hub_init(iot, iot_hub_hostname, device_id) != eAzureIoTSuccess)
+    if (azure_iot_hub_init(iot,
+                           iot_hub_hostname->buffer,
+                           (uint16_t)iot_hub_hostname->length,
+                           device_id->buffer,
+                           (uint16_t)device_id->length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure initializing");
         goto CLEAN_UP;
     }
 
-    if (azure_iot_hub_auth_set_symmetric_key(iot, device_symmetric_key) != eAzureIoTSuccess)
+    if (azure_iot_hub_auth_set_symmetric_key(iot, device_symmetric_key->buffer, device_symmetric_key->length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure setting symmetric key");
         goto CLEAN_UP;
@@ -58,19 +79,19 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
         goto CLEAN_UP;
     }
 
-    if (azure_iot_hub_subscribe_cloud_to_device_message(iot, &callback_cloud_to_device_subscription, NULL) != eAzureIoTSuccess)
+    if (azure_iot_hub_subscribe_cloud_to_device_message(iot, &callback_cloud_to_device_subscription, example_context) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure subscribing to cloud-to-device messages");
         goto CLEAN_UP;
     }
 
-    if (azure_iot_hub_subscribe_command(iot, &callback_cloud_command_subscription, iot) != eAzureIoTSuccess)
+    if (azure_iot_hub_subscribe_command(iot, &callback_cloud_command_subscription, example_context) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure subscribing to commands");
         goto CLEAN_UP;
     }
 
-    if (azure_iot_hub_subscribe_properties(iot, &callback_cloud_properties_subscription, iot) != eAzureIoTSuccess)
+    if (azure_iot_hub_subscribe_properties(iot, &callback_cloud_properties_subscription, example_context) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure subscribing to properties");
         goto CLEAN_UP;
@@ -82,20 +103,27 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
         goto CLEAN_UP;
     }
 
-    if (device_report_initial_state(iot, 25, 95) != eAzureIoTSuccess)
+    if (device_report_initial_state(example_context) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure reporting initial state");
         goto CLEAN_UP;
     }
 
     utf8_string_t telemetry_payload = UTF8_STRING_WITH_FIXED_LENGTH(15);
-    utf8_string_t component_name = UTF8_STRING_FROM_LITERAL("thermostat");
 
-    while (!s_turn_off_command_called)
+    while (!example_context->restart_command_called)
     {
-        telemetry_payload.length = sprintf((char *)telemetry_payload.buffer, "{\"temp\":%d}", rand() % (28 + 1 - 18) + 18);
+        telemetry_payload.length = sprintf((char *)telemetry_payload.buffer,
+                                           "{\"" TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME "\":%d}",
+                                           rand() % (28 + 1 - 18) + 18);
 
-        azure_iot_hub_send_telemetry_from_component(iot, &component_name, &telemetry_payload, eAzureIoTHubMessageQoS1, NULL);
+        azure_iot_hub_send_telemetry_from_component(iot,
+                                                    (uint8_t *)TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME,
+                                                    sizeof_l(TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME),
+                                                    telemetry_payload.buffer,
+                                                    telemetry_payload.length,
+                                                    eAzureIoTHubMessageQoS1,
+                                                    NULL);
 
         azure_iot_hub_process_loop(iot);
 
@@ -128,27 +156,27 @@ static void callback_cloud_command_subscription(const AzureIoTHubClientCommandRe
 {
     ESP_LOGI(TAG_EX_IOT, "command message: %.*s", message->usCommandNameLength, (const char *)message->pucCommandName);
 
-    azure_iot_hub_context_t *iot = (azure_iot_hub_context_t *)callback_context;
+    example_context_t *context = (example_context_t *)callback_context;
 
     // The "restart" command belongs to the root interface (TemperatureController),
     // therefore no component name must be sent.
-    if (message->usComponentNameLength == 0 && strncasecmp("restart", (const char *)message->pucCommandName, sizeof("restart") - 1) == 0)
+    if (message->usComponentNameLength == 0 && strncasecmp(TEMP_CTRL_CMD_RESTART_NAME, (const char *)message->pucCommandName, sizeof_l(TEMP_CTRL_CMD_RESTART_NAME)) == 0)
     {
         ESP_LOGW(TAG_EX_IOT, "restarting device");
 
-        if (azure_iot_hub_send_command_response(iot, message, NULL, 200) != eAzureIoTSuccess)
+        if (azure_iot_hub_send_command_response(context->iot_hub, message, NULL, 0, 200) != eAzureIoTSuccess)
         {
             ESP_LOGE(TAG_EX_IOT, "failure sending command response");
         }
 
-        s_turn_off_command_called = true;
+        context->restart_command_called = true;
 
         return;
     }
 
     utf8_string_t error_payload = UTF8_STRING_FROM_LITERAL("{\"message\":\"command unknown\"}");
 
-    if (azure_iot_hub_send_command_response(iot, message, &error_payload, 404) != eAzureIoTSuccess)
+    if (azure_iot_hub_send_command_response(context->iot_hub, message, error_payload.buffer, error_payload.length, 404) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure sending command response");
     }
@@ -156,9 +184,8 @@ static void callback_cloud_command_subscription(const AzureIoTHubClientCommandRe
 
 static void callback_cloud_properties_subscription(const AzureIoTHubClientPropertiesResponse_t *message, void *callback_context)
 {
-    azure_iot_hub_context_t *iot = (azure_iot_hub_context_t *)callback_context;
+    example_context_t *context = (example_context_t *)callback_context;
     uint32_t version = 0;
-    uint16_t new_value = 0;
 
     ESP_LOGI(TAG_EX_IOT, "property message: %.*s", message->ulPayloadLength, (const char *)message->pvMessagePayload);
 
@@ -167,7 +194,7 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
     case eAzureIoTHubPropertiesRequestedMessage:
         ESP_LOGI(TAG_EX_IOT, "azure_iot_hub_request_properties_async response = property document (desired + reported) sent by the server");
 
-        if (device_change_state(iot, message, &version, &new_value) == eAzureIoTSuccess)
+        if (device_change_state(context, message, &version) == eAzureIoTSuccess)
         {
             ESP_LOGI(TAG_EX_IOT, "device state changed");
         }
@@ -181,11 +208,11 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
     case eAzureIoTHubPropertiesWritablePropertyMessage:
         ESP_LOGI(TAG_EX_IOT, "server wants to change a device property");
 
-        if (device_change_state(iot, message, &version, &new_value) == eAzureIoTSuccess)
+        if (device_change_state(context, message, &version) == eAzureIoTSuccess)
         {
             ESP_LOGI(TAG_EX_IOT, "device state changed");
 
-            if (device_report_state_changed(iot, version, new_value) == eAzureIoTSuccess)
+            if (device_report_state_changed(context, version) == eAzureIoTSuccess)
             {
                 ESP_LOGI(TAG_EX_IOT, "state change reported");
             }
@@ -219,57 +246,42 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
 // PROPERTY HANDLE
 //
 
-static AzureIoTResult_t device_report_initial_state(azure_iot_hub_context_t *iot,
-                                                    uint8_t temperature,
-                                                    uint8_t display_brigthness)
+static AzureIoTResult_t device_report_initial_state(example_context_t *context)
 {
-    utf8_string_t payload = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_JSON_SIZEOF_OBJECT_EMPTY + AZURE_JSON_SIZEOF_OBJECT_PROPERTY("deviceStatus", 10) + AZURE_JSON_SIZEOF_IOTHUB_CLIENT_PROPERTY_BUILDER_COMPONENT("thermostat") + AZURE_JSON_SIZEOF_OBJECT_PROPERTY("temp", 2) + AZURE_JSON_SIZEOF_IOTHUB_CLIENT_PROPERTY_BUILDER_COMPONENT("display") + AZURE_JSON_SIZEOF_OBJECT_PROPERTY("brightness", 3));
-
     AzureIoTJSONWriter_t json_writer;
-    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(iot);
+    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(context->iot_hub);
 
     AZ_CHECK_BEGIN()
-    AZ_CHECK(AzureIoTJSONWriter_Init(&json_writer, payload.buffer, payload.length))
+    AZ_CHECK(AzureIoTJSONWriter_Init(&json_writer, context->scratch_buffer.buffer, context->scratch_buffer.length))
     AZ_CHECK(AzureIoTJSONWriter_AppendBeginObject(&json_writer))
-    AZ_CHECK(AzureIoTJSONWriter_AppendPropertyWithStringValue(&json_writer,
-                                                              (uint8_t *)"deviceStatus",
-                                                              sizeof("deviceStatus") - 1,
-                                                              (uint8_t *)"active",
-                                                              sizeof("active") - 1))
+    AZ_CHECK(AzureIoTJSONWriter_AppendPropertyWithInt32Value(&json_writer,
+                                                             (uint8_t *)TEMP_CTRL_PRP_DEVICE_STATUS_NAME,
+                                                             sizeof_l(TEMP_CTRL_PRP_DEVICE_STATUS_NAME),
+                                                             context->device_status))
     AZ_CHECK(AzureIoTHubClientProperties_BuilderBeginComponent(iot_client,
                                                                &json_writer,
-                                                               (uint8_t *)"thermostat",
-                                                               sizeof("thermostat") - 1))
+                                                               (uint8_t *)TEMP_CTRL_CMP_DISPLAY_NAME,
+                                                               sizeof_l(TEMP_CTRL_CMP_DISPLAY_NAME)))
     AZ_CHECK(AzureIoTJSONWriter_AppendPropertyWithInt32Value(&json_writer,
-                                                             (uint8_t *)"temp",
-                                                             sizeof("temp") - 1,
-                                                             temperature))
-    AZ_CHECK(AzureIoTHubClientProperties_BuilderEndComponent(iot_client, &json_writer))
-    AZ_CHECK(AzureIoTHubClientProperties_BuilderBeginComponent(iot_client,
-                                                               &json_writer,
-                                                               (uint8_t *)"display",
-                                                               sizeof("display") - 1))
-    AZ_CHECK(AzureIoTJSONWriter_AppendPropertyWithInt32Value(&json_writer,
-                                                             (uint8_t *)"brightness",
-                                                             sizeof("brightness") - 1,
-                                                             display_brigthness))
+                                                             (uint8_t *)TEMP_CTRL_CMP_DISPLAY_PRP_BRIGHTNESS_NAME,
+                                                             sizeof_l(TEMP_CTRL_CMP_DISPLAY_PRP_BRIGHTNESS_NAME),
+                                                             context->display_brightness))
     AZ_CHECK(AzureIoTHubClientProperties_BuilderEndComponent(iot_client, &json_writer))
     AZ_CHECK(AzureIoTJSONWriter_AppendEndObject(&json_writer))
 
-    payload.length = AzureIoTJSONWriter_GetBytesUsed(&json_writer);
+    int32_t payload_length = AzureIoTJSONWriter_GetBytesUsed(&json_writer);
 
-    AZ_CHECK(azure_iot_hub_send_properties_reported(iot, &payload, NULL))
+    AZ_CHECK(azure_iot_hub_send_properties_reported(context->iot_hub, context->scratch_buffer.buffer, payload_length, NULL))
 
     AZ_CHECK_RETURN_LAST()
 }
 
-static AzureIoTResult_t device_change_state(azure_iot_hub_context_t *iot,
+static AzureIoTResult_t device_change_state(example_context_t *context,
                                             const AzureIoTHubClientPropertiesResponse_t *message,
-                                            uint32_t *version,
-                                            uint16_t *new_display_brightness)
+                                            uint32_t *version)
 {
     AzureIoTJSONReader_t json_reader;
-    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(iot);
+    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(context->iot_hub);
     const uint8_t *component_name = NULL;
     uint32_t component_name_length = 0;
 
@@ -306,7 +318,7 @@ static AzureIoTResult_t device_change_state(azure_iot_hub_context_t *iot,
                 continue;
             }
 
-            if (strncasecmp("display", (const char *)component_name, sizeof("display") - 1) != 0)
+            if (strncasecmp(TEMP_CTRL_CMP_DISPLAY_NAME, (const char *)component_name, sizeof_l(TEMP_CTRL_CMP_DISPLAY_NAME)) != 0)
             {
                 ESP_LOGW(TAG_EX_IOT, "unknown component: %.*s", component_name_length, component_name);
 
@@ -318,14 +330,14 @@ static AzureIoTResult_t device_change_state(azure_iot_hub_context_t *iot,
             }
 
             if (AzureIoTJSONReader_TokenIsTextEqual(&json_reader,
-                                                    (uint8_t *)"brightness",
-                                                    sizeof("brightness") - 1))
+                                                    (uint8_t *)TEMP_CTRL_CMP_DISPLAY_PRP_BRIGHTNESS_NAME,
+                                                    sizeof_l(TEMP_CTRL_CMP_DISPLAY_PRP_BRIGHTNESS_NAME)))
             {
                 AZ_CHECK(AzureIoTJSONReader_NextToken(&json_reader))
-                AZ_CHECK(AzureIoTJSONReader_GetTokenUInt16(&json_reader, new_display_brightness))
+                AZ_CHECK(AzureIoTJSONReader_GetTokenUInt8(&json_reader, &context->display_brightness))
                 AZ_CHECK(AzureIoTJSONReader_NextToken(&json_reader))
 
-                ESP_LOGI(TAG_EX_IOT, "display.brightness received: %d", *new_display_brightness);
+                ESP_LOGI(TAG_EX_IOT, "display.brightness received: %d", context->display_brightness);
             }
         }
     }
@@ -333,34 +345,38 @@ static AzureIoTResult_t device_change_state(azure_iot_hub_context_t *iot,
     AZ_CHECK_RETURN_LAST()
 }
 
-static AzureIoTResult_t device_report_state_changed(azure_iot_hub_context_t *iot, uint32_t version, uint16_t display_brightness)
+static AzureIoTResult_t device_report_state_changed(example_context_t *context, uint32_t version)
 {
-    utf8_string_t payload = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_JSON_SIZEOF_OBJECT_EMPTY + AZURE_JSON_SIZEOF_IOTHUB_CLIENT_PROPERTY_BUILDER_COMPONENT("display") + AZURE_JSON_SIZEOF_IOTHUB_CLIENT_PROPERTY_BUILDER_RESPONSE_STATUS("brightness", sizeof("success") - 1, 3));
-
     AzureIoTJSONWriter_t json_writer;
-    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(iot);
+    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(context->iot_hub);
 
     AZ_CHECK_BEGIN()
 
-    AZ_CHECK(AzureIoTJSONWriter_Init(&json_writer, payload.buffer, payload.length))
+    AZ_CHECK(AzureIoTJSONWriter_Init(&json_writer, context->scratch_buffer.buffer, context->scratch_buffer.length))
     AZ_CHECK(AzureIoTJSONWriter_AppendBeginObject(&json_writer))
-    AZ_CHECK(AzureIoTHubClientProperties_BuilderBeginComponent(iot_client, &json_writer, (uint8_t *)"display", sizeof("display") - 1))
+    AZ_CHECK(AzureIoTHubClientProperties_BuilderBeginComponent(iot_client,
+                                                               &json_writer,
+                                                               (uint8_t *)TEMP_CTRL_CMP_DISPLAY_NAME,
+                                                               sizeof_l(TEMP_CTRL_CMP_DISPLAY_NAME)))
     AZ_CHECK(AzureIoTHubClientProperties_BuilderBeginResponseStatus(iot_client,
                                                                     &json_writer,
-                                                                    (uint8_t *)"brightness",
-                                                                    sizeof("brightness") - 1,
+                                                                    (uint8_t *)TEMP_CTRL_CMP_DISPLAY_PRP_BRIGHTNESS_NAME,
+                                                                    sizeof_l(TEMP_CTRL_CMP_DISPLAY_PRP_BRIGHTNESS_NAME),
                                                                     200,
                                                                     version,
                                                                     (uint8_t *)"success",
                                                                     sizeof("success") - 1))
-    AZ_CHECK(AzureIoTJSONWriter_AppendInt32(&json_writer, display_brightness))
+    AZ_CHECK(AzureIoTJSONWriter_AppendInt32(&json_writer, context->display_brightness))
     AZ_CHECK(AzureIoTHubClientProperties_BuilderEndResponseStatus(iot_client, &json_writer))
     AZ_CHECK(AzureIoTHubClientProperties_BuilderEndComponent(iot_client, &json_writer))
     AZ_CHECK(AzureIoTJSONWriter_AppendEndObject(&json_writer))
 
-    payload.length = AzureIoTJSONWriter_GetBytesUsed(&json_writer);
+    int32_t payload_length = AzureIoTJSONWriter_GetBytesUsed(&json_writer);
 
-    if ((AZ_CHECK_RESULT_VAR = azure_iot_hub_send_properties_reported(iot, &payload, NULL)) != eAzureIoTSuccess)
+    if ((AZ_CHECK_RESULT_VAR = azure_iot_hub_send_properties_reported(context->iot_hub,
+                                                                      context->scratch_buffer.buffer,
+                                                                      payload_length,
+                                                                      NULL)) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure reporting properties: 0x%08x", AZ_CHECK_RESULT_VAR);
     }

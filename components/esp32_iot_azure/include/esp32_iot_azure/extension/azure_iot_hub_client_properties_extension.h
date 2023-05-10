@@ -1,7 +1,6 @@
 #ifndef __ESP32_IOT_AZURE_HUB_CLI_PROP_EXT_H__
 #define __ESP32_IOT_AZURE_HUB_CLI_PROP_EXT_H__
 
-#include "esp32_iot_azure/azure_iot_common.h"
 #include "esp32_iot_azure/extension/azure_iot_json_writer_extension.h"
 
 #ifdef __cplusplus
