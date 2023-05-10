@@ -11,7 +11,22 @@
         "@type": "Property",
         "name": "deviceStatus",
         "displayName": "Device Status",
-        "schema": "string",
+        "schema": {
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": [
+            {
+              "name": "normal",
+              "displayName": "Normal",
+              "enumValue": 1
+            },
+            {
+              "name": "error",
+              "displayName": "Error",
+              "enumValue": 2
+            }
+          ]
+        },
         "writable": false
       },
       {
