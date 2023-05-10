@@ -111,14 +111,6 @@ extern "C"
         uint8_t *buffer; /** @brief UTF-8 string characters. */
     } utf8_string_t;
 
-    /**
-     * @brief Calculate the length of a string represented
-     * as a sequence of @ref uint8_t characters.
-     * @param[in] buffer Pointer to a buffer holding the string.
-     * @return String length.
-     */
-    uint32_t strlen_uint8_t(const uint8_t *buffer);
-
     // ==================
     // CLIENT CERTIFICATE
     // ==================
@@ -144,6 +136,13 @@ extern "C"
         uint16_t private_key_length;        /** @brief Certificate private key bytes length. */
         client_certificate_format_t format; /** @brief Certificate format. */
     } client_certificate_t;
+
+/**
+ * @brief Return the size of a literal, excluding the `NULL` terminator.
+ * @param text Text value.
+ * @return Text length excluding the `NULL` terminator.
+ */
+#define sizeof_l(text) (sizeof(text) - 1)
 
 #ifdef __cplusplus
 }

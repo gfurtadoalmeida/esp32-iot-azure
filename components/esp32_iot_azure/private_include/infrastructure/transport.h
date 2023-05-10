@@ -2,7 +2,6 @@
 #define __ESP32_IOT_AZURE_INFRA_TRANSPORT_H__
 
 #include <stdint.h>
-#include <stddef.h>
 #include "esp_transport.h"
 #include "esp32_iot_azure/azure_iot_common.h"
 

@@ -1,5 +1,5 @@
-#include "infrastructure/time.h"
 #include <time.h>
+#include "infrastructure/time.h"
 #include "assertion.h"
 
 static const char TAG_TIME[] = "AZ_TIME";
