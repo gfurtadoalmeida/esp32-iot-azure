@@ -1,8 +1,6 @@
 #ifndef __ESP32_IOT_AZURE_INFRA_CRYPTO_H__
 #define __ESP32_IOT_AZURE_INFRA_CRYPTO_H__
 
-// Reference: https://github.com/Azure-Samples/iot-middleware-freertos-samples/blob/main/demos/projects/ESPRESSIF/adu/components/sample-azure-iot/crypto_esp32.c
-
 #include <stdint.h>
 
 #ifdef __cplusplus

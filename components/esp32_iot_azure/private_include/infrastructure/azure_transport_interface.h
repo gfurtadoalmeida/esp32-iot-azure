@@ -12,7 +12,7 @@ extern "C"
     /**
      * @brief Create an @ref AzureIoTTransportInterface_t that
      * uses @ref esp_transport_handle_t to send and receive data.
-     * @note The interface must be released by @ref azure_transport_interface_free.
+     * @note The interface must be released by @ref azure_transport_interface_free().
      * @param[in] transport Transport that will be used.
      * @param[out] interface Azure transport interface to be configured.
      */
@@ -21,7 +21,7 @@ extern "C"
 
     /**
      * @brief Cleanup and free the interface.
-     * @param[out] interface Azure transport interface.
+     * @param[in] interface Azure transport interface.
      */
     void azure_transport_interface_free(AzureIoTTransportInterface_t *interface);
 
