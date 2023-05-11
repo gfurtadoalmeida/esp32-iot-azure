@@ -47,6 +47,43 @@ menu "ESP32 IoT Azure"
             help
                 Subscription timeout, in milliseconds.
 
+        menu "Certificates"
+
+            config ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA
+                bool "Azure Cloud RSA"
+                default y
+                help
+                    Use Azure Cloud RSA certificate.
+
+            config ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_ECC
+                bool "Azure Cloud ECC"
+                default n
+                select MBEDTLS_ECP_DP_SECP384R1_ENABLED
+                select MBEDTLS_SHA512_C
+                help
+                    Use Azure Cloud ECC certificate.
+                    Needed when connecting to Azure IoT Hub Gateway V2.
+
+                    Requires MBEDTLS_ECP_DP_SECP384R1_ENABLED and MBEDTLS_SHA512_C.
+
+            config ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_DE
+                bool "Azure Germany Cloud"
+                default n
+                help
+                    Use Azure Germany Cloud certificate.
+                    Needed when connecting to Azure IoT on the
+                    https://portal.microsoftazure.de cloud address.
+
+            config ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_CN
+                bool "Azure China Cloud"
+                default n
+                help
+                    Use Azure China Cloud certificate.
+                    Needed when connecting to Azure IoT on the
+                    https://portal.azure.cn cloud address.
+
+        endmenu
+
     endmenu
 
     menu "Azure Device"

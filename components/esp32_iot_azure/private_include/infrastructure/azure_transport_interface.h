@@ -1,5 +1,5 @@
-#ifndef __ESP32_IOT_AZURE_INFRA_AZURE_TRANSPORT_INTERFACEH__
-#define __ESP32_IOT_AZURE_INFRA_AZURE_TRANSPORT_INTERFACEH__
+#ifndef __ESP32_IOT_AZURE_INFRA_AZURE_TRANSPORT_INTERFACE_H__
+#define __ESP32_IOT_AZURE_INFRA_AZURE_TRANSPORT_INTERFACE_H__
 
 #include "infrastructure/transport.h"
 #include "azure_iot_transport_interface.h"

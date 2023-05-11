@@ -13,9 +13,9 @@ extern "C"
       Once defined there, the ones below will have no effect.
    */
 
-   // =====================
-   // AZURE IOT Hub
-   // =====================
+   // =============
+   // AZURE IOT HUB
+   // =============
 
 #ifndef CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED
 /**
@@ -64,6 +64,38 @@ extern "C"
  * @brief Azure IoT Hub subscription timeout, in milliseconds.
  */
 #define CONFIG_ESP32_IOT_AZURE_HUB_SUBSCRIBE_TIMEOUT_MS 5000U
+#endif
+
+   // ===========================
+   // AZURE IOT HUB: CERTIFICATES
+   // ===========================
+
+#ifndef CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA
+/**
+ * @brief Use Azure Cloud RSA certificate.
+ */
+#define CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA 1
+#endif
+
+#ifndef CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_ECC
+/**
+ * @brief Use Azure Cloud ECC certificate.
+ */
+#define CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_ECC 0
+#endif
+
+#ifndef CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_DE
+/**
+ * @brief Use Azure Germany Cloud certificate.
+ */
+#define CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_DE 0
+#endif
+
+#ifndef CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_CN
+/**
+ * @brief Use Azure China Cloud certificate.
+ */
+#define CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_CN 0
 #endif
 
    // ============
@@ -143,6 +175,10 @@ extern "C"
  */
 #define CONFIG_ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE 4096U
 #endif
+
+   // ==============================
+   // AZURE DEVICE UPDATE: UDPATE ID
+   // ==============================
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER
 /**

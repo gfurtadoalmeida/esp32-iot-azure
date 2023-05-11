@@ -1,5 +1,6 @@
 #include "infrastructure/transport.h"
 #include "infrastructure/backoff_algorithm.h"
+#include "infrastructure/azure_certificate.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_transport_ssl.h"
@@ -10,8 +11,8 @@ static const char TAG_TRANSPORT[] = "AZ_TRANSPORT";
 
 static const tls_certificate_t AZURE_CERTIFICATE_CHAIN =
     {
-        .data = (const uint8_t *)AZURE_CLOUD_RSA_CERT,
-        .length = sizeof(AZURE_CLOUD_RSA_CERT),
+        .data = (const uint8_t *)AZURE_CERTIFICATES_CHAIN,
+        .length = sizeof(AZURE_CERTIFICATES_CHAIN),
         .format = TLS_CERT_FORMAT_PEM};
 
 esp_transport_handle_t transport_create()
