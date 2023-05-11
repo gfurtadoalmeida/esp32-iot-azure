@@ -25,9 +25,9 @@ azure_iot_hub_context_t *azure_iot_hub_create()
     memset(context, 0, sizeof(azure_iot_hub_context_t));
 
     context->transport = transport_create_azure();
-    context->mqtt_buffer = (uint8_t *)malloc(CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE);
+    context->mqtt_buffer = (uint8_t *)malloc(CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB);
 
-    memset(context->mqtt_buffer, 0, CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE);
+    memset(context->mqtt_buffer, 0, CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB);
 
     return context;
 }
@@ -69,7 +69,7 @@ AzureIoTResult_t azure_iot_hub_init(azure_iot_hub_context_t *context,
                                   device_id_length,
                                   &context->iot_client_options,
                                   context->mqtt_buffer,
-                                  CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE,
+                                  CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB,
                                   &time_get_unix,
                                   &context->transport_interface);
 }

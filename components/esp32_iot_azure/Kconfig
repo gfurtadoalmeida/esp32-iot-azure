@@ -235,11 +235,17 @@ menu "ESP32 IoT Azure"
 
         menu "MQTT"
 
-            config ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE
-                int "Buffer size"
-                default 5120
+            config ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB
+                int "IoT Hub buffer size"
+                default 4096
                 help
-                    Size of the network buffer for MQTT packets.
+                    Size of the network buffer for IoT Hub MQTT packets.
+
+            config ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS
+                int "DPS buffer size"
+                default 3072
+                help
+                    Size of the network buffer for Device Provisioning Service MQTT packets.
 
             config ESP32_IOT_AZURE_TRANSPORT_MQTT_STATE_ARRAY_MAX_COUNT
                 int "Max PUBLISH messages pending"

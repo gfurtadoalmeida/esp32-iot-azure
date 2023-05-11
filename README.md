@@ -40,7 +40,6 @@ Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp
 - [ ] Compile Device Update sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`.
 - [ ] Compile coreHTTP only when compiling Device Update (`CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`).
 - [ ] Create `CONFIG_ESP32_IOT_AZURE_DEVICE_AUTH_MODE` and compile only the needed auth methods.
-- [ ] Create separe buffer configs for IoT Hub and Device Provisioning.
 
 ## Example: Getting Device and Hub Info from DPS
 
