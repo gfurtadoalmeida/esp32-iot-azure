@@ -25,11 +25,11 @@ extern "C"
     azure_iot_hub_context_t *azure_iot_hub_create();
 
     /**
-     * @brief Get the @ref AzureIoTHubClient_t used by the \p context
+     * @brief Get the @ref AzureIoTHubClient_t used by the \p context.
      * @param[in] context IoT context.
      * @return Pointer to @ref AzureIoTHubClient_t.
      */
-    AzureIoTHubClient_t *azure_iot_hub_get_context_client(azure_iot_hub_context_t *context);
+    AzureIoTHubClient_t *azure_iot_hub_get_iot_client(azure_iot_hub_context_t *context);
 
     /**
      * @brief Initialize the \p context internal Azure IoT Hub Options.
@@ -46,8 +46,8 @@ extern "C"
      * @brief Initialize the Azure IoT Hub Client with a given device id on a
      * given hostname.
      * @param[in] context IoT context.
-     * @param[in] hostname IoTHub hostname.
-     * @param[in] hostname_length IoTHub hostname length.
+     * @param[in] hostname IoT Hub hostname.
+     * @param[in] hostname_length IoT Hub hostname length.
      * @param[in] device_id Device id.
      * @param[in] device_id_length Device id length.
      * @return @ref AzureIoTResult_t with the result of the operation.

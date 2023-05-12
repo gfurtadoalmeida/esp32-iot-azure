@@ -32,7 +32,7 @@ azure_iot_hub_context_t *azure_iot_hub_create()
     return context;
 }
 
-AzureIoTHubClient_t *azure_iot_hub_get_context_client(azure_iot_hub_context_t *context)
+AzureIoTHubClient_t *azure_iot_hub_get_iot_client(azure_iot_hub_context_t *context)
 {
     return &context->iot_client;
 }
