@@ -117,15 +117,21 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
                                            "{\"" TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME "\":%d}",
                                            rand() % (28 + 1 - 18) + 18);
 
-        azure_iot_hub_send_telemetry_from_component(iot,
-                                                    (uint8_t *)TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME,
-                                                    sizeof_l(TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME),
-                                                    telemetry_payload.buffer,
-                                                    telemetry_payload.length,
-                                                    eAzureIoTHubMessageQoS1,
-                                                    NULL);
+        if (azure_iot_hub_send_telemetry_from_component(iot,
+                                                        (uint8_t *)TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME,
+                                                        sizeof_l(TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME),
+                                                        telemetry_payload.buffer,
+                                                        telemetry_payload.length,
+                                                        eAzureIoTHubMessageQoS1,
+                                                        NULL) != eAzureIoTSuccess)
+        {
+            ESP_LOGE(TAG_EX_IOT, "failure sending telemetry");
+        }
 
-        azure_iot_hub_process_loop(iot);
+        if (azure_iot_hub_process_loop(iot) != eAzureIoTSuccess)
+        {
+            ESP_LOGE(TAG_EX_IOT, "failure processing loop");
+        }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -249,7 +255,7 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
 static AzureIoTResult_t device_report_initial_state(example_context_t *context)
 {
     AzureIoTJSONWriter_t json_writer;
-    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(context->iot_hub);
+    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_iot_client(context->iot_hub);
 
     AZ_CHECK_BEGIN()
     AZ_CHECK(AzureIoTJSONWriter_Init(&json_writer, context->scratch_buffer.buffer, context->scratch_buffer.length))
@@ -281,9 +287,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
                                             uint32_t *version)
 {
     AzureIoTJSONReader_t json_reader;
-    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(context->iot_hub);
-    const uint8_t *component_name = NULL;
-    uint32_t component_name_length = 0;
+    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_iot_client(context->iot_hub);
 
     AZ_CHECK_BEGIN()
     AZ_CHECK(AzureIoTJSONReader_Init(&json_reader, message->pvMessagePayload, message->ulPayloadLength))
@@ -294,6 +298,9 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
     }
     else
     {
+        const uint8_t *component_name = NULL;
+        uint32_t component_name_length = 0;
+
         ESP_LOGI(TAG_EX_IOT, "desired property version: %d", *version);
 
         // Reset JSON reader to the beginning.
@@ -306,25 +313,24 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
                                                                     &component_name,
                                                                     &component_name_length) == eAzureIoTSuccess)
         {
+            // We're expecting properties from a component.
+            // We have to skip over the root property and value to continue iterating.
             if (component_name_length == 0)
             {
                 ESP_LOGW(TAG_EX_IOT, "unknown root property (we expect a component): %.*s", component_name_length, component_name);
 
-                // We're expecting properties from component.
-                // We have to skip over the property and value
-                // to continue iterating.
-                AzureIoTJSONReader_SkipPropertyAndValue(&json_reader);
+                AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader));
 
                 continue;
             }
 
+            // We're expecting a "display" component.
+            // We have to skip over the root property and value to continue iterating.
             if (strncasecmp(TEMP_CTRL_CMP_DISPLAY_NAME, (const char *)component_name, sizeof_l(TEMP_CTRL_CMP_DISPLAY_NAME)) != 0)
             {
                 ESP_LOGW(TAG_EX_IOT, "unknown component: %.*s", component_name_length, component_name);
 
-                // Unknown component name, we have to skip over the property
-                // and value to continue iterating.
-                AzureIoTJSONReader_SkipPropertyAndValue(&json_reader);
+                AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader));
 
                 continue;
             }
@@ -348,7 +354,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
 static AzureIoTResult_t device_report_state_changed(example_context_t *context, uint32_t version)
 {
     AzureIoTJSONWriter_t json_writer;
-    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_context_client(context->iot_hub);
+    AzureIoTHubClient_t *iot_client = azure_iot_hub_get_iot_client(context->iot_hub);
 
     AZ_CHECK_BEGIN()
 
