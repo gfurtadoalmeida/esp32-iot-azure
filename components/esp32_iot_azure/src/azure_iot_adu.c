@@ -24,6 +24,11 @@ azure_adu_context_t *azure_adu_create(azure_iot_hub_context_t *iot_context)
     return context;
 }
 
+azure_iot_hub_context_t *azure_adu_get_iot_hub_context(azure_adu_context_t *context)
+{
+    return context->iot_context;
+}
+
 AzureIoTResult_t azure_adu_options_init(azure_adu_context_t *context, AzureIoTADUClientOptions_t **client_options)
 {
     AzureIoTResult_t result = AzureIoTADUClient_OptionsInit(&context->adu_client_options);
@@ -81,7 +86,7 @@ AzureIoTResult_t azure_adu_send_response(azure_adu_context_t *adu_context,
                                          uint32_t *request_id)
 {
     return AzureIoTADUClient_SendResponse(&adu_context->adu_client,
-                                          azure_iot_hub_get_context_client(adu_context->iot_context),
+                                          azure_iot_hub_get_iot_client(adu_context->iot_context),
                                           request_decision,
                                           property_version,
                                           response_buffer,
@@ -99,7 +104,7 @@ AzureIoTResult_t azure_adu_send_agent_state(azure_adu_context_t *adu_context,
                                             uint32_t *request_id)
 {
     return AzureIoTADUClient_SendAgentState(&adu_context->adu_client,
-                                            azure_iot_hub_get_context_client(adu_context->iot_context),
+                                            azure_iot_hub_get_iot_client(adu_context->iot_context),
                                             device_properties,
                                             update_request,
                                             agent_state,

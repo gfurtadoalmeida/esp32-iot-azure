@@ -25,6 +25,13 @@ extern "C"
     azure_adu_context_t *azure_adu_create(azure_iot_hub_context_t *iot_context);
 
     /**
+     * @brief Get the @ref azure_iot_hub_context_t used by the \p context.
+     * @param[in] context ADU context.
+     * @return Pointer to @ref azure_iot_hub_context_t.
+     */
+    azure_iot_hub_context_t *azure_adu_get_iot_hub_context(azure_adu_context_t *context);
+
+    /**
      * @brief Initialize the \p context internal Azure IoT Device Update Options.
      * @param[in] context ADU context.
      * @param[out] client_options Pointer to a @ref AzureIoTADUClientOptions_t pointer used by the \p context.
@@ -116,7 +123,7 @@ extern "C"
      * results from an update.
      * @param[out] buffer The buffer into which the generated payload will be placed.
      * @param[out] buffer_length Buffer length.
-     * @param[in] request_id Pointer to request id to use for the operation.
+     * @param[in] request_id Pointer to an optional request id to use for the operation. Can be `NULL`.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
     AzureIoTResult_t azure_adu_send_agent_state(azure_adu_context_t *adu_context,
