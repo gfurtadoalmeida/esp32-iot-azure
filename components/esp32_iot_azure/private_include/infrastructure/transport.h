@@ -25,9 +25,8 @@ extern "C"
     typedef struct
     {
         const uint8_t *data;             /** @brief Certificate bytes. */
-        uint16_t length;                 /** @brief Certificate bytes length. */
         tls_certificate_format_t format; /** @brief Certificate format. */
-
+        uint16_t length;                 /** @brief Certificate bytes length. */
     } tls_certificate_t;
 
     /**
@@ -74,7 +73,7 @@ extern "C"
      * @brief Establish a connection to a server.
      * @note The connection must be closed by @ref transport_disconnect.
      * @param[in] transport Transport handle.
-     * @param[in] hostname Server address.
+     * @param[in] hostname Server address. Must be null-terminated.
      * @param[in] port Server port.
      * @param[in] timeout_ms Connection timeout in milliseconds.
      * @return @ref transport_status_t with the result of the operation.

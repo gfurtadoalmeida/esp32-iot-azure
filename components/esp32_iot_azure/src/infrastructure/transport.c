@@ -1,6 +1,6 @@
 #include "infrastructure/transport.h"
 #include "infrastructure/backoff_algorithm.h"
-#include "infrastructure/azure_certificate.h"
+#include "infrastructure/azure_iot_certificate.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_transport_ssl.h"
@@ -8,12 +8,6 @@
 #include "config.h"
 
 static const char TAG_TRANSPORT[] = "AZ_TRANSPORT";
-
-static const tls_certificate_t AZURE_CERTIFICATE_CHAIN =
-    {
-        .data = (const uint8_t *)AZURE_CERTIFICATES_CHAIN,
-        .length = sizeof(AZURE_CERTIFICATES_CHAIN),
-        .format = TLS_CERT_FORMAT_PEM};
 
 esp_transport_handle_t transport_create()
 {
@@ -48,7 +42,7 @@ esp_transport_handle_t transport_create_tls(const tls_certificate_t *certificate
 
 esp_transport_handle_t transport_create_azure()
 {
-    return transport_create_tls(&AZURE_CERTIFICATE_CHAIN);
+    return transport_create_tls(AZURE_IOT_CERTIFICATE);
 }
 
 transport_status_t transport_set_client_certificate(esp_transport_handle_t transport,
