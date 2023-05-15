@@ -90,7 +90,7 @@ menu "ESP32 IoT Azure"
 
         config ESP32_IOT_AZURE_DEVICE_MODEL_ID
             string "Model Id"
-            default "dtmi:com:esp32iotazure:TemperatureController;1"
+            default "dtmi:azure:iot:deviceUpdateContractModel;2"
             help
                 IoT Plug and Play device or module id implemented.
                 Can be empty if not used.
@@ -145,36 +145,46 @@ menu "ESP32 IoT Azure"
 
             config ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER
                 string "Device manufacturer"
-                default "Contoso Inc"
+                default "ESPRESSIF"
                 help
                     Company name of the device manufacturer. This could be the same
                     as the name of the original equipment manufacturer (OEM). Ex: Dell.
 
             config ESP32_IOT_AZURE_DU_DEVICE_MODEL
                 string "Device model"
-                default "Library Tester"
+                default "ESP-WROOM-32"
                 help
                     Device model name or ID. Ex: Alienware m15 R7.
 
-            config ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE
-                int "Download chunck size"
+            config ESP32_IOT_AZURE_DU_IMAGE_DOWNLOAD_CHUNCK_SIZE
+                int "Image download chunck size"
                 default 4096
+                help
+                    How many bytes should be read on each HTTP call to
+                    download the image.
+
+                    The image is donwloaded in blocks, and this configuration
+                    sets the block size.
 
             menu "Update Id"
 
                 config ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER
                     string "Update provider"
-                    default "Contoso Software"
+                    default "Contoso"
                     help
                         Entity who is creating or directly responsible for the update.
                         It will often be a company name. Example: Microsoft.
 
+                        Pattern: ^[a-zA-Z0-9.-]+$
+
                 config ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
                     string "Update name"
-                    default "Azure Library Tester"
+                    default "Azure-Library-Tester"
                     help
                         Identifier for a class of updates. It will often be a device
                         class or model name. Example: Windows 11.
+
+                        Pattern: ^[a-zA-Z0-9.-]+$
 
                 config ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
                     string "Update version"
@@ -182,6 +192,7 @@ menu "ESP32 IoT Azure"
                     help
                         Two- to four-part dot-separated numerical version numbers. Each part must be a
                         number between 0 and 2147483647 and leading zeroes will be dropped.
+
                         Examples: "1.0", "2021.11.8"
 
             endmenu

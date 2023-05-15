@@ -107,7 +107,7 @@ extern "C"
  * @brief IoT Plug and Play device or module id implemented.
  * Can be empty if not used.
  */
-#define CONFIG_ESP32_IOT_AZURE_DEVICE_MODEL_ID "dtmi:com:esp32iotazure:TemperatureController;1"
+#define CONFIG_ESP32_IOT_AZURE_DEVICE_MODEL_ID "dtmi:azure:iot:deviceUpdateContractModel;2"
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DEVICE_USER_AGENT
@@ -159,21 +159,21 @@ extern "C"
  * This could be the same as the name of the original
  * equipment manufacturer (OEM). Ex: Dell.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER "Contoso Inc"
+#define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MANUFACTURER "ESPRESSIF"
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL
 /**
  * @brief Azure DU device model name or ID. Ex: Alienware m15 R7.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL "Library Tester"
+#define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL "ESP-WROOM-32"
 #endif
 
-#ifndef CONFIG_ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE
+#ifndef CONFIG_ESP32_IOT_AZURE_DU_IMAGE_DOWNLOAD_CHUNCK_SIZE
 /**
- * @brief Azure DU download chunck size.
+ * @brief Azure DU image download chunck size.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_DOWNLOAD_CHUNCK_SIZE 4096U
+#define CONFIG_ESP32_IOT_AZURE_DU_IMAGE_DOWNLOAD_CHUNCK_SIZE 4096U
 #endif
 
    // ==============================
@@ -185,7 +185,7 @@ extern "C"
  * @brief Azure DU Entity who is creating or directly responsible
  * for the update. It will often be a company name. Example: Microsoft.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER "Contoso Software"
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER "Contoso"
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
@@ -193,7 +193,7 @@ extern "C"
  * @brief Azure DU identifier for a class of updates.
  * It will often be a device class or model name. Example: Windows 11.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME "Azure Library Tester"
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME "Azure-Library-Tester"
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
