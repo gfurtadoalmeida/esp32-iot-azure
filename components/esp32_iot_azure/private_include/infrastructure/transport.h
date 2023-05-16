@@ -39,11 +39,11 @@ extern "C"
     } transport_status_t;
 
     /**
-     * @brief Creates a RAW transport.
+     * @brief Creates a raw TCP transport.
      * @note The transport handle must be released by @ref transport_free.
      * @return @ref esp_transport_handle_t on success or null on failure.
      */
-    esp_transport_handle_t transport_create();
+    esp_transport_handle_t transport_create_tcp();
 
     /**
      * @brief Creates a TLS transport.

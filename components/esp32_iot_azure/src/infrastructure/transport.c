@@ -3,15 +3,16 @@
 #include "infrastructure/azure_iot_certificate.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_transport_tcp.h"
 #include "esp_transport_ssl.h"
 #include "log.h"
 #include "config.h"
 
 static const char TAG_TRANSPORT[] = "AZ_TRANSPORT";
 
-esp_transport_handle_t transport_create()
+esp_transport_handle_t transport_create_tcp()
 {
-    return esp_transport_init();
+    return esp_transport_tcp_init();
 }
 
 esp_transport_handle_t transport_create_tls(const tls_certificate_t *certificate)
