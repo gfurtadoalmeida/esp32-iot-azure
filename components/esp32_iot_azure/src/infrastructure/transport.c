@@ -95,15 +95,15 @@ transport_status_t transport_connect(esp_transport_handle_t transport,
                                  CONFIG_ESP32_IOT_AZURE_TRANSPORT_BACKOFF_RETRY_MAX_ATTEMPTS);
     do
     {
-        if (esp_transport_connect(transport, hostname, port, timeout_ms) < 0)
+        if (esp_transport_connect(transport, hostname, port, timeout_ms) == -1)
         {
-            CMP_LOGW(TAG_TRANSPORT, "failure establishing connection");
+            CMP_LOGW(TAG_TRANSPORT, "failure connecting to %s on %d: %d", hostname, port, esp_transport_get_errno(transport));
 
             backoff_status = backoff_algorithm_get_next(&backoff_context, &next_backoff_ms);
 
             if (backoff_status == BACKOFF_ALGORITHM_SUCCESS)
             {
-                CMP_LOGI(TAG_TRANSPORT, "will retry in %d ms", next_backoff_ms);
+                CMP_LOGW(TAG_TRANSPORT, "will retry in %d ms", next_backoff_ms);
 
                 vTaskDelay(pdMS_TO_TICKS(next_backoff_ms));
             }
@@ -122,7 +122,14 @@ int32_t transport_write(esp_transport_handle_t transport,
                         size_t length,
                         uint16_t timeout_ms)
 {
-    return esp_transport_write(transport, (const char *)buffer, length, timeout_ms);
+    int32_t result = esp_transport_write(transport, (const char *)buffer, length, timeout_ms);
+
+    if (result == -1)
+    {
+        CMP_LOGE(TAG_TRANSPORT, "failure writing: %d", esp_transport_get_errno(transport));
+    }
+
+    return result;
 }
 
 int32_t transport_read(esp_transport_handle_t transport,
@@ -130,7 +137,14 @@ int32_t transport_read(esp_transport_handle_t transport,
                        size_t expected_length,
                        uint16_t timeout_ms)
 {
-    return esp_transport_read(transport, (char *)buffer, expected_length, timeout_ms);
+    int32_t result = esp_transport_read(transport, (char *)buffer, expected_length, timeout_ms);
+
+    if (result == -1)
+    {
+        CMP_LOGE(TAG_TRANSPORT, "failure reading: %d", esp_transport_get_errno(transport));
+    }
+
+    return result;
 }
 
 void transport_disconnect(esp_transport_handle_t transport)
