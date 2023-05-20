@@ -1,8 +1,6 @@
 #include <string.h>
 #include "esp32_iot_azure/azure_iot_adu.h"
 #include "config.h"
-#include "assertion.h"
-#include "log.h"
 
 #define UPDATE_ID "{\"provider\":\"" CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER "\",\"name\":\"" CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME "\",\"version\":\"" CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION "\"}"
 
