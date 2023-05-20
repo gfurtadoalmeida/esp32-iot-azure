@@ -18,10 +18,10 @@ extern "C"
     /**
      * @brief Create an Azure HTTP context.
      * @note The context must be released by @ref azure_http_free.
-     * @param[in] url The URL to use for this request. Must be null-terminated.
-     * @param[in] url_length The length \p url.
-     * @param[in] path The path to use for this request.
-     * @param[in] path_length The length \p path.
+     * @param[in] url URL to use for this request. Must be null-terminated.
+     * @param[in] url_length Length of \p url without null-termination.
+     * @param[in] path Path to use for this request.
+     * @param[in] path_length Length of \p path without null-termination.
      * @return @ref azure_http_context_t on success or null on failure.
      */
     azure_http_context_t *azure_http_create(const char *url,
@@ -32,10 +32,9 @@ extern "C"
     /**
      * @brief Connect the Azure HTTP client.
      * @param[in] context HTTP context.
-     * @param[in] timeout_ms Connection timeout in milliseconds.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
-    AzureIoTHTTPResult_t azure_http_connect(azure_http_context_t *context, uint16_t timeout_ms);
+    AzureIoTHTTPResult_t azure_http_connect(azure_http_context_t *context);
 
     /**
      * @brief Disconnect the Azure HTTP client.

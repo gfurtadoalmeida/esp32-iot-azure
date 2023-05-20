@@ -2,6 +2,7 @@
 #include "esp32_iot_azure/azure_iot_http_client.h"
 #include "infrastructure/transport.h"
 #include "infrastructure/azure_transport_interface.h"
+#include "config.h"
 
 struct azure_http_context_t
 {
@@ -34,12 +35,12 @@ azure_http_context_t *azure_http_create(const char *url,
     return context;
 }
 
-AzureIoTHTTPResult_t azure_http_connect(azure_http_context_t *context, uint16_t timeout_ms)
+AzureIoTHTTPResult_t azure_http_connect(azure_http_context_t *context)
 {
     if (transport_connect(context->transport,
                           context->url,
                           80,
-                          timeout_ms) == TRANSPORT_STATUS_SUCCESS)
+                          CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_CONNECT_TIMEOUT_MS) == TRANSPORT_STATUS_SUCCESS)
     {
         return eAzureIoTHTTPSuccess;
     }
