@@ -5,6 +5,7 @@
 #include "infrastructure/crypto.h"
 #include "infrastructure/transport.h"
 #include "infrastructure/azure_transport_interface.h"
+#include "infrastructure/static_memory.h"
 #include "config.h"
 #include "assertion.h"
 #include "log.h"
@@ -17,7 +18,6 @@ struct azure_dps_context_t
     AzureIoTTransportInterface_t transport_interface;
     AzureIoTProvisioningClientOptions_t dps_client_options;
     esp_transport_handle_t transport;
-    uint8_t *mqtt_buffer;
 };
 
 azure_dps_context_t *azure_dps_create()
@@ -27,9 +27,6 @@ azure_dps_context_t *azure_dps_create()
     memset(context, 0, sizeof(azure_dps_context_t));
 
     context->transport = transport_create_azure();
-    context->mqtt_buffer = (uint8_t *)malloc(CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS);
-
-    memset(context->mqtt_buffer, 0, CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS);
 
     return context;
 }
@@ -63,7 +60,7 @@ AzureIoTResult_t azure_dps_init(azure_dps_context_t *context,
                                            registration_id,
                                            registration_id_length,
                                            &context->dps_client_options,
-                                           context->mqtt_buffer,
+                                           STATIC_MEMORY_DPS,
                                            CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS,
                                            &time_get_unix,
                                            &context->transport_interface);
@@ -155,6 +152,5 @@ void azure_dps_free(azure_dps_context_t *context)
 
     transport_free(context->transport);
 
-    free(context->mqtt_buffer);
     free(context);
 }

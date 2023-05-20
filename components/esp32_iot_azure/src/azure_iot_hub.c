@@ -4,6 +4,7 @@
 #include "infrastructure/crypto.h"
 #include "infrastructure/transport.h"
 #include "infrastructure/azure_transport_interface.h"
+#include "infrastructure/static_memory.h"
 #include "config.h"
 #include "log.h"
 
@@ -15,7 +16,6 @@ struct azure_iot_hub_context_t
     AzureIoTTransportInterface_t transport_interface;
     AzureIoTHubClientOptions_t iot_client_options;
     esp_transport_handle_t transport;
-    uint8_t *mqtt_buffer;
 };
 
 azure_iot_hub_context_t *azure_iot_hub_create()
@@ -25,9 +25,6 @@ azure_iot_hub_context_t *azure_iot_hub_create()
     memset(context, 0, sizeof(azure_iot_hub_context_t));
 
     context->transport = transport_create_azure();
-    context->mqtt_buffer = (uint8_t *)malloc(CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB);
-
-    memset(context->mqtt_buffer, 0, CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB);
 
     return context;
 }
@@ -68,7 +65,7 @@ AzureIoTResult_t azure_iot_hub_init(azure_iot_hub_context_t *context,
                                   device_id,
                                   device_id_length,
                                   &context->iot_client_options,
-                                  context->mqtt_buffer,
+                                  STATIC_MEMORY_IOT_HUB,
                                   CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB,
                                   &time_get_unix,
                                   &context->transport_interface);
@@ -238,6 +235,5 @@ void azure_iot_hub_free(azure_iot_hub_context_t *context)
 
     transport_free(context->transport);
 
-    free(context->mqtt_buffer);
     free(context);
 }
