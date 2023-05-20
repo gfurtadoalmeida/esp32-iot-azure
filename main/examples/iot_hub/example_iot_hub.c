@@ -193,7 +193,8 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
     example_context_t *context = (example_context_t *)callback_context;
     uint32_t version = 0;
 
-    ESP_LOGI(TAG_EX_IOT, "property message: %.*s", message->ulPayloadLength, (const char *)message->pvMessagePayload);
+    ESP_LOGI(TAG_EX_IOT, "message status: %d", message->xMessageStatus);
+    ESP_LOGI(TAG_EX_IOT, "message length: %d", message->ulPayloadLength);
 
     switch (message->xMessageType)
     {
