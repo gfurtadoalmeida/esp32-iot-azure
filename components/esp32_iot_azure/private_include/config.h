@@ -169,12 +169,24 @@ extern "C"
 #define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL "ESP-WROOM-32"
 #endif
 
-#ifndef CONFIG_ESP32_IOT_AZURE_DU_IMAGE_DOWNLOAD_CHUNCK_SIZE
+#ifndef CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE
 /**
- * @brief Azure DU image download chunck size.
+ * @brief How many bytes should be read on each Azure DU HTTP
+ * call to download a image.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_IMAGE_DOWNLOAD_CHUNCK_SIZE 4096U
+#define CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE 4096U
 #endif
+
+/**
+ * @brief Azure DU download buffer size.
+ * @note We need plus 1024 bytes for the HTTP headers.
+ */
+#define CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_HTTP_DOWNLOAD (CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE + 1024U)
+
+/**
+ * @brief Azure DU scratch buffer size.
+ */
+#define CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH 3072U
 
    // ==============================
    // AZURE DEVICE UPDATE: UDPATE ID
@@ -251,25 +263,32 @@ extern "C"
    // TRANSPORT HTTP
    // ==============
 
-#ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES
+#ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_CONNECT_TIMEOUT_MS
 /**
- * @brief Maximum size, in bytes, of headers allowed from the server for HTTP operations.
+ * @brief Connection timeout, in milliseconds.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES 2048U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_CONNECT_TIMEOUT_MS 5000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS
 /**
  * @brief Maximum receive retry timeout, in milliseconds, for HTTP operations.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS 10U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS 50U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS
 /**
  * @brief Maximum send retry timeout, in milliseconds, for HTTP operations.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS 10U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS 50U
+#endif
+
+#ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES
+/**
+ * @brief Maximum size, in bytes, of headers allowed from the server for HTTP operations.
+ */
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES 3072U
 #endif
 
    // ==============
@@ -280,7 +299,7 @@ extern "C"
 /**
  * @brief Size of the network buffer for IoT Hub MQTT packets.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB 2048U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB 5120U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS
@@ -288,6 +307,16 @@ extern "C"
  * @brief Size of the network buffer for Device Provisioning Service MQTT packets.
  */
 #define CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS 2048U
+#endif
+
+#ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_MERGE_IOT_HUB_DPS_BUFFERS
+/**
+ * @brief Create a shared buffer that will be utilized by Azure IoT Hub
+          and DPS. The buffer size will be the biggest value between
+          @ref CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB
+          and @ref CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS.
+ */
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_MERGE_IOT_HUB_DPS_BUFFERS 1
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_STATE_ARRAY_MAX_COUNT
