@@ -16,10 +16,7 @@ extern "C"
     typedef struct AzureADUImageContext
     {
         const esp_partition_t *partition; /** @brief Partition context for ESP. */
-        uint8_t *image_buffer;            /** @brief The buffer containing the bytes to write to the flash. */
-        uint32_t image_buffer_length;     /** @brief The length of the buffer from which to write the bytes. */
         uint32_t image_size;              /** @brief The total size of the image to write. */
-        uint32_t partition_offset;        /** @brief The offset for the partition to write the bytes. */
     } AzureADUImageContext_t;
 
     /**
