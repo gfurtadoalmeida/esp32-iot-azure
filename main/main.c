@@ -8,6 +8,7 @@
 
 #include "examples/provisioning/example_provisioning.h"
 #include "examples/iot_hub/example_iot_hub.h"
+#include "examples/adu/example_adu.h"
 
 #include "esp32_iot_azure/azure_iot_sdk.h"
 
@@ -17,7 +18,7 @@ static void initialize_infra();
 static char WIFI_SSID[] = "";
 static char WIFI_PASSWORD[] = "";
 static utf8_string_t DEVICE_SYMMETRIC_KEY = UTF8_STRING_FROM_LITERAL("");
-static utf8_string_t DEVICE_REGISTRATION_ID = UTF8_STRING_FROM_LITERAL("test-device");
+static utf8_string_t DEVICE_REGISTRATION_ID = UTF8_STRING_FROM_LITERAL("");
 
 void app_main(void)
 {
@@ -34,9 +35,19 @@ void app_main(void)
         abort();
     }
 
+    // This example only returns when a "restart" command is sent.
+    // To run example_adu_run example you can:
+    //   A) comment this run.
+    //   B) send a "restart" command.
     if (!example_iot_hub_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
     {
         ESP_LOGE(TAG, "failure running example: example_iot_hub_run");
+        abort();
+    }
+
+    if (!example_adu_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
+    {
+        ESP_LOGE(TAG, "failure running example: example_adu_run");
         abort();
     }
 
