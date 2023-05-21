@@ -60,9 +60,8 @@ extern "C"
 
     /**
      * @brief Returns whether the component is the ADU component.
-     * @note If it is, user should follow by parsing the component with the
-     *       @ref AzureIoTHubClient_ADUProcessComponent() call. The properties will be
-     *       processed into the AzureIoTADUClient.
+     * @note If it is, user should follow by parsing the component
+     * with the @ref azure_adu_parse_request() call.
      * @param[in] context ADU context.
      * @param[in] component_name Name of writable property component to be checked.
      * @param[in] component_name_length Name of writable property component length.

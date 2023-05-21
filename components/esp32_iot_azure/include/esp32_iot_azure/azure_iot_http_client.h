@@ -20,7 +20,7 @@ extern "C"
      * @note The context must be released by @ref azure_http_free.
      * @param[in] url URL to use for this request. Must be null-terminated.
      * @param[in] url_length Length of \p url without null-termination.
-     * @param[in] path Path to use for this request.
+     * @param[in] path Path to use for this request. Must be null-terminated.
      * @param[in] path_length Length of \p path without null-termination.
      * @return @ref azure_http_context_t on success or null on failure.
      */
