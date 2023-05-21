@@ -153,7 +153,7 @@ bool example_adu_run(const utf8_string_t *iot_hub_hostname,
             ESP_LOGE(TAG_EX_ADU, "failure processing loop");
         }
 
-        if (azure_adu_workflow_process(adu_workflow) != eAzureIoTSuccess)
+        if (azure_adu_workflow_process_loop(adu_workflow) != eAzureIoTSuccess)
         {
             ESP_LOGE(TAG_EX_ADU, "failure processing workflow");
         }
@@ -317,11 +317,9 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
 
             if (azure_adu_is_adu_component(context->adu, component_name, component_name_length))
             {
-                AzureIoTADUUpdateRequest_t update_request;
-
                 AZ_CHECK(azure_adu_workflow_process_update_request_manifest(context->adu_workflow,
                                                                             &json_reader,
-                                                                            &update_request))
+                                                                            *version))
 
                 continue;
             }
