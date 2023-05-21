@@ -253,43 +253,47 @@ menu "ESP32 IoT Azure"
 
     if ESP32_IOT_AZURE_TRANSPORT_SHOW_ADVANCED_CONFIG
 
-        menu "HTTP"
+        if ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED
 
-            config ESP32_IOT_AZURE_TRANSPORT_HTTP_CONNECT_TIMEOUT_MS
-                int "Connection timeout (ms)"
-                range 500 10000
-                default 5000
-                help
-                    Connection timeout, in milliseconds.
+            menu "HTTP"
 
-            config ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS
-                int "Max receive retry timeout (ms)"
-                default 1000
-                range 10 5000
-                help
-                    The transport receive function may be called multiple times until the end of
-                    the response is detected by the parser. This timeout represents the maximum
-                    duration that is allowed without any data reception from the network for the
-                    incoming response.
+                config ESP32_IOT_AZURE_TRANSPORT_HTTP_CONNECT_TIMEOUT_MS
+                    int "Connection timeout (ms)"
+                    range 500 10000
+                    default 5000
+                    help
+                        Connection timeout, in milliseconds.
 
-            config ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS
-                int "Max send retry timeout (ms)"
-                default 1000
-                range 10 5000
-                help
-                    When sending an HTTP request, the transport send function may be called multiple
-                    times until all of the required number of bytes are sent.
-                    This timeout represents the maximum duration that is allowed for no data
-                    transmission over the network through the transport send function.
+                config ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS
+                    int "Max receive retry timeout (ms)"
+                    default 1000
+                    range 10 5000
+                    help
+                        The transport receive function may be called multiple times until the end of
+                        the response is detected by the parser. This timeout represents the maximum
+                        duration that is allowed without any data reception from the network for the
+                        incoming response.
 
-            config ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES
-                int "Max response header size (bytes)"
-                default 3072
-                range 512 3072
-                help
-                    Maximum size, in bytes, of headers allowed from the server.
+                config ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS
+                    int "Max send retry timeout (ms)"
+                    default 1000
+                    range 10 5000
+                    help
+                        When sending an HTTP request, the transport send function may be called multiple
+                        times until all of the required number of bytes are sent.
+                        This timeout represents the maximum duration that is allowed for no data
+                        transmission over the network through the transport send function.
 
-        endmenu
+                config ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES
+                    int "Max response header size (bytes)"
+                    default 3072
+                    range 512 3072
+                    help
+                        Maximum size, in bytes, of headers allowed from the server.
+
+            endmenu
+
+        endif
 
         menu "MQTT"
 
@@ -299,24 +303,26 @@ menu "ESP32 IoT Azure"
                 help
                     Size of the network buffer for IoT Hub MQTT packets.
 
-            config ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS
-                int "DPS buffer size"
-                default 3072
-                help
-                    Size of the network buffer for Device Provisioning Service MQTT packets.
+            if ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED
+                config ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS
+                    int "DPS buffer size"
+                    default 3072
+                    help
+                        Size of the network buffer for Device Provisioning Service MQTT packets.
 
-            config ESP32_IOT_AZURE_TRANSPORT_MQTT_MERGE_IOT_HUB_DPS_BUFFERS
-                bool "Merge IoT Hub and DPS buffers"
-                default y
-                help
-                    Create a shared buffer that will be utilized by Azure IoT Hub
-                    and DPS. The buffer size will be the biggest value between
-                    "IoT Hub buffer size" and "DPS buffer size".
+                config ESP32_IOT_AZURE_TRANSPORT_MQTT_MERGE_IOT_HUB_DPS_BUFFERS
+                    bool "Merge IoT Hub and DPS buffers"
+                    default y
+                    help
+                        Create a shared buffer that will be utilized by Azure IoT Hub
+                        and DPS. The buffer size will be the biggest value between
+                        "IoT Hub buffer size" and "DPS buffer size".
 
-                    This saves resources as just one buffer will be created.
+                        This saves resources as just one buffer will be created.
 
-                    This settings can be checked if IoT Hub and DPS are not being
-                    called on different tasks, at the same time.
+                        This settings can be checked if IoT Hub and DPS are not being
+                        called on different tasks, at the same time.
+            endif
 
             config ESP32_IOT_AZURE_TRANSPORT_MQTT_STATE_ARRAY_MAX_COUNT
                 int "Max PUBLISH messages pending"

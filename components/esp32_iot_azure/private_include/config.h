@@ -2,6 +2,7 @@
 #define __ESP32_IOT_AZURE_CONFIG_H__
 
 #include <stdint.h>
+#include "sdkconfig.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -21,14 +22,14 @@ extern "C"
 /**
  * @brief Enables Azure Device Provisioning Service (DPS) feature.
  */
-#define CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED 1
+#define CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED 0
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED
 /**
  * @brief Enables Azure Device Update feature.
  */
-#define CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED 1
+#define CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED 0
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_HUB_SERVER_HOSTNAME
