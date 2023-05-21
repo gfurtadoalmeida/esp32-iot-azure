@@ -517,28 +517,26 @@ static AzureIoTResult_t azure_adu_workflow_send_update_results(const azure_adu_w
     return eAzureIoTSuccess;
 }
 
-static bool download_callback_write_to_flash(uint8_t *data,
-                                             uint32_t data_length,
-                                             uint32_t current_offset,
+static bool download_callback_write_to_flash(uint8_t *chunck,
+                                             uint32_t chunck_length,
+                                             uint32_t start_offset,
                                              uint32_t resource_size,
                                              void *callback_context)
 {
     download_callback_context_t *context = (download_callback_context_t *)callback_context;
 
     if (AzureIoTPlatform_WriteBlock(context->image,
-                                    current_offset,
-                                    data,
-                                    data_length) != eAzureIoTSuccess)
+                                    start_offset,
+                                    chunck,
+                                    chunck_length) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure writing to flash");
         return false;
     }
 
-    current_offset += data_length;
-
     if (context->context->download_progress_callback != NULL)
     {
-        context->context->download_progress_callback(current_offset, resource_size);
+        context->context->download_progress_callback(start_offset + chunck_length, resource_size);
     }
 
     return true;

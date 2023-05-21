@@ -11,15 +11,15 @@ extern "C"
 
     /**
      * @brief Callback to be invoked when a resource chunck is downloaded.
-     * @param[in] data Payload pointer.
-     * @param[in] data_length Payload length returned by \p data.
-     * @param[in] current_offset Resource starting point where the chunck was donwloaded.
+     * @param[in] chunck Chunck pointer.
+     * @param[in] chunck_length Downloaded chunck length returned by \p data.
+     * @param[in] start_offset Resource starting point where the chunck was donwloaded.
      * @param[in] resource_size Resource total size.
      * @param[in] callback_context Context passed back to the caller.
      */
-    typedef bool (*azure_http_download_callback_t)(uint8_t *data,
-                                                   uint32_t data_length,
-                                                   uint32_t current_offset,
+    typedef bool (*azure_http_download_callback_t)(uint8_t *chunck,
+                                                   uint32_t chunck_length,
+                                                   uint32_t start_offset,
                                                    uint32_t resource_size,
                                                    void *callback_context);
 
