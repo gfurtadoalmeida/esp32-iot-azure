@@ -11,6 +11,10 @@
 
 static const char TAG_AZ_ADU_WKF[] = "AZ_ADU_WKF";
 
+#define CALLBACK_UPDATE(context, success, error_code) \
+    if (context->callback_update_finished != NULL)    \
+        context->callback_update_finished(success, error_code);
+
 static AzureIoTResult_t azure_adu_step_accept(azure_adu_workflow_t *context);
 static AzureIoTResult_t azure_adu_step_reject(azure_adu_workflow_t *context);
 static AzureIoTResult_t azure_adu_step_download(azure_adu_workflow_t *context);
@@ -57,8 +61,9 @@ struct azure_adu_workflow_t
     AzureIoTADUUpdateRequest_t update_request;
     azure_adu_context_t *adu_context;
     AzureIoTADUClientDeviceProperties_t *device_properties;
-    azure_adu_workflow_decide_installation_callback_t decide_installation_callback;
-    azure_adu_workflow_download_progress_callback_t download_progress_callback;
+    azure_adu_workflow_decide_installation_callback_t callback_decide_installation;
+    azure_adu_workflow_download_progress_callback_t callback_download_progress;
+    azure_adu_workflow_update_finished_callback_t callback_update_finished;
     azure_adu_workflow_state_t state;
     uint32_t property_version;
 };
@@ -74,6 +79,24 @@ azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context
     context->property_version = 0;
 
     return context;
+}
+
+void azure_adu_workflow_set_callback_decide_installation(azure_adu_workflow_t *context,
+                                                         azure_adu_workflow_decide_installation_callback_t callback)
+{
+    context->callback_decide_installation = callback;
+}
+
+void azure_adu_workflow_set_callback_download_progress(azure_adu_workflow_t *context,
+                                                       azure_adu_workflow_download_progress_callback_t callback)
+{
+    context->callback_download_progress = callback;
+}
+
+void azure_adu_workflow_set_callback_update_finished(azure_adu_workflow_t *context,
+                                                     azure_adu_workflow_update_finished_callback_t callback)
+{
+    context->callback_update_finished = callback;
 }
 
 AzureIoTResult_t azure_adu_workflow_init_agent(azure_adu_workflow_t *context, AzureIoTADUClientDeviceProperties_t *device_properties)
@@ -188,6 +211,11 @@ AzureIoTResult_t azure_adu_workflow_process_loop(azure_adu_workflow_t *context)
     return eAzureIoTErrorFailed;
 }
 
+void azure_adu_workflow_reset_device()
+{
+    AzureIoTPlatform_ResetDevice(NULL);
+}
+
 void azure_adu_workflow_free(azure_adu_workflow_t *context)
 {
     free(context);
@@ -291,6 +319,12 @@ static AzureIoTResult_t azure_adu_step_report_success(azure_adu_workflow_t *cont
         context->state = ADU_WORKFLOW_STATE_ERROR;
 
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure reporting success: %d", result);
+
+        CALLBACK_UPDATE(context, false, ADU_WORKFLOW_STATE_REPORT_SUCCESS)
+    }
+    else
+    {
+        CALLBACK_UPDATE(context, true, 0)
     }
 
     return result;
@@ -314,6 +348,12 @@ static AzureIoTResult_t azure_adu_step_finish(azure_adu_workflow_t *context)
         context->state = ADU_WORKFLOW_STATE_ERROR;
 
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure finishing: %d", result);
+
+        CALLBACK_UPDATE(context, false, ADU_WORKFLOW_STATE_FINISH)
+    }
+    else
+    {
+        CALLBACK_UPDATE(context, true, 0)
     }
 
     return result;
@@ -336,6 +376,12 @@ static AzureIoTResult_t azure_adu_step_error(azure_adu_workflow_t *context)
     if (result != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending error: %d", result);
+
+        CALLBACK_UPDATE(context, false, ADU_WORKFLOW_STATE_ERROR)
+    }
+    else
+    {
+        CALLBACK_UPDATE(context, true, 0)
     }
 
     return result;
@@ -365,7 +411,7 @@ static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre
         return eAzureIoTADURequestDecisionReject;
     }
 
-    if (context->decide_installation_callback != NULL && context->decide_installation_callback(&context->update_request) != eAzureIoTADURequestDecisionAccept)
+    if (context->callback_decide_installation != NULL && context->callback_decide_installation(&context->update_request) != eAzureIoTADURequestDecisionAccept)
     {
         CMP_LOGI(TAG_AZ_ADU_WKF, "installation rejected by the caller");
         return eAzureIoTADURequestDecisionReject;
@@ -534,9 +580,9 @@ static bool download_callback_write_to_flash(uint8_t *chunck,
         return false;
     }
 
-    if (context->context->download_progress_callback != NULL)
+    if (context->context->callback_download_progress != NULL)
     {
-        context->context->download_progress_callback(start_offset + chunck_length, resource_size);
+        context->context->callback_download_progress(start_offset + chunck_length, resource_size);
     }
 
     return true;

@@ -25,12 +25,19 @@ extern "C"
 
   /**
    * @typedef azure_adu_workflow_download_progress_callback_t
-   * @brief Callback to decide if the update should be accepted ou rejected.
+   * @brief Callback to indicate the download progress.
    * @param[in] downloaded_size Total downloaded bytes.
    * @param[in] image_size Total image size, in bytes, to be downloaded.
-   * @return Boolean indicating if the update must proceed or not.
    */
   typedef void (*azure_adu_workflow_download_progress_callback_t)(uint32_t downloaded_size, uint32_t image_size);
+
+  /**
+   * @typedef azure_adu_workflow_update_finished_callback_t
+   * @brief Callback to indicate the update is finished.
+   * @param[in] success Indicate success or failure.
+   * @param[in] error_code Erro code when \p sucess is false.
+   */
+  typedef void (*azure_adu_workflow_update_finished_callback_t)(bool success, uint8_t error_code);
 
   /**
    * @brief Create a Device Update Workflow context.
@@ -39,6 +46,31 @@ extern "C"
    * @return @ref azure_adu_workflow_t on success or null on failure.
    */
   azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context);
+
+  /**
+   * @brief Set the callback used to decide if the update should be accepted ou rejected.
+   * @param[in] context Workflow context.
+   * @param[in] callback Pointer to the callback function.
+   */
+  void azure_adu_workflow_set_callback_decide_installation(azure_adu_workflow_t *context,
+                                                           azure_adu_workflow_decide_installation_callback_t callback);
+
+  /**
+   * @brief Set the callback used to indicate the update is finished.
+   * @param[in] context Workflow context.
+   * @param[in] callback Pointer to the callback function.
+   */
+  void azure_adu_workflow_set_callback_download_progress(azure_adu_workflow_t *context,
+                                                         azure_adu_workflow_download_progress_callback_t callback);
+
+  /**
+   * @brief Set the callback used to indicate the download progress.
+   * @note When \p success is true, one could call @ref azure_adu_workflow_reset_device.
+   * @param[in] context Workflow context.
+   * @param[in] callback Pointer to the callback function.
+   */
+  void azure_adu_workflow_set_callback_update_finished(azure_adu_workflow_t *context,
+                                                       azure_adu_workflow_update_finished_callback_t callback);
 
   /**
    * @brief Initialize the workflow.
@@ -79,6 +111,13 @@ extern "C"
      azure_adu_workflow_process(adu_workflow);
    */
   AzureIoTResult_t azure_adu_workflow_process_loop(azure_adu_workflow_t *context);
+
+  /**
+   * @brief Reset the device. Should be called after a successful update.
+   * @note After restarting the device, @ref azure_adu_workflow_init_agent must
+   * be called to notify Azure Device Update that the deployment was successful.
+   */
+  void azure_adu_workflow_reset_device();
 
   /**
    * @brief Cleanup and free the context.
