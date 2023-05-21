@@ -1,8 +1,8 @@
 # ESP32 IoT Azure
 
 ![GitHub Build Status](https://github.com/gfurtadoalmeida/esp32-iot-azure/actions/workflows/build.yml/badge.svg) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=bugs)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure)  
-ESP32 library to access [Azure IoT Services](https://azure.microsoft.com/en-us/solutions/iot), in a easier way.  
-Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html) and use!  
+ESP32 library to access [Azure IoT Services](https://azure.microsoft.com/en-us/solutions/iot), in a easier and cleaner way.  
+Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html) and connect!  
 
 ## Characteristics
 
@@ -32,14 +32,34 @@ Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp
 * Examples:
   * Azure IoT Hub: [examples/iot_hub](/main/examples/iot_hub)
   * Azure Device Provisioning Service: [examples/provisioning](/main/examples/provisioning)
-  * Azure Device Update: _(in progress)_
+  * Azure Device Update: [examples/adu](/main/examples/adu)
+
+## Code Size
+
+Build options:
+
+* Compile optimized for size (`CONFIG_COMPILER_OPTIMIZATION_SIZE=y`).
+* Error logging (`CONFIG_LOG_DEFAULT_LEVEL_ERROR=y`).
+* Merged buffers (`CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_MERGE_IOT_HUB_DPS_BUFFERS=y`).
+
+This chart include the following configurable memory buffers, on DRAM:
+
+* IoT Hub + DPS: 5.12 KB
+* Device Update Workflow: 8.19 KB
+
+|  | DRAM | Flash (code,rodata) |
+|-|:-:|:-:|
+| IoT Hub + PnP + DPS + ADU + ADU workflow | buffers: 13.31 KB <br/> bss,data: 4 KB | 93.26 KB |
+| IoT Hub + PnP + DPS + ADU | - | - |
+| IoT Hub + PnP + DPS | - | - |
+| IoT Hub + PnP | - | - |
+| IoT Hub | - | - |
 
 ## To Do
 
 - [ ] Compile DPS sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DPS_ENABLED == 1`.
 - [ ] Compile Device Update sources only when `CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`.
 - [ ] Compile coreHTTP only when compiling Device Update (`CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED == 1`).
-- [ ] Create `CONFIG_ESP32_IOT_AZURE_DEVICE_AUTH_MODE` and compile only the needed auth methods.
 
 ## Example: Getting Device and Hub Info from DPS
 
