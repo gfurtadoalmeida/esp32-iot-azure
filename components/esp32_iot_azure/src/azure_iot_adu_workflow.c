@@ -26,7 +26,7 @@ static AzureIoTResult_t azure_adu_workflow_download_image(azure_adu_workflow_t *
                                                           const uint8_t *path,
                                                           uint32_t path_length);
 static AzureIoTResult_t azure_adu_workflow_enable_image(const azure_adu_workflow_t *context, AzureADUImage_t *image);
-static AzureIoTResult_t azure_adu_workflow_send_update_results(const azure_adu_workflow_t *context);
+static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflow_t *context);
 static bool download_callback_write_to_flash(uint8_t *data,
                                              uint32_t data_length,
                                              uint32_t current_offset,
@@ -440,7 +440,7 @@ static AzureIoTResult_t azure_adu_workflow_download_image(azure_adu_workflow_t *
 
     download_callback_context_t download_context = {
         .context = context,
-        .image = &image};
+        .image = image};
 
     AzureIoTResult_t result = azure_http_download_resource(http,
                                                            (char *)STATIC_MEMORY_ADU_DOWNLOAD,
@@ -479,7 +479,7 @@ static AzureIoTResult_t azure_adu_workflow_enable_image(const azure_adu_workflow
     return eAzureIoTSuccess;
 }
 
-static AzureIoTResult_t azure_adu_workflow_send_update_results(const azure_adu_workflow_t *context)
+static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflow_t *context)
 {
     AzureIoTADUClientInstallResult_t update_results =
         {

@@ -4,8 +4,8 @@
 // https://github.com/Azure/iot-hub-device-update/blob/main/src/utils/crypto_utils/src/root_key_util.c
 // https://github.com/Azure-Samples/iot-middleware-freertos-samples/blob/main/demos/sample_azure_iot_adu/sample_azure_iot_pnp_simulated_data.c
 
-static const uint8_t ADU_ROOT_KEY_2007_02_ID[13] = "ADU.200702.R";
-static const uint8_t ADU_ROOT_KEY_2007_02_N[385] =
+static uint8_t ADU_ROOT_KEY_2007_02_ID[13] = "ADU.200702.R";
+static uint8_t ADU_ROOT_KEY_2007_02_N[385] =
     {
         0x00, 0xd5, 0x42, 0x2e, 0xaf, 0x11, 0x54, 0xa3, 0x50, 0x65, 0x87, 0xa2, 0x4d, 0x5b, 0xba,
         0x1a, 0xfb, 0xa9, 0x32, 0xdf, 0xe9, 0x99, 0x5f, 0x05, 0x45, 0xc8, 0xaf, 0xbd, 0x35, 0x1d,
@@ -33,10 +33,10 @@ static const uint8_t ADU_ROOT_KEY_2007_02_N[385] =
         0xa8, 0x71, 0x4f, 0x51, 0x8e, 0x0e, 0x7b, 0x4d, 0xfa, 0x79, 0x98, 0x8d, 0xbe, 0xfc, 0x82,
         0x7e, 0x40, 0x48, 0xa9, 0x12, 0x01, 0xa8, 0xd9, 0x7e, 0xf3, 0xa5, 0x1b, 0xf1, 0xfb, 0x90,
         0x77, 0x3e, 0x40, 0x87, 0x18, 0xc9, 0xab, 0xd9, 0xf7, 0x79};
-static const uint8_t ADU_ROOT_KEY_2007_02_E[3] = {0x01, 0x00, 0x01};
+static uint8_t ADU_ROOT_KEY_2007_02_E[3] = {0x01, 0x00, 0x01};
 
-static const uint8_t ADU_ROOT_KEY_2007_03_ID[13] = "ADU.200703.R";
-static const uint8_t ADU_ROOT_KEY_2007_03_N[385] =
+static uint8_t ADU_ROOT_KEY_2007_03_ID[13] = "ADU.200703.R";
+static uint8_t ADU_ROOT_KEY_2007_03_N[385] =
     {
         0x00, 0xb2, 0xa3, 0xb2, 0x74, 0x16, 0xfa, 0xbb, 0x20, 0xf9, 0x52, 0x76, 0xe6, 0x27, 0x3e,
         0x80, 0x41, 0xc6, 0xfe, 0xcf, 0x30, 0xf9, 0xc8, 0x96, 0xf5, 0x59, 0x0a, 0xaa, 0x81, 0xe7,
@@ -66,7 +66,7 @@ static const uint8_t ADU_ROOT_KEY_2007_03_N[385] =
         0x11, 0xfe, 0x1b, 0x98, 0x05, 0xe4, 0xa3, 0x60, 0x31, 0x99};
 static uint8_t ADU_ROOT_KEY_2007_03_E[3] = {0x01, 0x00, 0x01};
 
-static const AzureIoTJWS_RootKey_t AZURE_ADU_ROOT_KEYS_ARRAY[2] =
+static AzureIoTJWS_RootKey_t AZURE_ADU_ROOT_KEYS_ARRAY[2] =
     {
         {.pucRootKeyId = ADU_ROOT_KEY_2007_03_ID,
          .ulRootKeyIdLength = sizeof(ADU_ROOT_KEY_2007_03_ID) - 1,
@@ -81,8 +81,8 @@ static const AzureIoTJWS_RootKey_t AZURE_ADU_ROOT_KEYS_ARRAY[2] =
          .pucRootKeyExponent = ADU_ROOT_KEY_2007_02_E,
          .ulRootKeyExponentLength = sizeof(ADU_ROOT_KEY_2007_02_E)}};
 
-static const azure_jws_root_keys_t _AZURE_ADU_ROOT_KEYS = {
-    .keys = &AZURE_ADU_ROOT_KEYS_ARRAY,
+static azure_jws_root_keys_t _AZURE_ADU_ROOT_KEYS = {
+    .keys = AZURE_ADU_ROOT_KEYS_ARRAY,
     .keys_count = 2};
 
 const azure_jws_root_keys_t *AZURE_ADU_ROOT_KEYS = &_AZURE_ADU_ROOT_KEYS;
