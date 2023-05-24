@@ -85,4 +85,7 @@ static azure_jws_root_keys_t _AZURE_ADU_ROOT_KEYS = {
     .keys = AZURE_ADU_ROOT_KEYS_ARRAY,
     .keys_count = 2};
 
-const azure_jws_root_keys_t *AZURE_ADU_ROOT_KEYS = &_AZURE_ADU_ROOT_KEYS;
+const azure_jws_root_keys_t *azure_adu_root_key_get()
+{
+    return &_AZURE_ADU_ROOT_KEYS;
+}

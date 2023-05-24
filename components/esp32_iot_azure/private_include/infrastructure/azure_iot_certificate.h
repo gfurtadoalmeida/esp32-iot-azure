@@ -8,8 +8,11 @@ extern "C"
 {
 #endif
 
-        /** @brief Azure IoT root certificate chain. */
-        extern const tls_certificate_t *AZURE_IOT_CERTIFICATE;
+        /**
+         * @brief Get the Azure IoT root certificate chain used by Azure IoT services.
+         * @return Poiter to the certificate.
+         */
+        const tls_certificate_t *azure_iot_certificate_get();
 
 #endif
 #ifdef __cplusplus

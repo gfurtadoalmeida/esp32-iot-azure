@@ -19,10 +19,11 @@ extern "C"
     } azure_jws_root_keys_t;
 
     /**
-     * @brief Azure Device Update root keys used to verify
+     * @brief Get the Azure Device Update root keys used to verify
      * the update JWS signature.
+     * @return Pointer to the root keys.
      */
-    extern const azure_jws_root_keys_t *AZURE_ADU_ROOT_KEYS;
+    const azure_jws_root_keys_t *azure_adu_root_key_get();
 
 #endif
 #ifdef __cplusplus

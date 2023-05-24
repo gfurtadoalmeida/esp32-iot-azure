@@ -197,6 +197,9 @@ static const char AZURE_CERTIFICATE_CHAIN[] =
 static const tls_certificate_t _AZURE_IOT_CERTIFICATE = {
     .data = (const uint8_t *)AZURE_CERTIFICATE_CHAIN,
     .format = TLS_CERT_FORMAT_PEM,
-    .length = sizeof(AZURE_CERTIFICATE_CHAIN)};
+    .length = sizeof(AZURE_CERTIFICATE_CHAIN) - 1};
 
-const tls_certificate_t *AZURE_IOT_CERTIFICATE = &_AZURE_IOT_CERTIFICATE;
+const tls_certificate_t *azure_iot_certificate_get()
+{
+    return &_AZURE_IOT_CERTIFICATE;
+}

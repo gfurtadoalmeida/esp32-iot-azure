@@ -43,7 +43,7 @@ esp_transport_handle_t transport_create_tls(const tls_certificate_t *certificate
 
 esp_transport_handle_t transport_create_azure()
 {
-    return transport_create_tls(AZURE_IOT_CERTIFICATE);
+    return transport_create_tls(azure_iot_certificate_get());
 }
 
 transport_status_t transport_set_client_certificate(esp_transport_handle_t transport,
