@@ -96,9 +96,9 @@ extern "C"
           azure_adu_workflow_process_update_request_manifest(context->adu_workflow, &json_reader, *version))
      }
    */
-  AzureIoTResult_t azure_adu_workflow_process_update_request_manifest(azure_adu_workflow_t *context,
-                                                                      AzureIoTJSONReader_t *json_reader,
-                                                                      uint32_t property_version);
+  AzureIoTResult_t azure_adu_workflow_process_update_request(azure_adu_workflow_t *context,
+                                                             AzureIoTJSONReader_t *json_reader,
+                                                             uint32_t property_version);
 
   /**
    * @brief Process the workflow.

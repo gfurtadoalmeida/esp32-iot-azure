@@ -317,9 +317,9 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
 
             if (azure_adu_is_adu_component(context->adu, component_name, component_name_length))
             {
-                AZ_CHECK(azure_adu_workflow_process_update_request_manifest(context->adu_workflow,
-                                                                            &json_reader,
-                                                                            *version))
+                AZ_CHECK(azure_adu_workflow_process_update_request(context->adu_workflow,
+                                                                   &json_reader,
+                                                                   *version))
 
                 continue;
             }

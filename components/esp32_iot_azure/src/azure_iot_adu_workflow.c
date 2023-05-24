@@ -23,12 +23,6 @@ static AzureIoTResult_t azure_adu_step_finish(azure_adu_workflow_t *context);
 static AzureIoTResult_t azure_adu_step_error(azure_adu_workflow_t *context);
 static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre_requisites(azure_adu_workflow_t *context);
 static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context);
-static AzureIoTResult_t azure_adu_workflow_download_image(azure_adu_workflow_t *context,
-                                                          AzureADUImage_t *image,
-                                                          const uint8_t *file_url,
-                                                          uint32_t file_url_length,
-                                                          const uint8_t *path,
-                                                          uint32_t path_length);
 static AzureIoTResult_t azure_adu_workflow_enable_image(const azure_adu_workflow_t *context, AzureADUImage_t *image);
 static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflow_t *context);
 static bool download_callback_write_to_flash(uint8_t *data,
@@ -113,9 +107,9 @@ AzureIoTResult_t azure_adu_workflow_init_agent(azure_adu_workflow_t *context, Az
                                       NULL);
 }
 
-AzureIoTResult_t azure_adu_workflow_process_update_request_manifest(azure_adu_workflow_t *context,
-                                                                    AzureIoTJSONReader_t *json_reader,
-                                                                    uint32_t property_version)
+AzureIoTResult_t azure_adu_workflow_process_update_request(azure_adu_workflow_t *context,
+                                                           AzureIoTJSONReader_t *json_reader,
+                                                           uint32_t property_version)
 {
     AzureIoTResult_t result = azure_adu_parse_request(context->adu_context, json_reader, &context->update_request);
 
@@ -127,12 +121,14 @@ AzureIoTResult_t azure_adu_workflow_process_update_request_manifest(azure_adu_wo
 
     if (context->update_request.xWorkflow.xAction == eAzureIoTADUActionApplyDownload)
     {
+        const azure_jws_root_keys_t *jws_keys = azure_adu_root_key_get();
+
         result = AzureIoTJWS_ManifestAuthenticate(context->update_request.pucUpdateManifest,
                                                   context->update_request.ulUpdateManifestLength,
                                                   context->update_request.pucUpdateManifestSignature,
                                                   context->update_request.ulUpdateManifestSignatureLength,
-                                                  AZURE_ADU_ROOT_KEYS->keys,
-                                                  AZURE_ADU_ROOT_KEYS->keys_count,
+                                                  jws_keys->keys,
+                                                  jws_keys->keys_count,
                                                   STATIC_MEMORY_ADU_SCRATCH_BUFFER,
                                                   CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH);
 
@@ -422,10 +418,7 @@ static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre
 
 static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context)
 {
-    uint8_t *file_url = NULL;
-    uint32_t file_url_length = 0;
-    uint8_t *path = NULL;
-    uint32_t path_length = 0;
+    parsed_file_url_t parsed_url;
     AzureADUImage_t image;
 
     if (AzureIoTPlatform_Init(&image) != eAzureIoTSuccess)
@@ -434,24 +427,25 @@ static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_w
         return eAzureIoTErrorFailed;
     }
 
-    if (azure_adu_parse_file_url(&context->update_request.pxFileUrls[0],
+    if (azure_adu_file_parse_url(&context->update_request.pxFileUrls[0],
                                  STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                 &file_url,
-                                 &file_url_length,
-                                 &path,
-                                 &path_length) != eAzureIoTSuccess)
+                                 &parsed_url) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure parsing file url");
         return eAzureIoTErrorFailed;
     }
 
-    // Remote null-terminator from file_url and path.
-    if (azure_adu_workflow_download_image(context,
-                                          &image,
-                                          file_url,
-                                          file_url_length - 1,
-                                          path,
-                                          path_length - 1) != eAzureIoTSuccess)
+    download_callback_context_t download_context = {
+        .context = context,
+        .image = &image};
+
+    if (azure_adu_file_download(&parsed_url,
+                                STATIC_MEMORY_ADU_DOWNLOAD,
+                                CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_HTTP_DOWNLOAD,
+                                CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE,
+                                &download_callback_write_to_flash,
+                                &download_context,
+                                &image.image_size) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure downloading image");
         return eAzureIoTErrorFailed;
@@ -464,44 +458,6 @@ static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_w
     }
 
     return eAzureIoTSuccess;
-}
-
-static AzureIoTResult_t azure_adu_workflow_download_image(azure_adu_workflow_t *context,
-                                                          AzureADUImage_t *image,
-                                                          const uint8_t *file_url,
-                                                          uint32_t file_url_length,
-                                                          const uint8_t *path,
-                                                          uint32_t path_length)
-{
-    azure_http_context_t *http = azure_http_create((const char *)file_url,
-                                                   file_url_length,
-                                                   (const char *)path,
-                                                   path_length);
-
-    if (azure_http_connect(http) != eAzureIoTHTTPSuccess)
-    {
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure connecting to: %s", file_url);
-        return eAzureIoTErrorFailed;
-    }
-
-    download_callback_context_t download_context = {
-        .context = context,
-        .image = image};
-
-    AzureIoTResult_t result = azure_http_download_resource(http,
-                                                           (char *)STATIC_MEMORY_ADU_DOWNLOAD,
-                                                           CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_HTTP_DOWNLOAD,
-                                                           CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE,
-                                                           &download_callback_write_to_flash,
-                                                           &download_context,
-                                                           &image->image_size) == eAzureIoTHTTPSuccess
-                                  ? eAzureIoTSuccess
-                                  : eAzureIoTErrorFailed;
-
-    azure_http_disconnect(http);
-    azure_http_free(http);
-
-    return result;
 }
 
 static AzureIoTResult_t azure_adu_workflow_enable_image(const azure_adu_workflow_t *context, AzureADUImage_t *image)
