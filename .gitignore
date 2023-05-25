@@ -1,14 +1,13 @@
+# Azure SDK
+
+components/esp32_iot_azure/.sdk/azure-iot-middleware-freertos
 
 # ESP-IDF project files
-build/
-sdkconfig
-sdkconfig.old
+**/build
+**/sdkconfig
+**/sdkconfig.old
+**/dependencies.lock
 debug.log
-test/build/
-test/sdkconfig
-test/sdkconfig.old
-dependencies.lock
-components/esp32_iot_azure/.sdk/azure-iot-middleware-freertos
 
 # Prerequisites
 *.d
