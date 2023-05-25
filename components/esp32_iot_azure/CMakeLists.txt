@@ -21,7 +21,6 @@ list(APPEND srcsCOMP
      "src/infrastructure/azure_transport_interface.c"
      "src/infrastructure/backoff_algorithm.c"
      "src/infrastructure/crypto.c"
-     "src/infrastructure/static_memory.c"
      "src/infrastructure/time.c"
      "src/infrastructure/transport.c"
 )

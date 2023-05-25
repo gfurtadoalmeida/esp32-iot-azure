@@ -170,25 +170,6 @@ extern "C"
 #define CONFIG_ESP32_IOT_AZURE_DU_DEVICE_MODEL "ESP-WROOM-32"
 #endif
 
-#ifndef CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE
-/**
- * @brief How many bytes should be read on each Azure DU HTTP
- * call to download a image.
- */
-#define CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE 4096U
-#endif
-
-/**
- * @brief Azure DU download buffer size.
- * @note We need plus 1024 bytes for the HTTP headers.
- */
-#define CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_HTTP_DOWNLOAD (CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE + 1024U)
-
-/**
- * @brief Azure DU scratch buffer size.
- */
-#define CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH 3072U
-
    // ==============================
    // AZURE DEVICE UPDATE: UDPATE ID
    // ==============================
@@ -295,30 +276,6 @@ extern "C"
    // ==============
    // TRANSPORT MQTT
    // ==============
-
-#ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB
-/**
- * @brief Size of the network buffer for IoT Hub MQTT packets.
- */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB 5120U
-#endif
-
-#ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS
-/**
- * @brief Size of the network buffer for Device Provisioning Service MQTT packets.
- */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS 2048U
-#endif
-
-#ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_MERGE_IOT_HUB_DPS_BUFFERS
-/**
- * @brief Create a shared buffer that will be utilized by Azure IoT Hub
-          and DPS. The buffer size will be the biggest value between
-          @ref CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB
-          and @ref CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_DPS.
- */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_MERGE_IOT_HUB_DPS_BUFFERS 1
-#endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_STATE_ARRAY_MAX_COUNT
 /**
