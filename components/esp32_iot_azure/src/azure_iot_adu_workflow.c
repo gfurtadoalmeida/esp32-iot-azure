@@ -11,43 +11,23 @@
 
 static const char TAG_AZ_ADU_WKF[] = "AZ_ADU_WKF";
 
-#define CALLBACK_UPDATE(context, success, error_code) \
-    if (context->callback_update_finished != NULL)    \
-        context->callback_update_finished(success, error_code);
-
-static AzureIoTResult_t azure_adu_step_accept(azure_adu_workflow_t *context);
-static AzureIoTResult_t azure_adu_step_reject(azure_adu_workflow_t *context);
-static AzureIoTResult_t azure_adu_step_download(azure_adu_workflow_t *context);
-static AzureIoTResult_t azure_adu_step_report_success(azure_adu_workflow_t *context);
-static AzureIoTResult_t azure_adu_step_finish(azure_adu_workflow_t *context);
-static AzureIoTResult_t azure_adu_step_error(azure_adu_workflow_t *context);
-static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre_requisites(azure_adu_workflow_t *context);
-static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context);
-static AzureIoTResult_t azure_adu_workflow_enable_image(const azure_adu_workflow_t *context, AzureADUImage_t *image);
+static AzureIoTResult_t azure_adu_workflow_cancel_update(azure_adu_workflow_t *context);
+static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre_requisites(const azure_adu_workflow_t *context);
+static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context,
+                                                                     azure_adu_workflow_download_progress_callback_t callback,
+                                                                     void *callback_context);
 static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflow_t *context);
 static bool download_callback_write_to_flash(uint8_t *data,
                                              uint32_t data_length,
                                              uint32_t current_offset,
                                              uint32_t resource_size,
                                              void *callback_context);
-
-typedef enum
-{
-    ADU_WORKFLOW_STATE_IDLE = 0,
-    ADU_WORKFLOW_STATE_ACCEPT = 1,
-    ADU_WORKFLOW_STATE_DOWNLOAD = 2,
-    ADU_WORKFLOW_STATE_REPORT_SUCCESS = 3,
-    ADU_WORKFLOW_STATE_FINISH = 4,
-    ADU_WORKFLOW_STATE_REJECT = 5,
-    ADU_WORKFLOW_STATE_CANCEL = 250,
-    ADU_WORKFLOW_STATE_ACTION_UNKNOWN = 251,
-    ADU_WORKFLOW_STATE_ERROR = 252
-} azure_adu_workflow_state_t;
-
 typedef struct
 {
     azure_adu_workflow_t *context;
     AzureADUImage_t *image;
+    azure_adu_workflow_download_progress_callback_t callback;
+    void *callback_context;
 } download_callback_context_t;
 
 struct azure_adu_workflow_t
@@ -55,11 +35,8 @@ struct azure_adu_workflow_t
     AzureIoTADUUpdateRequest_t update_request;
     azure_adu_context_t *adu_context;
     AzureIoTADUClientDeviceProperties_t *device_properties;
-    azure_adu_workflow_decide_installation_callback_t callback_decide_installation;
-    azure_adu_workflow_download_progress_callback_t callback_download_progress;
-    azure_adu_workflow_update_finished_callback_t callback_update_finished;
-    azure_adu_workflow_state_t state;
     uint32_t property_version;
+    volatile bool has_update;
 };
 
 azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context)
@@ -69,31 +46,13 @@ azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context
     memset(context, 0, sizeof(azure_adu_workflow_t));
 
     context->adu_context = adu_context;
-    context->state = ADU_WORKFLOW_STATE_IDLE;
     context->property_version = 0;
+    context->has_update = false;
 
     return context;
 }
 
-void azure_adu_workflow_set_callback_decide_installation(azure_adu_workflow_t *context,
-                                                         azure_adu_workflow_decide_installation_callback_t callback)
-{
-    context->callback_decide_installation = callback;
-}
-
-void azure_adu_workflow_set_callback_download_progress(azure_adu_workflow_t *context,
-                                                       azure_adu_workflow_download_progress_callback_t callback)
-{
-    context->callback_download_progress = callback;
-}
-
-void azure_adu_workflow_set_callback_update_finished(azure_adu_workflow_t *context,
-                                                     azure_adu_workflow_update_finished_callback_t callback)
-{
-    context->callback_update_finished = callback;
-}
-
-AzureIoTResult_t azure_adu_workflow_init_agent(azure_adu_workflow_t *context, AzureIoTADUClientDeviceProperties_t *device_properties)
+AzureIoTResult_t azure_adu_workflow_init(azure_adu_workflow_t *context, AzureIoTADUClientDeviceProperties_t *device_properties)
 {
     context->device_properties = device_properties;
 
@@ -107,11 +66,18 @@ AzureIoTResult_t azure_adu_workflow_init_agent(azure_adu_workflow_t *context, Az
                                       NULL);
 }
 
+bool azure_adu_workflow_has_update(const azure_adu_workflow_t *context)
+{
+    return context->has_update;
+}
+
 AzureIoTResult_t azure_adu_workflow_process_update_request(azure_adu_workflow_t *context,
                                                            AzureIoTJSONReader_t *json_reader,
                                                            uint32_t property_version)
 {
     AzureIoTResult_t result = azure_adu_parse_request(context->adu_context, json_reader, &context->update_request);
+
+    context->property_version = property_version;
 
     if (result != eAzureIoTSuccess)
     {
@@ -123,88 +89,113 @@ AzureIoTResult_t azure_adu_workflow_process_update_request(azure_adu_workflow_t 
     {
         const azure_jws_root_keys_t *jws_keys = azure_adu_root_key_get();
 
-        result = AzureIoTJWS_ManifestAuthenticate(context->update_request.pucUpdateManifest,
-                                                  context->update_request.ulUpdateManifestLength,
-                                                  context->update_request.pucUpdateManifestSignature,
-                                                  context->update_request.ulUpdateManifestSignatureLength,
-                                                  jws_keys->keys,
-                                                  jws_keys->keys_count,
-                                                  STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                                  CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH);
-
-        if (result != eAzureIoTSuccess)
+        if ((result = AzureIoTJWS_ManifestAuthenticate(context->update_request.pucUpdateManifest,
+                                                       context->update_request.ulUpdateManifestLength,
+                                                       context->update_request.pucUpdateManifestSignature,
+                                                       context->update_request.ulUpdateManifestSignatureLength,
+                                                       jws_keys->keys,
+                                                       jws_keys->keys_count,
+                                                       STATIC_MEMORY_ADU_SCRATCH_BUFFER,
+                                                       CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH)) != eAzureIoTSuccess)
         {
             CMP_LOGE(TAG_AZ_ADU_WKF, "failure validating manifest: %d", result);
             return result;
         }
 
-        context->property_version = property_version;
-
         if (azure_adu_workflow_validate_installation_pre_requisites(context) == eAzureIoTADURequestDecisionAccept)
         {
-            context->state = ADU_WORKFLOW_STATE_ACCEPT;
+            context->has_update = true;
+
+            return eAzureIoTSuccess;
         }
         else
         {
-            context->state = ADU_WORKFLOW_STATE_REJECT;
+            return azure_adu_workflow_reject_update(context);
         }
-    }
-    else if (context->update_request.xWorkflow.xAction == eAzureIoTADUActionCancel)
-    {
-        context->state = ADU_WORKFLOW_STATE_CANCEL;
-
-        CMP_LOGI(TAG_AZ_ADU_WKF, "update canceled");
     }
     else
     {
-        context->state = ADU_WORKFLOW_STATE_ACTION_UNKNOWN;
+        return azure_adu_workflow_cancel_update(context);
+    }
+}
 
-        CMP_LOGW(TAG_AZ_ADU_WKF, "action unknown: %d", context->update_request.xWorkflow.xAction);
+AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
+                                                  azure_adu_workflow_download_progress_callback_t callback,
+                                                  void *callback_context)
+{
+    AzureIoTResult_t result = eAzureIoTSuccess;
+
+    if ((result = azure_adu_send_response(context->adu_context,
+                                          eAzureIoTADURequestDecisionAccept,
+                                          context->property_version,
+                                          STATIC_MEMORY_ADU_SCRATCH_BUFFER,
+                                          CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                          NULL)) != eAzureIoTSuccess)
+    {
+        CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending accept response: %d", result);
+        return result;
+    }
+
+    if ((result = azure_adu_send_agent_state(context->adu_context,
+                                             context->device_properties,
+                                             &context->update_request,
+                                             eAzureIoTADUAgentStateDeploymentInProgress,
+                                             NULL,
+                                             STATIC_MEMORY_ADU_SCRATCH_BUFFER,
+                                             CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                             NULL)) != eAzureIoTSuccess)
+    {
+        CMP_LOGE(TAG_AZ_ADU_WKF, "failure setting in progress state: %d", result);
+        return result;
+    }
+
+    if ((result = azure_adu_workflow_download_and_enable_image(context, callback, callback_context)) != eAzureIoTSuccess)
+    {
+        CMP_LOGE(TAG_AZ_ADU_WKF, "failure downloading and enabling image: %d", result);
+        return result;
+    }
+
+    context->has_update = false;
+
+    // Once the image is downloaded and enabled, it does not matter
+    // if we send the results or not.
+    //
+    // Do not send any eAzureIoTADUAgentState*
+    // Doing so will change the device update status to failed.
+    // A device update will only succeed when a azure_adu_send_agent_state
+    // with eAzureIoTADUAgentStateIdle status and the new version is sent
+    // to the service. This will occur when the device restarts and
+    // boot with the new image version.
+    if (azure_adu_workflow_send_update_results(context) != eAzureIoTSuccess)
+    {
+        CMP_LOGW(TAG_AZ_ADU_WKF, "failure updating results: %d", result);
     }
 
     return result;
 }
 
-AzureIoTResult_t azure_adu_workflow_process_loop(azure_adu_workflow_t *context)
+AzureIoTResult_t azure_adu_workflow_reject_update(azure_adu_workflow_t *context)
 {
-    if (context->state == ADU_WORKFLOW_STATE_IDLE)
+    if (!context->has_update)
     {
         return eAzureIoTSuccess;
     }
 
-    if (context->state == ADU_WORKFLOW_STATE_ACCEPT)
+    context->has_update = false;
+
+    AzureIoTResult_t result = eAzureIoTSuccess;
+
+    if ((result = azure_adu_send_response(context->adu_context,
+                                          eAzureIoTADURequestDecisionReject,
+                                          context->property_version,
+                                          STATIC_MEMORY_ADU_SCRATCH_BUFFER,
+                                          CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                          NULL)) != eAzureIoTSuccess)
     {
-        return azure_adu_step_accept(context);
+        CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending reject response: %d", result);
     }
 
-    if (context->state == ADU_WORKFLOW_STATE_DOWNLOAD)
-    {
-        return azure_adu_step_download(context);
-    }
-
-    if (context->state == ADU_WORKFLOW_STATE_REPORT_SUCCESS)
-    {
-        return azure_adu_step_report_success(context);
-    }
-
-    if (context->state == ADU_WORKFLOW_STATE_FINISH || context->state == ADU_WORKFLOW_STATE_CANCEL || context->state == ADU_WORKFLOW_STATE_ACTION_UNKNOWN)
-    {
-        return azure_adu_step_finish(context);
-    }
-
-    if (context->state == ADU_WORKFLOW_STATE_REJECT)
-    {
-        return azure_adu_step_reject(context);
-    }
-
-    if (context->state == ADU_WORKFLOW_STATE_ERROR)
-    {
-        return azure_adu_step_error(context);
-    }
-
-    CMP_LOGW(TAG_AZ_ADU_WKF, "unhandled workflow state: %d", context->state);
-
-    return eAzureIoTErrorFailed;
+    return azure_adu_workflow_cancel_update(context);
 }
 
 void azure_adu_workflow_reset_device()
@@ -218,176 +209,31 @@ void azure_adu_workflow_free(azure_adu_workflow_t *context)
 }
 
 //
-// STEPS
-//
-
-static AzureIoTResult_t azure_adu_step_accept(azure_adu_workflow_t *context)
-{
-    AzureIoTResult_t result = azure_adu_send_response(context->adu_context,
-                                                      eAzureIoTADURequestDecisionAccept,
-                                                      context->property_version,
-                                                      STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                                      CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
-                                                      NULL);
-
-    context->state = ADU_WORKFLOW_STATE_DOWNLOAD;
-
-    if (result != eAzureIoTSuccess)
-    {
-        context->state = ADU_WORKFLOW_STATE_ERROR;
-
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending accept response: %d", result);
-    }
-
-    return result;
-}
-
-static AzureIoTResult_t azure_adu_step_reject(azure_adu_workflow_t *context)
-{
-    AzureIoTResult_t result = azure_adu_send_response(context->adu_context,
-                                                      eAzureIoTADURequestDecisionReject,
-                                                      context->property_version,
-                                                      STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                                      CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
-                                                      NULL);
-
-    context->state = ADU_WORKFLOW_STATE_FINISH;
-
-    if (result != eAzureIoTSuccess)
-    {
-        context->state = ADU_WORKFLOW_STATE_ERROR;
-
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending update rejected response");
-    }
-
-    return result;
-}
-
-static AzureIoTResult_t azure_adu_step_download(azure_adu_workflow_t *context)
-{
-    AzureIoTResult_t result = azure_adu_send_agent_state(context->adu_context,
-                                                         context->device_properties,
-                                                         &context->update_request,
-                                                         eAzureIoTADUAgentStateDeploymentInProgress,
-                                                         NULL,
-                                                         STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                                         CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
-                                                         NULL);
-
-    context->state = ADU_WORKFLOW_STATE_REPORT_SUCCESS;
-
-    if (result != eAzureIoTSuccess)
-    {
-        context->state = ADU_WORKFLOW_STATE_ERROR;
-
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending in progress response: %d", result);
-    }
-    else
-    {
-        result = azure_adu_workflow_download_and_enable_image(context);
-
-        if (result != eAzureIoTSuccess)
-        {
-            context->state = ADU_WORKFLOW_STATE_ERROR;
-
-            CMP_LOGE(TAG_AZ_ADU_WKF, "failure downloading and enabling image: %d", result);
-        }
-    }
-
-    return result;
-}
-
-static AzureIoTResult_t azure_adu_step_report_success(azure_adu_workflow_t *context)
-{
-    AzureIoTResult_t result = azure_adu_workflow_send_update_results(context);
-
-    // Do not go to ADU_WORKFLOW_STATE_FINISH.
-    // Doing so will change the device update status to failed.
-    // A device update will only succeed when a azure_adu_send_agent_state
-    // with eAzureIoTADUAgentStateIdle status and the new version is sent
-    // to the service. This will occur when the device restarts and
-    // boot with the new image version.
-
-    context->state = ADU_WORKFLOW_STATE_IDLE;
-
-    if (result != eAzureIoTSuccess)
-    {
-        context->state = ADU_WORKFLOW_STATE_ERROR;
-
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure reporting success: %d", result);
-
-        CALLBACK_UPDATE(context, false, ADU_WORKFLOW_STATE_REPORT_SUCCESS)
-    }
-    else
-    {
-        CALLBACK_UPDATE(context, true, 0)
-    }
-
-    return result;
-}
-
-static AzureIoTResult_t azure_adu_step_finish(azure_adu_workflow_t *context)
-{
-    AzureIoTResult_t result = azure_adu_send_agent_state(context->adu_context,
-                                                         context->device_properties,
-                                                         &context->update_request,
-                                                         eAzureIoTADUAgentStateIdle,
-                                                         NULL,
-                                                         STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                                         CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
-                                                         NULL);
-
-    context->state = ADU_WORKFLOW_STATE_IDLE;
-
-    if (result != eAzureIoTSuccess)
-    {
-        context->state = ADU_WORKFLOW_STATE_ERROR;
-
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure finishing: %d", result);
-
-        CALLBACK_UPDATE(context, false, ADU_WORKFLOW_STATE_FINISH)
-    }
-    else
-    {
-        CALLBACK_UPDATE(context, true, 0)
-    }
-
-    return result;
-}
-
-static AzureIoTResult_t azure_adu_step_error(azure_adu_workflow_t *context)
-{
-    AzureIoTResult_t result = azure_adu_send_agent_state(context->adu_context,
-                                                         context->device_properties,
-                                                         NULL,
-                                                         eAzureIoTADUAgentStateError,
-                                                         NULL,
-                                                         STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                                         CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
-                                                         NULL);
-
-    // We'll always go to idle to not loop infinitely on error.
-    context->state = ADU_WORKFLOW_STATE_IDLE;
-
-    if (result != eAzureIoTSuccess)
-    {
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending error: %d", result);
-
-        CALLBACK_UPDATE(context, false, ADU_WORKFLOW_STATE_ERROR)
-    }
-    else
-    {
-        CALLBACK_UPDATE(context, true, 0)
-    }
-
-    return result;
-}
-
-//
 // PRIVATE
 //
 
-static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre_requisites(azure_adu_workflow_t *context)
+static AzureIoTResult_t azure_adu_workflow_cancel_update(azure_adu_workflow_t *context)
+{
+    context->has_update = false;
+
+    AzureIoTResult_t result = eAzureIoTSuccess;
+
+    if ((result = azure_adu_send_agent_state(context->adu_context,
+                                             context->device_properties,
+                                             &context->update_request,
+                                             eAzureIoTADUAgentStateIdle,
+                                             NULL,
+                                             STATIC_MEMORY_ADU_SCRATCH_BUFFER,
+                                             CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                             NULL)) != eAzureIoTSuccess)
+    {
+        CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending idle state: %d", result);
+    }
+
+    return result;
+}
+
+static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre_requisites(const azure_adu_workflow_t *context)
 {
     if (context->update_request.xUpdateManifest.pxFiles[0].llSizeInBytes < 0)
     {
@@ -407,72 +253,58 @@ static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre
         return eAzureIoTADURequestDecisionReject;
     }
 
-    if (context->callback_decide_installation != NULL && context->callback_decide_installation(&context->update_request) != eAzureIoTADURequestDecisionAccept)
-    {
-        CMP_LOGI(TAG_AZ_ADU_WKF, "installation rejected by the caller");
-        return eAzureIoTADURequestDecisionReject;
-    }
-
     return eAzureIoTADURequestDecisionAccept;
 }
 
-static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context)
+static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context,
+                                                                     azure_adu_workflow_download_progress_callback_t callback,
+                                                                     void *callback_context)
 {
     parsed_file_url_t parsed_url;
     AzureADUImage_t image;
+    AzureIoTResult_t result;
 
-    if (AzureIoTPlatform_Init(&image) != eAzureIoTSuccess)
+    if ((result = AzureIoTPlatform_Init(&image)) != eAzureIoTSuccess)
     {
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure initializing flash platform");
+        CMP_LOGE(TAG_AZ_ADU_WKF, "failure initializing flash: %d", result);
         return eAzureIoTErrorFailed;
     }
 
-    if (azure_adu_file_parse_url(&context->update_request.pxFileUrls[0],
-                                 STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                 &parsed_url) != eAzureIoTSuccess)
+    if ((result = azure_adu_file_parse_url(&context->update_request.pxFileUrls[0],
+                                           STATIC_MEMORY_ADU_SCRATCH_BUFFER,
+                                           &parsed_url)) != eAzureIoTSuccess)
     {
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure parsing file url");
+        CMP_LOGE(TAG_AZ_ADU_WKF, "failure parsing file url: %d", result);
         return eAzureIoTErrorFailed;
     }
 
     download_callback_context_t download_context = {
         .context = context,
-        .image = &image};
+        .image = &image,
+        .callback = callback,
+        .callback_context = callback_context};
 
-    if (azure_adu_file_download(&parsed_url,
-                                STATIC_MEMORY_ADU_DOWNLOAD,
-                                CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_HTTP_DOWNLOAD,
-                                CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE,
-                                &download_callback_write_to_flash,
-                                &download_context,
-                                &image.image_size) != eAzureIoTSuccess)
+    if ((result = azure_adu_file_download(&parsed_url,
+                                          STATIC_MEMORY_ADU_DOWNLOAD,
+                                          CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_HTTP_DOWNLOAD,
+                                          CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE,
+                                          &download_callback_write_to_flash,
+                                          &download_context,
+                                          &image.image_size)) != eAzureIoTSuccess)
     {
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure downloading image");
+        CMP_LOGE(TAG_AZ_ADU_WKF, "failure downloading image: %d", result);
         return eAzureIoTErrorFailed;
     }
 
-    if (azure_adu_workflow_enable_image(context, &image) != eAzureIoTSuccess)
-    {
-        CMP_LOGE(TAG_AZ_ADU_WKF, "failure enabling image");
-        return eAzureIoTErrorFailed;
-    }
-
-    return eAzureIoTSuccess;
-}
-
-static AzureIoTResult_t azure_adu_workflow_enable_image(const azure_adu_workflow_t *context, AzureADUImage_t *image)
-{
-    AzureIoTResult_t result = AzureIoTPlatform_VerifyImage(image,
-                                                           context->update_request.xUpdateManifest.pxFiles[0].pxHashes[0].pucHash,
-                                                           context->update_request.xUpdateManifest.pxFiles[0].pxHashes[0].ulHashLength);
-
-    if (result != eAzureIoTSuccess)
+    if ((result = AzureIoTPlatform_VerifyImage(&image,
+                                               context->update_request.xUpdateManifest.pxFiles[0].pxHashes[0].pucHash,
+                                               context->update_request.xUpdateManifest.pxFiles[0].pxHashes[0].ulHashLength)) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure validating image: %d", result);
         return eAzureIoTErrorFailed;
     }
 
-    if ((result = AzureIoTPlatform_EnableImage(image)) != eAzureIoTSuccess)
+    if ((result = AzureIoTPlatform_EnableImage(&image)) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure enabling image: %d", result);
         return eAzureIoTErrorFailed;
@@ -536,9 +368,9 @@ static bool download_callback_write_to_flash(uint8_t *chunck,
         return false;
     }
 
-    if (context->context->callback_download_progress != NULL)
+    if (context->callback != NULL)
     {
-        context->context->callback_download_progress(start_offset + chunck_length, resource_size);
+        context->callback(start_offset + chunck_length, resource_size, context->callback_context);
     }
 
     return true;

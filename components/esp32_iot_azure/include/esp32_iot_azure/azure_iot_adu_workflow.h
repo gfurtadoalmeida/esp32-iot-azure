@@ -16,28 +16,15 @@ extern "C"
   typedef struct azure_adu_workflow_t azure_adu_workflow_t;
 
   /**
-   * @typedef azure_adu_workflow_decide_installation_callback_t
-   * @brief Callback to decide if the update should be accepted ou rejected.
-   * @param[in] update_request @ref Pointer to an AzureIoTADUUpdateRequest_t structure with update information.
-   * @return AzureIoTADURequestDecision_t with the decision.
-   */
-  typedef AzureIoTADURequestDecision_t (*azure_adu_workflow_decide_installation_callback_t)(AzureIoTADUUpdateRequest_t *update_request);
-
-  /**
    * @typedef azure_adu_workflow_download_progress_callback_t
    * @brief Callback to indicate the download progress.
    * @param[in] downloaded_size Total downloaded bytes.
    * @param[in] image_size Total image size, in bytes, to be downloaded.
+   * @param[in] callback_context Pointer to a context to pass to the callback.
    */
-  typedef void (*azure_adu_workflow_download_progress_callback_t)(uint32_t downloaded_size, uint32_t image_size);
-
-  /**
-   * @typedef azure_adu_workflow_update_finished_callback_t
-   * @brief Callback to indicate the update is finished.
-   * @param[in] success Indicate success or failure.
-   * @param[in] error_code Erro code when \p sucess is false.
-   */
-  typedef void (*azure_adu_workflow_update_finished_callback_t)(bool success, uint8_t error_code);
+  typedef void (*azure_adu_workflow_download_progress_callback_t)(uint32_t downloaded_size,
+                                                                  uint32_t image_size,
+                                                                  void *callback_context);
 
   /**
    * @brief Create a Device Update Workflow context.
@@ -48,32 +35,7 @@ extern "C"
   azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context);
 
   /**
-   * @brief Set the callback used to decide if the update should be accepted ou rejected.
-   * @param[in] context Workflow context.
-   * @param[in] callback Pointer to the callback function.
-   */
-  void azure_adu_workflow_set_callback_decide_installation(azure_adu_workflow_t *context,
-                                                           azure_adu_workflow_decide_installation_callback_t callback);
-
-  /**
-   * @brief Set the callback used to indicate the update is finished.
-   * @param[in] context Workflow context.
-   * @param[in] callback Pointer to the callback function.
-   */
-  void azure_adu_workflow_set_callback_download_progress(azure_adu_workflow_t *context,
-                                                         azure_adu_workflow_download_progress_callback_t callback);
-
-  /**
-   * @brief Set the callback used to indicate the download progress.
-   * @note When \p success is true, one could call @ref azure_adu_workflow_reset_device.
-   * @param[in] context Workflow context.
-   * @param[in] callback Pointer to the callback function.
-   */
-  void azure_adu_workflow_set_callback_update_finished(azure_adu_workflow_t *context,
-                                                       azure_adu_workflow_update_finished_callback_t callback);
-
-  /**
-   * @brief Initialize the workflow.
+   * @brief Initialize the workflow, setting the state to idle.
    * @note Will set the agent state to eAzureIoTADUAgentStateIdle.
    * @note After updating the device, this function must be called after a restart,
    * to notify Azure Device Update that the deployment was successful.
@@ -81,8 +43,15 @@ extern "C"
    * @param[in] device_properties Azure IoT Device Update client properties.
    * @return @ref AzureIoTResult_t with the result of the operation.
    */
-  AzureIoTResult_t azure_adu_workflow_init_agent(azure_adu_workflow_t *context,
-                                                 AzureIoTADUClientDeviceProperties_t *device_properties);
+  AzureIoTResult_t azure_adu_workflow_init(azure_adu_workflow_t *context,
+                                           AzureIoTADUClientDeviceProperties_t *device_properties);
+
+  /**
+   * @brief Verify is there is an update available.
+   * @param[in] context Workflow context.
+   * @return true/false.
+   */
+  bool azure_adu_workflow_has_update(const azure_adu_workflow_t *context);
 
   /**
    * @brief Process an Update Request Manifest sent by Azure IoT Hub.
@@ -101,16 +70,22 @@ extern "C"
                                                              uint32_t property_version);
 
   /**
-   * @brief Process the workflow.
-   * @note This function should be called after the @ref azure_iot_hub_process_loop,
-   * in the same loop.
+   * @brief Accept and download a pending update.
+   * @param[in] context Workflow context.
+   * @param[in] callback Callback to be invoked on download progress.
+   * @param[in] callback_context Pointer to a context to pass to the callback.
+   * @return @ref AzureIoTResult_t with the result of the operation.
+   */
+  AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
+                                                    azure_adu_workflow_download_progress_callback_t callback,
+                                                    void *callback_context);
+
+  /**
+   * @brief Reject a pending update.
    * @param[in] context Workflow context.
    * @return @ref AzureIoTResult_t with the result of the operation.
-   * @example
-     azure_iot_hub_process_loop(iot);
-     azure_adu_workflow_process(adu_workflow);
    */
-  AzureIoTResult_t azure_adu_workflow_process_loop(azure_adu_workflow_t *context);
+  AzureIoTResult_t azure_adu_workflow_reject_update(azure_adu_workflow_t *context);
 
   /**
    * @brief Reset the device. Should be called after a successful update.

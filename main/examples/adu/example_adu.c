@@ -115,7 +115,7 @@ bool example_adu_run(const utf8_string_t *iot_hub_hostname,
         goto CLEAN_UP;
     }
 
-    if (azure_adu_workflow_init_agent(adu_workflow, &adu_client_device_properties) != eAzureIoTSuccess)
+    if (azure_adu_workflow_init(adu_workflow, &adu_client_device_properties) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_ADU, "failure initializing Device Update Workflow");
         goto CLEAN_UP;
@@ -153,9 +153,9 @@ bool example_adu_run(const utf8_string_t *iot_hub_hostname,
             ESP_LOGE(TAG_EX_ADU, "failure processing loop");
         }
 
-        if (azure_adu_workflow_process_loop(adu_workflow) != eAzureIoTSuccess)
+        if (azure_adu_workflow_has_update(adu_workflow) && azure_adu_workflow_accept_update(adu_workflow, NULL, NULL) != eAzureIoTSuccess)
         {
-            ESP_LOGE(TAG_EX_ADU, "failure processing workflow");
+            ESP_LOGE(TAG_EX_ADU, "failure updating");
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));
