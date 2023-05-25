@@ -1,5 +1,5 @@
-#ifndef __ESP32_IOT_AZURE_STRUCTURES_H__
-#define __ESP32_IOT_AZURE_STRUCTURES_H__
+#ifndef __ESP32_IOT_AZURE_COMMON_H__
+#define __ESP32_IOT_AZURE_COMMON_H__
 
 #include <stdint.h>
 
@@ -103,13 +103,27 @@ extern "C"
 
     /**
      * @typedef utf8_string_t
-     * @brief Represents a UTF-8 encoded string.
+     * @brief Represents a null-terminated, UTF-8 encoded, string.
      */
     typedef struct
     {
         uint32_t length; /** @brief String length, excluding the `NULL` terminator. */
         uint8_t *buffer; /** @brief UTF-8 string characters. */
     } utf8_string_t;
+
+    // ======
+    // BUFFER
+    // ======
+
+    /**
+     * @typedef buffer_t
+     * @brief Represents a memory buffer.
+     */
+    typedef struct
+    {
+        uint32_t length; /** @brief Buffer length. */
+        uint8_t *buffer; /** @brief Buffer bytes. */
+    } buffer_t;
 
     // ==================
     // CLIENT CERTIFICATE
