@@ -13,8 +13,11 @@ bool example_dps_run(const utf8_string_t *device_symmetric_key,
 
     AzureIoTProvisioningClientOptions_t *dps_client_options = NULL;
     utf8_string_t registration_payload = UTF8_STRING_FOR_DPS_PNP_REGISTRATION_PAYLOAD();
+    buffer_t buffer = {
+        .length = 2048,
+        .buffer = (uint8_t *)malloc(2048)};
 
-    azure_dps_context_t *dps = azure_dps_create();
+    azure_dps_context_t *dps = azure_dps_create(&buffer);
 
     if (azure_dps_options_init(dps, &dps_client_options) != eAzureIoTSuccess)
     {
@@ -67,6 +70,8 @@ bool example_dps_run(const utf8_string_t *device_symmetric_key,
 CLEAN_UP:
     azure_dps_deinit(dps);
     azure_dps_free(dps);
+
+    free(buffer.buffer);
 
     ESP_LOGI(TAG_EX_DPS, "hostname: %.*s", iot_hub_hostname->length, (char *)iot_hub_hostname->buffer);
     ESP_LOGI(TAG_EX_DPS, "device_id: %.*s", device_id->length, (char *)device_id->buffer);

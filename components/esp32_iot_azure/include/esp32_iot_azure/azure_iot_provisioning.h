@@ -19,9 +19,10 @@ extern "C"
     /**
      * @brief Create an Azure IoT Provisioning Client context.
      * @note The context must be released by @ref azure_dps_free.
+     * @param[in] mqtt_buffer Buffer for MQTT operations. Minimum of 2048 bytes are needed.
      * @return @ref azure_dps_context_t on success or null on failure.
      */
-    azure_dps_context_t *azure_dps_create();
+    azure_dps_context_t *azure_dps_create(buffer_t *mqtt_buffer);
 
     /**
      * @brief Initialize the \p context internal Azure IoT Provisioning Options.
