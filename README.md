@@ -73,8 +73,11 @@ void app_main(void)
     azure_iot_sdk_init();
 
     AzureIoTProvisioningClientOptions_t *dps_client_options = NULL;
+    buffer_t buffer = {
+        .length = 2048,
+        .buffer = (uint8_t *)malloc(2048)};
 
-    azure_dps_context_t *dps = azure_dps_create();
+    azure_dps_context_t *dps = azure_dps_create(&buffer);
     azure_dps_options_init(dps, &dps_client_options);
     azure_dps_init(dps, registration_id->buffer, registration_id->length);
     azure_dps_auth_set_symmetric_key(dps, symmetric_key->buffer, symmetric_key->length);
@@ -88,6 +91,8 @@ void app_main(void)
                                  &device_id->length);
     azure_dps_deinit(dps);
     azure_dps_free(dps);
+
+    free(buffer.buffer);
 
     azure_iot_sdk_deinit();
 
