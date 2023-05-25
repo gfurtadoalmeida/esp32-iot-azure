@@ -9,6 +9,10 @@ extern "C"
 {
 #endif
 
+/** @brief Extra bytes needed on the download buffer,
+ *  to hold the HTTP response headers. */
+#define ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES 1024U
+
   /**
    * @typedef azure_adu_workflow_t
    * @brief Azure IoT Device Update Workflow context.
@@ -30,9 +34,11 @@ extern "C"
    * @brief Create a Device Update Workflow context.
    * @note The context must be released by @ref azure_adu_workflow_free.
    * @param[in] adu_context Azure Device Update context.
+   * @param[in] operation_buffer Buffer for internal operations. Minimum of 3072 bytes are needed.
    * @return @ref azure_adu_workflow_t on success or null on failure.
    */
-  azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context);
+  azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context,
+                                                  buffer_t *operation_buffer);
 
   /**
    * @brief Initialize the workflow, setting the state to idle.
@@ -71,12 +77,19 @@ extern "C"
 
   /**
    * @brief Accept and download a pending update.
+   * @note The update is downloaded in blocks, and \p chunck_size sets the block size.
+   * @details It needs extra bytes on the \p download_buffer to hold the HTTP response headers.
    * @param[in] context Workflow context.
+   * @param[in] download_buffer Buffer used for the download operation. Must have at least
+   * ( \p chunck_size + @ref ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES ) bytes.
+   * @param[in] chunck_size How many bytes should be read per request.
    * @param[in] callback Callback to be invoked on download progress.
    * @param[in] callback_context Pointer to a context to pass to the callback.
    * @return @ref AzureIoTResult_t with the result of the operation.
    */
   AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
+                                                    buffer_t *download_buffer,
+                                                    uint16_t chunck_size,
                                                     azure_adu_workflow_download_progress_callback_t callback,
                                                     void *callback_context);
 

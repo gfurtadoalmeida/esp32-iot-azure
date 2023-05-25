@@ -4,7 +4,6 @@
 #include "esp32_iot_azure/extension/azure_iot_adu_extension.h"
 #include "esp32_iot_azure/extension/azure_iot_http_client_extension.h"
 #include "infrastructure/azure_adu_root_key.h"
-#include "infrastructure/static_memory.h"
 #include "azure_iot_flash_platform.h"
 #include "config.h"
 #include "log.h"
@@ -14,6 +13,8 @@ static const char TAG_AZ_ADU_WKF[] = "AZ_ADU_WKF";
 static AzureIoTResult_t azure_adu_workflow_cancel_update(azure_adu_workflow_t *context);
 static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre_requisites(const azure_adu_workflow_t *context);
 static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context,
+                                                                     buffer_t *download_buffer,
+                                                                     uint16_t chunck_size,
                                                                      azure_adu_workflow_download_progress_callback_t callback,
                                                                      void *callback_context);
 static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflow_t *context);
@@ -35,12 +36,18 @@ struct azure_adu_workflow_t
     AzureIoTADUUpdateRequest_t update_request;
     azure_adu_context_t *adu_context;
     AzureIoTADUClientDeviceProperties_t *device_properties;
+    buffer_t *scratch_buffer;
     uint32_t property_version;
     volatile bool has_update;
 };
 
-azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context)
+azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context, buffer_t *operation_buffer)
 {
+    if (operation_buffer == NULL || operation_buffer->buffer == NULL)
+    {
+        ESP_LOGE(TAG_AZ_ADU_WKF, "operation_buffer null");
+        return NULL;
+    }
     azure_adu_workflow_t *context = (azure_adu_workflow_t *)malloc(sizeof(azure_adu_workflow_t));
 
     memset(context, 0, sizeof(azure_adu_workflow_t));
@@ -48,6 +55,7 @@ azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context
     context->adu_context = adu_context;
     context->property_version = 0;
     context->has_update = false;
+    context->scratch_buffer = operation_buffer;
 
     return context;
 }
@@ -61,8 +69,8 @@ AzureIoTResult_t azure_adu_workflow_init(azure_adu_workflow_t *context, AzureIoT
                                       NULL,
                                       eAzureIoTADUAgentStateIdle,
                                       NULL,
-                                      STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                      CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                      context->scratch_buffer->buffer,
+                                      context->scratch_buffer->length,
                                       NULL);
 }
 
@@ -95,8 +103,8 @@ AzureIoTResult_t azure_adu_workflow_process_update_request(azure_adu_workflow_t 
                                                        context->update_request.ulUpdateManifestSignatureLength,
                                                        jws_keys->keys,
                                                        jws_keys->keys_count,
-                                                       STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                                       CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH)) != eAzureIoTSuccess)
+                                                       context->scratch_buffer->buffer,
+                                                       context->scratch_buffer->length)) != eAzureIoTSuccess)
         {
             CMP_LOGE(TAG_AZ_ADU_WKF, "failure validating manifest: %d", result);
             return result;
@@ -120,16 +128,30 @@ AzureIoTResult_t azure_adu_workflow_process_update_request(azure_adu_workflow_t 
 }
 
 AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
+                                                  buffer_t *download_buffer,
+                                                  uint16_t chunck_size,
                                                   azure_adu_workflow_download_progress_callback_t callback,
                                                   void *callback_context)
 {
+    if (download_buffer == NULL || download_buffer->buffer == NULL)
+    {
+        ESP_LOGE(TAG_AZ_ADU_WKF, "download_buffer null");
+        return eAzureIoTErrorInvalidArgument;
+    }
+
+    if (download_buffer->length < chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES)
+    {
+        ESP_LOGE(TAG_AZ_ADU_WKF, "not enough memory on download_buffer: has %d needs %d", download_buffer->length, chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES);
+        return eAzureIoTErrorInvalidArgument;
+    }
+
     AzureIoTResult_t result = eAzureIoTSuccess;
 
     if ((result = azure_adu_send_response(context->adu_context,
                                           eAzureIoTADURequestDecisionAccept,
                                           context->property_version,
-                                          STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                          CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                          context->scratch_buffer->buffer,
+                                          context->scratch_buffer->length,
                                           NULL)) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending accept response: %d", result);
@@ -141,15 +163,19 @@ AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
                                              &context->update_request,
                                              eAzureIoTADUAgentStateDeploymentInProgress,
                                              NULL,
-                                             STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                             CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                             context->scratch_buffer->buffer,
+                                             context->scratch_buffer->length,
                                              NULL)) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure setting in progress state: %d", result);
         return result;
     }
 
-    if ((result = azure_adu_workflow_download_and_enable_image(context, callback, callback_context)) != eAzureIoTSuccess)
+    if ((result = azure_adu_workflow_download_and_enable_image(context,
+                                                               download_buffer,
+                                                               chunck_size,
+                                                               callback,
+                                                               callback_context)) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure downloading and enabling image: %d", result);
         return result;
@@ -188,8 +214,8 @@ AzureIoTResult_t azure_adu_workflow_reject_update(azure_adu_workflow_t *context)
     if ((result = azure_adu_send_response(context->adu_context,
                                           eAzureIoTADURequestDecisionReject,
                                           context->property_version,
-                                          STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                          CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                          context->scratch_buffer->buffer,
+                                          context->scratch_buffer->length,
                                           NULL)) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending reject response: %d", result);
@@ -223,8 +249,8 @@ static AzureIoTResult_t azure_adu_workflow_cancel_update(azure_adu_workflow_t *c
                                              &context->update_request,
                                              eAzureIoTADUAgentStateIdle,
                                              NULL,
-                                             STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                             CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                             context->scratch_buffer->buffer,
+                                             context->scratch_buffer->length,
                                              NULL)) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure sending idle state: %d", result);
@@ -257,6 +283,8 @@ static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre
 }
 
 static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context,
+                                                                     buffer_t *download_buffer,
+                                                                     uint16_t chunck_size,
                                                                      azure_adu_workflow_download_progress_callback_t callback,
                                                                      void *callback_context)
 {
@@ -271,7 +299,7 @@ static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_w
     }
 
     if ((result = azure_adu_file_parse_url(&context->update_request.pxFileUrls[0],
-                                           STATIC_MEMORY_ADU_SCRATCH_BUFFER,
+                                           context->scratch_buffer->buffer,
                                            &parsed_url)) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure parsing file url: %d", result);
@@ -285,9 +313,9 @@ static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_w
         .callback_context = callback_context};
 
     if ((result = azure_adu_file_download(&parsed_url,
-                                          STATIC_MEMORY_ADU_DOWNLOAD,
-                                          CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_HTTP_DOWNLOAD,
-                                          CONFIG_ESP32_IOT_AZURE_DU_HTTP_DOWNLOAD_CHUNCK_SIZE,
+                                          download_buffer->buffer,
+                                          download_buffer->length,
+                                          chunck_size,
                                           &download_callback_write_to_flash,
                                           &download_context,
                                           &image.image_size)) != eAzureIoTSuccess)
@@ -338,8 +366,8 @@ static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflo
                                                          &context->update_request,
                                                          eAzureIoTADUAgentStateDeploymentInProgress,
                                                          &update_results,
-                                                         STATIC_MEMORY_ADU_SCRATCH_BUFFER,
-                                                         CONFIG_ESP32_IOT_AZURE_DU_BUFFER_SIZE_SCRATCH,
+                                                         context->scratch_buffer->buffer,
+                                                         context->scratch_buffer->length,
                                                          NULL);
 
     if (result != eAzureIoTSuccess)

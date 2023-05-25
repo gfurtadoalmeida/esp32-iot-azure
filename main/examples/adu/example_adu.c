@@ -47,13 +47,19 @@ bool example_adu_run(const utf8_string_t *iot_hub_hostname,
     AzureIoTHubClientOptions_t *iot_client_options = NULL;
     AzureIoTADUClientOptions_t *adu_client_options = NULL;
     AzureIoTADUClientDeviceProperties_t adu_client_device_properties = {0};
-    buffer_t buffer = {
+    buffer_t iot_hub_mqtt_buffer = {
         .length = 4096,
         .buffer = (uint8_t *)malloc(4096)};
+    buffer_t adu_op_buffer = {
+        .length = 3072,
+        .buffer = (uint8_t *)malloc(3072)};
+    buffer_t adu_down_buffer = {
+        .length = 4096 + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES,
+        .buffer = (uint8_t *)malloc(4096 + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES)};
 
-    azure_iot_hub_context_t *iot = azure_iot_hub_create(&buffer);
+    azure_iot_hub_context_t *iot = azure_iot_hub_create(&iot_hub_mqtt_buffer);
     azure_adu_context_t *adu = azure_adu_create(iot);
-    azure_adu_workflow_t *adu_workflow = azure_adu_workflow_create(adu);
+    azure_adu_workflow_t *adu_workflow = azure_adu_workflow_create(adu, &adu_op_buffer);
 
     example_context_t *example_context = &EXAMPLE_CONTEXT;
     example_context->adu = adu;
@@ -156,7 +162,7 @@ bool example_adu_run(const utf8_string_t *iot_hub_hostname,
             ESP_LOGE(TAG_EX_ADU, "failure processing loop");
         }
 
-        if (azure_adu_workflow_has_update(adu_workflow) && azure_adu_workflow_accept_update(adu_workflow, NULL, NULL) != eAzureIoTSuccess)
+        if (azure_adu_workflow_has_update(adu_workflow) && azure_adu_workflow_accept_update(adu_workflow, &adu_down_buffer, 4096, NULL, NULL) != eAzureIoTSuccess)
         {
             ESP_LOGE(TAG_EX_ADU, "failure updating");
         }
@@ -174,7 +180,8 @@ CLEAN_UP:
     azure_iot_hub_deinit(iot);
     azure_iot_hub_free(iot);
 
-    free(buffer.buffer);
+    free(iot_hub_mqtt_buffer.buffer);
+    free(adu_op_buffer.buffer);
 
     return success;
 }
