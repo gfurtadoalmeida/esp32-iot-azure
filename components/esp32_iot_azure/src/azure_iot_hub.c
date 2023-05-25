@@ -16,15 +16,19 @@ struct azure_iot_hub_context_t
     AzureIoTTransportInterface_t transport_interface;
     AzureIoTHubClientOptions_t iot_client_options;
     esp_transport_handle_t transport;
+    uint8_t *mqtt_buffer;
+    uint32_t mqtt_buffer_length;
 };
 
-azure_iot_hub_context_t *azure_iot_hub_create()
+azure_iot_hub_context_t *azure_iot_hub_create(buffer_t *mqtt_buffer)
 {
     azure_iot_hub_context_t *context = (azure_iot_hub_context_t *)malloc(sizeof(azure_iot_hub_context_t));
 
     memset(context, 0, sizeof(azure_iot_hub_context_t));
 
     context->transport = transport_create_azure();
+    context->mqtt_buffer = mqtt_buffer->buffer;
+    context->mqtt_buffer_length = mqtt_buffer->length;
 
     return context;
 }
@@ -65,8 +69,8 @@ AzureIoTResult_t azure_iot_hub_init(azure_iot_hub_context_t *context,
                                   device_id,
                                   device_id_length,
                                   &context->iot_client_options,
-                                  STATIC_MEMORY_IOT_HUB,
-                                  CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_BUFFER_SIZE_IOT_HUB,
+                                  context->mqtt_buffer,
+                                  context->mqtt_buffer_length,
                                   &time_get_unix,
                                   &context->transport_interface);
 }

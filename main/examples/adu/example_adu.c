@@ -47,8 +47,11 @@ bool example_adu_run(const utf8_string_t *iot_hub_hostname,
     AzureIoTHubClientOptions_t *iot_client_options = NULL;
     AzureIoTADUClientOptions_t *adu_client_options = NULL;
     AzureIoTADUClientDeviceProperties_t adu_client_device_properties = {0};
+    buffer_t buffer = {
+        .length = 4096,
+        .buffer = (uint8_t *)malloc(4096)};
 
-    azure_iot_hub_context_t *iot = azure_iot_hub_create();
+    azure_iot_hub_context_t *iot = azure_iot_hub_create(&buffer);
     azure_adu_context_t *adu = azure_adu_create(iot);
     azure_adu_workflow_t *adu_workflow = azure_adu_workflow_create(adu);
 
@@ -170,6 +173,8 @@ CLEAN_UP:
     azure_iot_hub_disconnect(iot);
     azure_iot_hub_deinit(iot);
     azure_iot_hub_free(iot);
+
+    free(buffer.buffer);
 
     return success;
 }

@@ -20,9 +20,10 @@ extern "C"
     /**
      * @brief Create an Azure IoT Hub Client context.
      * @note The context must be released by @ref azure_iot_hub_free.
+     * @param[in] mqtt_buffer Buffer for MQTT operations. Minimum of 4096 bytes are needed.
      * @return @ref azure_iot_hub_context_t on success or null on failure.
      */
-    azure_iot_hub_context_t *azure_iot_hub_create();
+    azure_iot_hub_context_t *azure_iot_hub_create(buffer_t *mqtt_buffer);
 
     /**
      * @brief Get the @ref AzureIoTHubClient_t used by the \p context.

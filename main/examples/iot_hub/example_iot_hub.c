@@ -41,7 +41,11 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
 {
     bool success = false;
     AzureIoTHubClientOptions_t *iot_client_options = NULL;
-    azure_iot_hub_context_t *iot = azure_iot_hub_create();
+    buffer_t buffer = {
+        .length = 4096,
+        .buffer = (uint8_t *)malloc(4096)};
+
+    azure_iot_hub_context_t *iot = azure_iot_hub_create(&buffer);
 
     example_context_t *example_context = &EXAMPLE_CONTEXT;
     example_context->iot_hub = iot;
