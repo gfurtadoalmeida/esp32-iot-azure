@@ -15,7 +15,7 @@ struct azure_iot_hub_context_t
     AzureIoTTransportInterface_t transport_interface;
     AzureIoTHubClientOptions_t iot_client_options;
     esp_transport_handle_t transport;
-    buffer_t *mqtt_buffer
+    buffer_t *mqtt_buffer;
 };
 
 azure_iot_hub_context_t *azure_iot_hub_create(buffer_t *mqtt_buffer)
