@@ -40,18 +40,15 @@ Build options:
 
 * Compile optimized for size (`CONFIG_COMPILER_OPTIMIZATION_SIZE=y`).
 * Error logging (`CONFIG_LOG_DEFAULT_LEVEL_ERROR=y`).
-* Merged buffers (`CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_MERGE_IOT_HUB_DPS_BUFFERS=y`).
+* Azure Cloud RSA certificate: (`CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA=y`)
 
-This chart include the following configurable memory buffers, on DRAM:
+This chart already includes the Azure IoT certificate and Device Update root key sizes.
 
-* IoT Hub + DPS: 5.12 KB
-* Device Update Workflow: 8.19 KB
-
-| | DRAM | Flash (code,rodata) |
+| | DRAM (bss,data) | Flash (code,rodata) |
 |-|:-:|:-:|
-| IoT Hub + PnP + DPS + ADU + ADU workflow | buffers: 13.31 KB <br/> bss,data: 842 B | 97.31 KB |
-| IoT Hub + PnP + DPS | buffers: 5.12 KB <br/> bss,data: 24 B | 54.62 KB |
-| IoT Hub + PnP | buffers: 5.12 KB <br/> bss,data: 20 B | 44.30 KB |
+| IoT Hub + PnP + DPS + ADU + ADU workflow | 874 B | 97.41 KB |
+| IoT Hub + PnP + DPS | 12 B | 54.73 KB |
+| IoT Hub + PnP | 12 B | 44.37 KB |
 
 ## Example: Getting Device and Hub Info from DPS
 
