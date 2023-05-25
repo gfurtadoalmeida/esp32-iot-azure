@@ -17,19 +17,23 @@ struct azure_dps_context_t
     AzureIoTTransportInterface_t transport_interface;
     AzureIoTProvisioningClientOptions_t dps_client_options;
     esp_transport_handle_t transport;
-    uint8_t *mqtt_buffer;
-    uint32_t mqtt_buffer_length;
+    buffer_t *mqtt_buffer;
 };
 
 azure_dps_context_t *azure_dps_create(buffer_t *mqtt_buffer)
 {
+    if (mqtt_buffer == NULL || mqtt_buffer->buffer == NULL)
+    {
+        ESP_LOGE(TAG_AZ_DPS, "mqtt_buffer null");
+        return NULL;
+    }
+
     azure_dps_context_t *context = (azure_dps_context_t *)malloc(sizeof(azure_dps_context_t));
 
     memset(context, 0, sizeof(azure_dps_context_t));
 
     context->transport = transport_create_azure();
-    context->mqtt_buffer = mqtt_buffer->buffer;
-    context->mqtt_buffer_length = mqtt_buffer->length;
+    context->mqtt_buffer = mqtt_buffer;
 
     return context;
 }
@@ -63,8 +67,8 @@ AzureIoTResult_t azure_dps_init(azure_dps_context_t *context,
                                            registration_id,
                                            registration_id_length,
                                            &context->dps_client_options,
-                                           context->mqtt_buffer,
-                                           context->mqtt_buffer_length,
+                                           context->mqtt_buffer->buffer,
+                                           context->mqtt_buffer->length,
                                            &time_get_unix,
                                            &context->transport_interface);
 }
