@@ -63,12 +63,12 @@ void app_main(void)
     // 2. Connect to WiFi.
     // 3. Set up SNTP.
 
-    utf8_string_t symmetric_key = UTF8_STRING_FROM_LITERAL("you_device_enrollment_symmetric_key");
-    utf8_string_t registration_id = UTF8_STRING_FROM_LITERAL("your_device_registration_id");
+    buffer_t symmetric_key = BUFFER_FROM_LITERAL("you_device_enrollment_symmetric_key");
+    buffer_t registration_id = BUFFER_FROM_LITERAL("your_device_registration_id");
 
-    utf8_string_t registration_payload = UTF8_STRING_FOR_DPS_PNP_REGISTRATION_PAYLOAD();
-    utf8_string_t hostname = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_CONST_HOSTNAME_MAX_LENGTH);
-    utf8_string_t device_id = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_CONST_DEVICE_ID_MAX_LENGTH);
+    buffer_t registration_payload = BUFFER_FOR_DPS_PNP_REGISTRATION_PAYLOAD();
+    buffer_t hostname = BUFFER_WITH_FIXED_LENGTH(AZURE_CONST_HOSTNAME_MAX_LENGTH);
+    buffer_t device_id = BUFFER_WITH_FIXED_LENGTH(AZURE_CONST_DEVICE_ID_MAX_LENGTH);
 
     azure_iot_sdk_init();
 

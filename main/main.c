@@ -15,17 +15,17 @@
 static const char TAG[] = "main";
 static void initialize_infra();
 
-static char WIFI_SSID[] = "";
-static char WIFI_PASSWORD[] = "";
-static utf8_string_t DEVICE_SYMMETRIC_KEY = UTF8_STRING_FROM_LITERAL("");
-static utf8_string_t DEVICE_REGISTRATION_ID = UTF8_STRING_FROM_LITERAL("");
+static char WIFI_SSID[] = "Yggdrasil";
+static char WIFI_PASSWORD[] = "gfa18021988";
+static buffer_t DEVICE_SYMMETRIC_KEY = BUFFER_FROM_LITERAL("w5vkMc/rp+yMfKzFgAgqaxmOH5L7JKYYnbQSLMfAUkfeUEhHFErNIy5fRSBZuD9N06pzOr6EnArVx3tBm+Y9wg==");
+static buffer_t DEVICE_REGISTRATION_ID = BUFFER_FROM_LITERAL("test-device");
 
 void app_main(void)
 {
     initialize_infra();
 
-    utf8_string_t hostname = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_CONST_HOSTNAME_MAX_LENGTH);
-    utf8_string_t device_id = UTF8_STRING_WITH_FIXED_LENGTH(AZURE_CONST_DEVICE_ID_MAX_LENGTH);
+    buffer_t hostname = BUFFER_WITH_FIXED_LENGTH(AZURE_CONST_HOSTNAME_MAX_LENGTH);
+    buffer_t device_id = BUFFER_WITH_FIXED_LENGTH(AZURE_CONST_DEVICE_ID_MAX_LENGTH);
 
     azure_iot_sdk_init();
 
@@ -39,11 +39,11 @@ void app_main(void)
     // To run example_adu_run example you can:
     //   A) comment this run.
     //   B) send a "restart" command.
-    if (!example_iot_hub_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
-    {
-        ESP_LOGE(TAG, "failure running example: example_iot_hub_run");
-        abort();
-    }
+    // if (!example_iot_hub_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
+    // {
+    //     ESP_LOGE(TAG, "failure running example: example_iot_hub_run");
+    //     abort();
+    // }
 
     if (!example_adu_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
     {

@@ -16,7 +16,7 @@ typedef struct
     azure_iot_hub_context_t *iot_hub;
     azure_adu_context_t *adu;
     azure_adu_workflow_t *adu_workflow;
-    utf8_string_t scratch_buffer;
+    buffer_t scratch_buffer;
     temperature_controller_status_t device_status;
     uint8_t display_brightness;
     bool restart_command_called;
@@ -27,7 +27,7 @@ static const char TAG_EX_ADU[] = "EX_IOT_ADU";
 static example_context_t EXAMPLE_CONTEXT = {
     .adu = NULL,
     .iot_hub = NULL,
-    .scratch_buffer = UTF8_STRING_WITH_FIXED_LENGTH(700),
+    .scratch_buffer = BUFFER_WITH_FIXED_LENGTH(700),
     .device_status = TEMP_CONTROLLER_STATUS_NORMAL,
     .display_brightness = 50,
     .restart_command_called = false};
@@ -39,9 +39,9 @@ static AzureIoTResult_t device_report_initial_state(example_context_t *context);
 static AzureIoTResult_t device_change_state(example_context_t *context, const AzureIoTHubClientPropertiesResponse_t *message, uint32_t *version);
 static AzureIoTResult_t device_report_state_changed(example_context_t *context, uint32_t version);
 
-bool example_adu_run(const utf8_string_t *iot_hub_hostname,
-                     const utf8_string_t *device_id,
-                     const utf8_string_t *device_symmetric_key)
+bool example_adu_run(const buffer_t *iot_hub_hostname,
+                     const buffer_t *device_id,
+                     const buffer_t *device_symmetric_key)
 {
     bool success = false;
     AzureIoTHubClientOptions_t *iot_client_options = NULL;
@@ -142,7 +142,7 @@ bool example_adu_run(const utf8_string_t *iot_hub_hostname,
         goto CLEAN_UP;
     }
 
-    utf8_string_t telemetry_payload = UTF8_STRING_FROM_LITERAL("{\"temp\":25}");
+    buffer_t telemetry_payload = BUFFER_FROM_LITERAL("{\"temp\":25}");
 
     while (true)
     {

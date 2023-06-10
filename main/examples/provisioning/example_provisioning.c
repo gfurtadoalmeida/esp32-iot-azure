@@ -4,15 +4,15 @@
 
 static const char TAG_EX_DPS[] = "EX_DPS";
 
-bool example_dps_run(const utf8_string_t *device_symmetric_key,
-                     const utf8_string_t *device_registration_id,
-                     utf8_string_t *iot_hub_hostname,
-                     utf8_string_t *device_id)
+bool example_dps_run(const buffer_t *device_symmetric_key,
+                     const buffer_t *device_registration_id,
+                     buffer_t *iot_hub_hostname,
+                     buffer_t *device_id)
 {
     bool success = false;
 
     AzureIoTProvisioningClientOptions_t *dps_client_options = NULL;
-    utf8_string_t registration_payload = UTF8_STRING_FOR_DPS_PNP_REGISTRATION_PAYLOAD();
+    buffer_t registration_payload = BUFFER_FOR_DPS_PNP_REGISTRATION_PAYLOAD();
     buffer_t buffer = {
         .length = 2048,
         .buffer = (uint8_t *)malloc(2048)};

@@ -72,45 +72,6 @@ extern "C"
  */
 #define AZ_CHECK_RETURN_LAST() return azure_result;
 
-    // ============
-    // UTF-8 STRING
-    // ============
-
-/**
- * @brief Create an @ref utf8_string_t from a literal.
- * @note The length will exclude the `NULL` terminator.
- * @param text Text literal.
- * @example utf8_string_t string = UTF8_STRING_FROM_CONST("my_value");
- */
-#define UTF8_STRING_FROM_LITERAL(text) \
-    {                                  \
-        .length = sizeof(text) - 1,    \
-        .buffer = (uint8_t *)text      \
-    }
-
-/**
- * @brief Create an @ref utf8_string_t with a fixed size buffer.
- * @param buffer_length Length of the buffer being allocated on stack.
- * @example utf8_string_t string = UTF8_STRING_WITH_FIXED_LENGTH(128);
- */
-#define UTF8_STRING_WITH_FIXED_LENGTH(buffer_length) \
-    {                                                \
-        .length = buffer_length,                     \
-        .buffer = (uint8_t[buffer_length])           \
-        {                                            \
-        }                                            \
-    }
-
-    /**
-     * @typedef utf8_string_t
-     * @brief Represents a null-terminated, UTF-8 encoded, string.
-     */
-    typedef struct
-    {
-        uint32_t length; /** @brief String length, excluding the `NULL` terminator. */
-        uint8_t *buffer; /** @brief UTF-8 string characters. */
-    } utf8_string_t;
-
     // ======
     // BUFFER
     // ======
@@ -124,6 +85,31 @@ extern "C"
         uint32_t length; /** @brief Buffer length. */
         uint8_t *buffer; /** @brief Buffer bytes. */
     } buffer_t;
+
+/**
+ * @brief Create an @ref buffer_t from a literal.
+ * @note The length will exclude the `NULL` terminator.
+ * @param text Text literal.
+ * @example buffer_t buffer = BUFFER_FROM_CONST("my_value");
+ */
+#define BUFFER_FROM_LITERAL(text)   \
+    {                               \
+        .length = sizeof(text) - 1, \
+        .buffer = (uint8_t *)text   \
+    }
+
+/**
+ * @brief Create an @ref buffer_t with a fixed size.
+ * @param buffer_length Length of the buffer being allocated on stack.
+ * @example buffer_t buffer = BUFFER_WITH_FIXED_LENGTH(128);
+ */
+#define BUFFER_WITH_FIXED_LENGTH(buffer_length) \
+    {                                           \
+        .length = buffer_length,                \
+        .buffer = (uint8_t[buffer_length])      \
+        {                                       \
+        }                                       \
+    }
 
     // ==================
     // CLIENT CERTIFICATE

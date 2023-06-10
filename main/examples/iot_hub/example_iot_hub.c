@@ -12,7 +12,7 @@
 typedef struct
 {
     azure_iot_hub_context_t *iot_hub;
-    utf8_string_t scratch_buffer;
+    buffer_t scratch_buffer;
     temperature_controller_status_t device_status;
     uint8_t display_brightness;
     bool restart_command_called;
@@ -22,7 +22,7 @@ static const char TAG_EX_IOT[] = "EX_IOT_HUB";
 
 static example_context_t EXAMPLE_CONTEXT = {
     .iot_hub = NULL,
-    .scratch_buffer = UTF8_STRING_WITH_FIXED_LENGTH(700),
+    .scratch_buffer = BUFFER_WITH_FIXED_LENGTH(700),
     .device_status = TEMP_CONTROLLER_STATUS_NORMAL,
     .display_brightness = 50,
     .restart_command_called = false};
@@ -35,9 +35,9 @@ static AzureIoTResult_t device_report_initial_state(example_context_t *context);
 static AzureIoTResult_t device_change_state(example_context_t *context, const AzureIoTHubClientPropertiesResponse_t *message, uint32_t *version);
 static AzureIoTResult_t device_report_state_changed(example_context_t *context, uint32_t version);
 
-bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
-                         const utf8_string_t *device_id,
-                         const utf8_string_t *device_symmetric_key)
+bool example_iot_hub_run(const buffer_t *iot_hub_hostname,
+                         const buffer_t *device_id,
+                         const buffer_t *device_symmetric_key)
 {
     bool success = false;
     AzureIoTHubClientOptions_t *iot_client_options = NULL;
@@ -113,7 +113,7 @@ bool example_iot_hub_run(const utf8_string_t *iot_hub_hostname,
         goto CLEAN_UP;
     }
 
-    utf8_string_t telemetry_payload = UTF8_STRING_WITH_FIXED_LENGTH(15);
+    buffer_t telemetry_payload = BUFFER_WITH_FIXED_LENGTH(15);
 
     while (!example_context->restart_command_called)
     {
@@ -184,7 +184,7 @@ static void callback_cloud_command_subscription(const AzureIoTHubClientCommandRe
         return;
     }
 
-    utf8_string_t error_payload = UTF8_STRING_FROM_LITERAL("{\"message\":\"command unknown\"}");
+    buffer_t error_payload = BUFFER_FROM_LITERAL("{\"message\":\"command unknown\"}");
 
     if (azure_iot_hub_send_command_response(context->iot_hub, message, error_payload.buffer, error_payload.length, 404) != eAzureIoTSuccess)
     {

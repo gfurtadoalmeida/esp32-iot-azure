@@ -17,10 +17,10 @@ extern "C"
      * @param[in,out] device_id Device Id buffer with capacity for AZURE_CONST_DEVICE_ID_MAX_LENGTH chars.
      * @return Success or failure.
      */
-    bool example_dps_run(const utf8_string_t *device_symmetric_key,
-                         const utf8_string_t *device_registration_id,
-                         utf8_string_t *iot_hub_hostname,
-                         utf8_string_t *device_id);
+    bool example_dps_run(const buffer_t *device_symmetric_key,
+                         const buffer_t *device_registration_id,
+                         buffer_t *iot_hub_hostname,
+                         buffer_t *device_id);
 
 #ifdef __cplusplus
 }

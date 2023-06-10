@@ -16,9 +16,9 @@ extern "C"
      * @param[in] device_symmetric_key Device symmetric key.
      * @return Success or failure.
      */
-    bool example_adu_run(const utf8_string_t *iot_hub_hostname,
-                         const utf8_string_t *device_id,
-                         const utf8_string_t *device_symmetric_key);
+    bool example_adu_run(const buffer_t *iot_hub_hostname,
+                         const buffer_t *device_id,
+                         const buffer_t *device_symmetric_key);
 
 #ifdef __cplusplus
 }

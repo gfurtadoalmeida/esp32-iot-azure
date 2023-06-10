@@ -19,12 +19,12 @@ extern "C"
 #define AZURE_DPS_SIZEOF_PNP_REGISTRATION_PAYLOAD (AZURE_JSON_SIZEOF_OBJECT_EMPTY + AZURE_JSON_SIZEOF_OBJECT_PROPERTY("modelId", sizeof(CONFIG_ESP32_IOT_AZURE_DEVICE_MODEL_ID) - 1))
 
 /**
- * @brief Create an @ref utf8_string_t with a buffer enough for an
+ * @brief Create an @ref buffer_t with enough space for an
  * Azure IoT Plug and Play registration payload containg just the
  * configured "modelId" property.
  * @note Helper for @ref azure_dps_create_pnp_registration_payload.
  */
-#define UTF8_STRING_FOR_DPS_PNP_REGISTRATION_PAYLOAD() UTF8_STRING_WITH_FIXED_LENGTH(AZURE_DPS_SIZEOF_PNP_REGISTRATION_PAYLOAD)
+#define BUFFER_FOR_DPS_PNP_REGISTRATION_PAYLOAD() BUFFER_WITH_FIXED_LENGTH(AZURE_DPS_SIZEOF_PNP_REGISTRATION_PAYLOAD)
 
     /**
      * @brief Create an Azure IoT Plug and Play registration payload, with just the device model id, that can be passed
