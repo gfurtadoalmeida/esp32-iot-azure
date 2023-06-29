@@ -15,10 +15,10 @@
 static const char TAG[] = "main";
 static void initialize_infra();
 
-static char WIFI_SSID[] = "Yggdrasil";
-static char WIFI_PASSWORD[] = "gfa18021988";
-static buffer_t DEVICE_SYMMETRIC_KEY = BUFFER_FROM_LITERAL("w5vkMc/rp+yMfKzFgAgqaxmOH5L7JKYYnbQSLMfAUkfeUEhHFErNIy5fRSBZuD9N06pzOr6EnArVx3tBm+Y9wg==");
-static buffer_t DEVICE_REGISTRATION_ID = BUFFER_FROM_LITERAL("test-device");
+static char WIFI_SSID[] = "";
+static char WIFI_PASSWORD[] = "";
+static buffer_t DEVICE_SYMMETRIC_KEY = BUFFER_FROM_LITERAL("");
+static buffer_t DEVICE_REGISTRATION_ID = BUFFER_FROM_LITERAL("");
 
 void app_main(void)
 {
@@ -39,17 +39,17 @@ void app_main(void)
     // To run example_adu_run example you can:
     //   A) comment this run.
     //   B) send a "restart" command.
-    // if (!example_iot_hub_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
-    // {
-    //     ESP_LOGE(TAG, "failure running example: example_iot_hub_run");
-    //     abort();
-    // }
-
-    if (!example_adu_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
+    if (!example_iot_hub_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
     {
-        ESP_LOGE(TAG, "failure running example: example_adu_run");
+        ESP_LOGE(TAG, "failure running example: example_iot_hub_run");
         abort();
     }
+
+    // if (!example_adu_run(&hostname, &device_id, &DEVICE_SYMMETRIC_KEY))
+    // {
+    //     ESP_LOGE(TAG, "failure running example: example_adu_run");
+    //     abort();
+    // }
 
     azure_iot_sdk_deinit();
 

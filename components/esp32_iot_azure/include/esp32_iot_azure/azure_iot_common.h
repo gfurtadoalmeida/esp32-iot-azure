@@ -14,31 +14,37 @@ extern "C"
 
 /**
  * @brief IoT Hub hostname max length.
+ * @note Does not include null termination.
  */
 #define AZURE_CONST_HOSTNAME_MAX_LENGTH 128U
 
 /**
  * @brief IoT device id max length.
+ * @note Does not include null termination.
  */
 #define AZURE_CONST_DEVICE_ID_MAX_LENGTH 128U
 
 /**
  * @brief IoT device registration id max length.
+ * @note Does not include null termination.
  */
 #define AZURE_CONST_REGISTRATION_ID_MAX_LENGTH 128U
 
 /**
  * @brief IoT device symmetric key max length.
+ * @note Does not include null termination.
  */
 #define AZURE_CONST_SYMMETRIC_KEY_MAX_LENGTH 128U
 
 /**
  * @brief IoT device model id max length.
+ * @note Does not include null termination.
  */
 #define AZURE_CONST_MODEL_ID_MAX_LENGTH 128U
 
 /**
  * @brief IoT device component name max length.
+ * @note Does not include null termination.
  */
 #define AZURE_CONST_COMPONENT_NAME_MAX_LENGTH 64U
 
@@ -103,12 +109,10 @@ extern "C"
  * @param buffer_length Length of the buffer being allocated on stack.
  * @example buffer_t buffer = BUFFER_WITH_FIXED_LENGTH(128);
  */
-#define BUFFER_WITH_FIXED_LENGTH(buffer_length) \
-    {                                           \
-        .length = buffer_length,                \
-        .buffer = (uint8_t[buffer_length])      \
-        {                                       \
-        }                                       \
+#define BUFFER_WITH_FIXED_LENGTH(buffer_length)  \
+    {                                            \
+        .length = buffer_length,                 \
+        .buffer = (uint8_t[buffer_length]) { 0 } \
     }
 
     // ==================

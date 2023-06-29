@@ -324,7 +324,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
             {
                 ESP_LOGW(TAG_EX_IOT, "unknown root property (we expect a component): %.*s", component_name_length, component_name);
 
-                AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader));
+                AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader))
 
                 continue;
             }
@@ -335,7 +335,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
             {
                 ESP_LOGW(TAG_EX_IOT, "unknown component: %.*s", component_name_length, component_name);
 
-                AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader));
+                AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader))
 
                 continue;
             }
