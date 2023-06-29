@@ -54,16 +54,20 @@ AzureIoTResult_t azure_dps_options_init(azure_dps_context_t *context, AzureIoTPr
 }
 
 AzureIoTResult_t azure_dps_init(azure_dps_context_t *context,
+                                const uint8_t *hostname,
+                                uint32_t hostname_length,
+                                const uint8_t *scope_id,
+                                uint32_t scope_id_length,
                                 const uint8_t *registration_id,
                                 uint32_t registration_id_length)
 {
     azure_transport_interface_init(context->transport, &context->transport_interface);
 
     return AzureIoTProvisioningClient_Init(&context->dps_client,
-                                           (const uint8_t *)CONFIG_ESP32_IOT_AZURE_DPS_SERVER_HOSTNAME,
-                                           sizeof(CONFIG_ESP32_IOT_AZURE_DPS_SERVER_HOSTNAME) - 1,
-                                           (const uint8_t *)CONFIG_ESP32_IOT_AZURE_DPS_SCOPE_ID,
-                                           sizeof(CONFIG_ESP32_IOT_AZURE_DPS_SCOPE_ID) - 1,
+                                           hostname,
+                                           hostname_length,
+                                           scope_id,
+                                           scope_id_length,
                                            registration_id,
                                            registration_id_length,
                                            &context->dps_client_options,
@@ -101,7 +105,7 @@ AzureIoTResult_t azure_dps_set_registration_payload(azure_dps_context_t *context
 AzureIoTResult_t azure_dps_register(azure_dps_context_t *context)
 {
     if (transport_connect(context->transport,
-                          CONFIG_ESP32_IOT_AZURE_DPS_SERVER_HOSTNAME,
+                          (const char *)context->dps_client._internal.pucEndpoint,
                           CONFIG_ESP32_IOT_AZURE_HUB_SERVER_PORT,
                           CONFIG_ESP32_IOT_AZURE_DPS_CONNECT_TIMEOUT_MS) != TRANSPORT_STATUS_SUCCESS)
     {

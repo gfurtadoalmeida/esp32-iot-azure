@@ -38,11 +38,19 @@ extern "C"
      * @brief Initialize the Azure IoT Provisioning Client with a
      * given registration id.
      * @param[in] context DPS context.
+     * @param[in] hostname Hostname.
+     * @param[in] hostname_length Hostname length.
+     * @param[in] scope_id Scope id.
+     * @param[in] scope_id_length Scope id length.
      * @param[in] registration_id Device registration id.
      * @param[in] registration_id_length Device registration id length.
      * @return @ref AzureIoTResult_t with the result of the operation.
      */
     AzureIoTResult_t azure_dps_init(azure_dps_context_t *context,
+                                    const uint8_t *hostname,
+                                    uint32_t hostname_length,
+                                    const uint8_t *scope_id,
+                                    uint32_t scope_id_length,
                                     const uint8_t *registration_id,
                                     uint32_t registration_id_length);
 
