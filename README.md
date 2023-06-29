@@ -79,7 +79,7 @@ void app_main(void)
 
     azure_dps_context_t *dps = azure_dps_create(&buffer);
     azure_dps_options_init(dps, &dps_client_options);
-    azure_dps_init(dps, registration_id->buffer, registration_id->length);
+    azure_dps_init_default(dps, registration_id->buffer, registration_id->length);
     azure_dps_auth_set_symmetric_key(dps, symmetric_key->buffer, symmetric_key->length);
     azure_dps_create_pnp_registration_payload(registration_payload.buffer, &registration_payload.length);
     azure_dps_set_registration_payload(dps, registration_payload.buffer, registration_payload.length);

@@ -4,6 +4,19 @@
 
 static const char TAG_AZ_DPS_EXT[] = "AZ_DPS_EXT";
 
+AzureIoTResult_t azure_dps_init_default(azure_dps_context_t *context,
+                                        const uint8_t *registration_id,
+                                        uint32_t registration_id_length)
+{
+    return azure_dps_init(context,
+                          (const uint8_t *)CONFIG_ESP32_IOT_AZURE_DPS_SERVER_HOSTNAME,
+                          sizeof(CONFIG_ESP32_IOT_AZURE_DPS_SERVER_HOSTNAME) - 1,
+                          (const uint8_t *)CONFIG_ESP32_IOT_AZURE_DPS_SCOPE_ID,
+                          sizeof(CONFIG_ESP32_IOT_AZURE_DPS_SCOPE_ID) - 1,
+                          registration_id,
+                          registration_id_length);
+}
+
 AzureIoTResult_t azure_dps_create_pnp_registration_payload(uint8_t *registration_payload,
                                                            uint32_t *registration_payload_length)
 {

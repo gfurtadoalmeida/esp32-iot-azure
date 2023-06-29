@@ -25,7 +25,7 @@ bool example_dps_run(const buffer_t *device_symmetric_key,
         goto CLEAN_UP;
     }
 
-    if (azure_dps_init(dps, device_registration_id->buffer, device_registration_id->length) != eAzureIoTSuccess)
+    if (azure_dps_init_default(dps, device_registration_id->buffer, device_registration_id->length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_DPS, "failure initializing");
         goto CLEAN_UP;
