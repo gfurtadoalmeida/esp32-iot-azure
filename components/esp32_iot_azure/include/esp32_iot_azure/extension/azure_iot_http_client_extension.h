@@ -2,6 +2,7 @@
 #define __ESP32_IOT_AZURE_IOT_HTTP_CLIENT_EXT_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "esp32_iot_azure/azure_iot_http_client.h"
 
 #ifdef __cplusplus

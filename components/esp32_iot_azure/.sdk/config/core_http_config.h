@@ -38,7 +38,7 @@
 #define __CORE_HTTP_CONFIG_H__
 
 #include "azure_iot_log.h"
-#include "config.h"
+#include "../../private_include/config.h"
 
 #ifdef __cplusplus
 extern "C"

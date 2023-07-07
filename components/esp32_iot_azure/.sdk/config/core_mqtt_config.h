@@ -6,7 +6,7 @@
 #ifndef __CORE_MQTT_CONFIG_H__
 #define __CORE_MQTT_CONFIG_H__
 
-#include "config.h"
+#include "../../private_include/config.h"
 
 #ifdef __cplusplus
 extern "C"

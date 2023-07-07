@@ -71,6 +71,8 @@ idf_component_register(
         "private_include"
     REQUIRES
         freertos
+        esp_event
+        esp_wifi
         mbedtls
         tcp_transport
         app_update

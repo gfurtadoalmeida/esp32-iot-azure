@@ -73,8 +73,8 @@ CLEAN_UP:
 
     free(buffer.buffer);
 
-    ESP_LOGI(TAG_EX_DPS, "hostname: %.*s", iot_hub_hostname->length, (char *)iot_hub_hostname->buffer);
-    ESP_LOGI(TAG_EX_DPS, "device_id: %.*s", device_id->length, (char *)device_id->buffer);
+    ESP_LOGI(TAG_EX_DPS, "hostname: %.*s", (int)iot_hub_hostname->length, (char *)iot_hub_hostname->buffer);
+    ESP_LOGI(TAG_EX_DPS, "device_id: %.*s", (int)device_id->length, (char *)device_id->buffer);
 
     return success;
 }

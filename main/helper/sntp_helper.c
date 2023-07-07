@@ -45,7 +45,7 @@ bool helper_sntp_deinit()
 
 static void handle_sntp_event(const struct timeval *time_received)
 {
-    ESP_LOGI(TAG_HELPER_SNTP, "got time: %ld", time_received->tv_sec);
+    ESP_LOGI(TAG_HELPER_SNTP, "got time: %lld", time_received->tv_sec);
 
     s_got_time = true;
 }

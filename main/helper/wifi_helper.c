@@ -95,7 +95,7 @@ static void handle_wifi_event(void const *event_handler_arg, esp_event_base_t ev
     }
     else if (event_base == WIFI_EVENT)
     {
-        system_event_sta_disconnected_t *disconnect_data = (system_event_sta_disconnected_t *)event_data;
+        wifi_event_sta_disconnected_t *disconnect_data = (wifi_event_sta_disconnected_t *)event_data;
 
         ESP_LOGE(TAG_HELPER_WIFI, "disconnected from: %s", disconnect_data->ssid);
         ESP_LOGE(TAG_HELPER_WIFI, "disconnection reason: %d", disconnect_data->reason);

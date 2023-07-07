@@ -6,6 +6,8 @@ message("Azure FreeRTOS: added SDK and IoT Hub")
 idf_component_get_property(FREERTOS_DIR freertos COMPONENT_DIR)
 idf_component_get_property(MBEDTLS_DIR mbedtls COMPONENT_DIR)
 
+set(FREERTOS_DIR ${FREERTOS_DIR}/FreeRTOS-Kernel)
+
 set(AZURE_IOT_MIDDLEWARE_FREERTOS_INCLUDE_DIRS
     ${MBEDTLS_DIR}/mbedtls/include
     ${FREERTOS_DIR}/include/freertos

@@ -196,7 +196,7 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
     uint32_t version = 0;
 
     ESP_LOGI(TAG_EX_ADU, "message status: %d", message->xMessageStatus);
-    ESP_LOGI(TAG_EX_ADU, "message length: %d", message->ulPayloadLength);
+    ESP_LOGI(TAG_EX_ADU, "message length: %lu", message->ulPayloadLength);
 
     switch (message->xMessageType)
     {
@@ -242,7 +242,7 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
 
         if (message->xMessageStatus != eAzureIoTStatusNoContent)
         {
-            ESP_LOGW(TAG_EX_ADU, "failure reporting properties: %.*s", message->ulPayloadLength, (const char *)message->pvMessagePayload);
+            ESP_LOGW(TAG_EX_ADU, "failure reporting properties: %.*s", (int)message->ulPayloadLength, (const char *)message->pvMessagePayload);
         }
         break;
 
@@ -304,7 +304,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
         const uint8_t *component_name = NULL;
         uint32_t component_name_length = 0;
 
-        ESP_LOGI(TAG_EX_ADU, "desired property version: %d", *version);
+        ESP_LOGI(TAG_EX_ADU, "desired property version: %lu", *version);
 
         // Reset JSON reader to the beginning.
         AZ_CHECK(AzureIoTJSONReader_Init(&json_reader, message->pvMessagePayload, message->ulPayloadLength))
@@ -320,7 +320,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
             // We have to skip over the root property and value to continue iterating.
             if (component_name_length == 0)
             {
-                ESP_LOGW(TAG_EX_ADU, "unknown root property (we expect a component): %.*s", component_name_length, component_name);
+                ESP_LOGW(TAG_EX_ADU, "unknown root property (we expect a component): %.*s", (int)component_name_length, component_name);
 
                 AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader))
 
@@ -340,7 +340,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
             // We have to skip over the root property and value to continue iterating.
             if (strncasecmp(TEMP_CTRL_CMP_DISPLAY_NAME, (const char *)component_name, sizeof_l(TEMP_CTRL_CMP_DISPLAY_NAME)) != 0)
             {
-                ESP_LOGW(TAG_EX_ADU, "unknown component: %.*s", component_name_length, component_name);
+                ESP_LOGW(TAG_EX_ADU, "unknown component: %.*s", (int)component_name_length, component_name);
 
                 AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader))
 

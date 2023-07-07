@@ -141,7 +141,7 @@ AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
 
     if (download_buffer->length < chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES)
     {
-        ESP_LOGE(TAG_AZ_ADU_WKF, "not enough memory on download_buffer: has %d needs %d", download_buffer->length, chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES);
+        ESP_LOGE(TAG_AZ_ADU_WKF, "not enough memory on download_buffer: has %lu needs %u", download_buffer->length, chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES);
         return eAzureIoTErrorInvalidArgument;
     }
 
@@ -272,7 +272,7 @@ static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre
     if (free_space < context->update_request.xUpdateManifest.pxFiles[0].llSizeInBytes)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF,
-                 "not flash space: has %d but needs %d",
+                 "not flash space: has %ld but needs %ld",
                  (int32_t)free_space,
                  (int32_t)context->update_request.xUpdateManifest.pxFiles[0].llSizeInBytes);
 

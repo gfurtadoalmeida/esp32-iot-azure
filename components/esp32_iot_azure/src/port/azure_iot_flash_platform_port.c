@@ -47,7 +47,7 @@ AzureIoTResult_t AzureIoTPlatform_WriteBlock(AzureADUImage_t *const pxAduImage,
                                              uint8_t *const pData,
                                              uint32_t ulBlockSize)
 {
-    esp_err_t result = esp_partition_write(pxAduImage->partition, offset, pData, ulBlockSize);
+    esp_err_t result = esp_partition_write(pxAduImage->partition, (size_t)offset, pData, (size_t)ulBlockSize);
 
     if (result != ESP_OK)
     {
@@ -64,9 +64,9 @@ AzureIoTResult_t AzureIoTPlatform_VerifyImage(AzureADUImage_t *const pxAduImage,
 {
     uint8_t decoded_hash[AZURE_IOT_SHA_256_SIZE];
     uint8_t calculated_hash[AZURE_IOT_SHA_256_SIZE];
-    uint32_t base64_decoded_length;
+    size_t base64_decoded_length;
 
-    CMP_LOGI(TAG_FLASH_PORT, "base64 encoded hash from ADU: %.*s", ulSHA256HashLength, pucSHA256Hash);
+    CMP_LOGI(TAG_FLASH_PORT, "base64 encoded hash from ADU: %.*s", (int)ulSHA256HashLength, pucSHA256Hash);
 
     if (pxAduImage->image_size == 0)
     {
@@ -74,7 +74,7 @@ AzureIoTResult_t AzureIoTPlatform_VerifyImage(AzureADUImage_t *const pxAduImage,
         return eAzureIoTErrorInvalidArgument;
     }
 
-    if (base64_decode(pucSHA256Hash, ulSHA256HashLength, decoded_hash, sizeof(decoded_hash), &base64_decoded_length) != eAzureIoTSuccess)
+    if (base64_decode(pucSHA256Hash, (unsigned int)ulSHA256HashLength, decoded_hash, sizeof(decoded_hash), &base64_decoded_length) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_FLASH_PORT, "failure decoding base64 SHA256");
         return eAzureIoTErrorFailed;
@@ -148,7 +148,7 @@ static AzureIoTResult_t image_calculate_hmac_256(const AzureADUImage_t *adu_imag
     mbedtls_md_setup(&context, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 0);
     mbedtls_md_starts(&context);
 
-    CMP_LOGI(TAG_FLASH_PORT, "calculating hash for image with size: %d", adu_image->image_size);
+    CMP_LOGI(TAG_FLASH_PORT, "calculating hash for image with size: %lu", adu_image->image_size);
 
     for (size_t offset = 0; offset < adu_image->image_size; offset += sizeof(read_buffer))
     {
@@ -161,7 +161,7 @@ static AzureIoTResult_t image_calculate_hmac_256(const AzureADUImage_t *adu_imag
             size_read = sizeof(read_buffer);
         }
 
-        if ((read_partition_result = esp_partition_read(adu_image->partition, offset, read_buffer, size_read)) != ESP_OK)
+        if ((read_partition_result = esp_partition_read(adu_image->partition, offset, read_buffer, (size_t)size_read)) != ESP_OK)
         {
             CMP_LOGE(TAG_FLASH_PORT, "failure reading partition: %d", read_partition_result);
 
@@ -170,7 +170,7 @@ static AzureIoTResult_t image_calculate_hmac_256(const AzureADUImage_t *adu_imag
             break;
         }
 
-        mbedtls_md_update(&context, (const unsigned char *)read_buffer, size_read);
+        mbedtls_md_update(&context, (const unsigned char *)read_buffer, (size_t)size_read);
     }
 
     mbedtls_md_finish(&context, output_buffer);

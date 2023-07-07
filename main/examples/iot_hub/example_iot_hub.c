@@ -159,12 +159,12 @@ CLEAN_UP:
 
 static void callback_cloud_to_device_subscription(const AzureIoTHubClientCloudToDeviceMessageRequest_t *message, const void *callback_context)
 {
-    ESP_LOGI(TAG_EX_IOT, "cloud-to-device message: %.*s", message->ulPayloadLength, (const char *)message->pvMessagePayload);
+    ESP_LOGI(TAG_EX_IOT, "cloud-to-device message: %.*s", (int)message->ulPayloadLength, (const char *)message->pvMessagePayload);
 }
 
 static void callback_cloud_command_subscription(const AzureIoTHubClientCommandRequest_t *message, void *callback_context)
 {
-    ESP_LOGI(TAG_EX_IOT, "command message: %.*s", message->usCommandNameLength, (const char *)message->pucCommandName);
+    ESP_LOGI(TAG_EX_IOT, "command message: %.*s", (int)message->usCommandNameLength, (const char *)message->pucCommandName);
 
     example_context_t *context = (example_context_t *)callback_context;
 
@@ -198,7 +198,7 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
     uint32_t version = 0;
 
     ESP_LOGI(TAG_EX_IOT, "message status: %d", message->xMessageStatus);
-    ESP_LOGI(TAG_EX_IOT, "message length: %d", message->ulPayloadLength);
+    ESP_LOGI(TAG_EX_IOT, "message length: %lu", message->ulPayloadLength);
 
     switch (message->xMessageType)
     {
@@ -244,7 +244,7 @@ static void callback_cloud_properties_subscription(const AzureIoTHubClientProper
 
         if (message->xMessageStatus != eAzureIoTStatusNoContent)
         {
-            ESP_LOGW(TAG_EX_IOT, "failure reporting properties: %.*s", message->ulPayloadLength, (const char *)message->pvMessagePayload);
+            ESP_LOGW(TAG_EX_IOT, "failure reporting properties: %.*s", (int)message->ulPayloadLength, (const char *)message->pvMessagePayload);
         }
         break;
 
@@ -306,7 +306,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
         const uint8_t *component_name = NULL;
         uint32_t component_name_length = 0;
 
-        ESP_LOGI(TAG_EX_IOT, "desired property version: %d", *version);
+        ESP_LOGI(TAG_EX_IOT, "desired property version: %lu", *version);
 
         // Reset JSON reader to the beginning.
         AZ_CHECK(AzureIoTJSONReader_Init(&json_reader, message->pvMessagePayload, message->ulPayloadLength))
@@ -322,7 +322,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
             // We have to skip over the root property and value to continue iterating.
             if (component_name_length == 0)
             {
-                ESP_LOGW(TAG_EX_IOT, "unknown root property (we expect a component): %.*s", component_name_length, component_name);
+                ESP_LOGW(TAG_EX_IOT, "unknown root property (we expect a component): %.*s", (int)component_name_length, component_name);
 
                 AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader))
 
@@ -333,7 +333,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
             // We have to skip over the root property and value to continue iterating.
             if (strncasecmp(TEMP_CTRL_CMP_DISPLAY_NAME, (const char *)component_name, sizeof_l(TEMP_CTRL_CMP_DISPLAY_NAME)) != 0)
             {
-                ESP_LOGW(TAG_EX_IOT, "unknown component: %.*s", component_name_length, component_name);
+                ESP_LOGW(TAG_EX_IOT, "unknown component: %.*s", (int)component_name_length, component_name);
 
                 AZ_CHECK(AzureIoTJSONReader_SkipPropertyAndValue(&json_reader))
 
