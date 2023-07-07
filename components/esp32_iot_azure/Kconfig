@@ -28,22 +28,22 @@ menu "ESP32 IoT Azure"
 
         config ESP32_IOT_AZURE_HUB_CONNECT_TIMEOUT_MS
             int "Connection timeout (ms)"
-            range 500 10000
-            default 5000
+            range 500 60000
+            default 10000
             help
                 Connection timeout, in milliseconds.
 
         config ESP32_IOT_AZURE_HUB_LOOP_TIMEOUT_MS
             int "Loop timeout (ms)"
-            range 500 10000
+            range 500 60000
             default 500
             help
                 Loop timeout, in milliseconds.
 
         config ESP32_IOT_AZURE_HUB_SUBSCRIBE_TIMEOUT_MS
             int "Subscription timeout (ms)"
-            range 500 10000
-            default 5000
+            range 500 60000
+            default 10000
             help
                 Subscription timeout, in milliseconds.
 
@@ -52,14 +52,19 @@ menu "ESP32 IoT Azure"
             config ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA
                 bool "Azure Cloud RSA"
                 default y
+                select MBEDTLS_ECP_C
+                select MBEDTLS_ECDH_C
+                select MBEDTLS_ECP_DP_SECP256R1_ENABLED
                 help
                     Use Azure Cloud RSA certificate.
 
             config ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_ECC
                 bool "Azure Cloud ECC"
                 default n
-                select MBEDTLS_ECP_DP_SECP384R1_ENABLED
+                select MBEDTLS_ECP_C
+                select MBEDTLS_ECDH_C
                 select MBEDTLS_SHA512_C
+                select MBEDTLS_ECP_DP_SECP384R1_ENABLED
                 help
                     Use Azure Cloud ECC certificate.
                     Needed when connecting to Azure IoT Hub Gateway V2.
@@ -123,15 +128,15 @@ menu "ESP32 IoT Azure"
 
             config ESP32_IOT_AZURE_DPS_CONNECT_TIMEOUT_MS
                 int "Connection timeout (ms)"
-                range 500 10000
-                default 5000
+                range 500 60000
+                default 10000
                 help
                     Connection timeout, in milliseconds.
 
             config ESP32_IOT_AZURE_DPS_REGISTRATION_TIMEOUT_MS
                 int "Registration timeout (ms)"
-                range 500 10000
-                default 5000
+                range 500 60000
+                default 10000
                 help
                     Registration timeout, in milliseconds.
 
@@ -195,7 +200,7 @@ menu "ESP32 IoT Azure"
 
         config ESP32_IOT_AZURE_TRANSPORT_BACKOFF_BASE_MS
             int "Back-off delay (ms)"
-            range 100 1000
+            range 100 5000
             default 500
             help
                 The base back-off delay, in milliseconds,
@@ -203,7 +208,7 @@ menu "ESP32 IoT Azure"
 
         config ESP32_IOT_AZURE_TRANSPORT_BACKOFF_MAX_DELAY_MS
             int "Max back-off delay (ms)"
-            range 1000 10000
+            range 1000 60000
             default 1000
             help
                 The maximum back-off delay, in milliseconds, for
@@ -218,14 +223,14 @@ menu "ESP32 IoT Azure"
 
         config ESP32_IOT_AZURE_TRANSPORT_SEND_TIMEOUT_MS
             int "Send timeout (ms)"
-            range 100 10000
+            range 100 60000
             default 1000
             help
                 Send timeout, in milliseconds.
 
         config ESP32_IOT_AZURE_TRANSPORT_RECEIVE_TIMEOUT_MS
             int "Receive timeout (ms)"
-            range 100 10000
+            range 100 60000
             default 1000
             help
                 Receive timeout, in milliseconds.
@@ -246,15 +251,15 @@ menu "ESP32 IoT Azure"
 
                 config ESP32_IOT_AZURE_TRANSPORT_HTTP_CONNECT_TIMEOUT_MS
                     int "Connection timeout (ms)"
-                    range 500 10000
-                    default 5000
+                    range 500 60000
+                    default 10000
                     help
                         Connection timeout, in milliseconds.
 
                 config ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS
                     int "Max receive retry timeout (ms)"
-                    default 1000
                     range 10 5000
+                    default 1000
                     help
                         The transport receive function may be called multiple times until the end of
                         the response is detected by the parser. This timeout represents the maximum
@@ -263,8 +268,8 @@ menu "ESP32 IoT Azure"
 
                 config ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS
                     int "Max send retry timeout (ms)"
-                    default 1000
                     range 10 5000
+                    default 1000
                     help
                         When sending an HTTP request, the transport send function may be called multiple
                         times until all of the required number of bytes are sent.
@@ -273,8 +278,8 @@ menu "ESP32 IoT Azure"
 
                 config ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES
                     int "Max response header size (bytes)"
-                    default 3072
                     range 512 3072
+                    default 3072
                     help
                         Maximum size, in bytes, of headers allowed from the server.
 
@@ -286,8 +291,8 @@ menu "ESP32 IoT Azure"
 
             config ESP32_IOT_AZURE_TRANSPORT_MQTT_STATE_ARRAY_MAX_COUNT
                 int "Max PUBLISH messages pending"
-                default 10
                 range 5 20
+                default 10
                 help
                     Maximum number of MQTT PUBLISH messages that may be pending
                     acknowledgement at any time.
