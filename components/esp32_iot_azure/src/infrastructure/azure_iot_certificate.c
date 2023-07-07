@@ -14,6 +14,8 @@
 static const char AZURE_CERTIFICATE_CHAIN[] =
 
 #if CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA == 1
+
+#if CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA_ADD_BALTIMORE == 1
     /* Baltimore CyberTrust Root */
     "-----BEGIN CERTIFICATE-----\r\n"
     "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"
@@ -36,6 +38,7 @@ static const char AZURE_CERTIFICATE_CHAIN[] =
     "ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS\r\n"
     "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n"
     "-----END CERTIFICATE-----\r\n"
+#endif
 
     /* DigiCert Global Root G2 */
     "-----BEGIN CERTIFICATE-----\r\n"

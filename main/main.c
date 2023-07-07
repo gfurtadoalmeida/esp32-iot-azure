@@ -15,10 +15,10 @@
 static const char TAG[] = "main";
 static void initialize_infra();
 
-static char WIFI_SSID[] = "";
-static char WIFI_PASSWORD[] = "";
-static buffer_t DEVICE_SYMMETRIC_KEY = BUFFER_FROM_LITERAL("");
-static buffer_t DEVICE_REGISTRATION_ID = BUFFER_FROM_LITERAL("");
+static char WIFI_SSID[] = "Yggdrasil";
+static char WIFI_PASSWORD[] = "gfa18021988";
+static buffer_t DEVICE_SYMMETRIC_KEY = BUFFER_FROM_LITERAL("w5vkMc/rp+yMfKzFgAgqaxmOH5L7JKYYnbQSLMfAUkfeUEhHFErNIy5fRSBZuD9N06pzOr6EnArVx3tBm+Y9wg==");
+static buffer_t DEVICE_REGISTRATION_ID = BUFFER_FROM_LITERAL("test-device");
 
 void app_main(void)
 {

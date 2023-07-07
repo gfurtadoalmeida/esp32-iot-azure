@@ -58,6 +58,28 @@ menu "ESP32 IoT Azure"
                 help
                     Use Azure Cloud RSA certificate.
 
+            if ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA
+
+                config ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA_ADD_BALTIMORE
+                    bool "Add Baltimore CyberTrust Root certificate to RSA chain"
+                    default y
+                    help
+                        Add Baltimore CyberTrust Root certificate to the
+                        Azure Cloud RSA certificate chain.
+
+                        Baltimore CyberTrust Root certificate expires in 2025.
+                        Starting in February 2023, all IoT hubs in the global Azure
+                        cloud will migrate to a new TLS certificate issued by the
+                        DigiCert Global Root G2.
+
+                        If the target IoT Hub and DPS are on the new certificate, you
+                        can disabled this option.
+
+                        Announcement: https://techcommunity.microsoft.com/t5/internet-of-things-blog/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169
+
+                        How to migrate IoT Hub: https://learn.microsoft.com/en-us/azure/iot-hub/migrate-tls-certificate
+            endif
+
             config ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_ECC
                 bool "Azure Cloud ECC"
                 default n

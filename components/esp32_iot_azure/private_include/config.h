@@ -77,6 +77,19 @@ extern "C"
 #define CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA 1
 #endif
 
+#ifndef CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA_ADD_BALTIMORE
+/**
+ * @brief Add Baltimore CyberTrust Root certificate to
+ * the Azure Cloud RSA certificate chain.
+ * @warning Baltimore CyberTrust Root certificate expires in 2025.
+ * Starting in February 2023, all IoT hubs in the global Azure cloud
+ * will migrate to a new TLS certificate issued by the DigiCert Global Root G2.
+ * @link https://techcommunity.microsoft.com/t5/internet-of-things-blog/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169
+ * @link https://learn.microsoft.com/en-us/azure/iot-hub/migrate-tls-certificate
+ */
+#define CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_RSA_ADD_BALTIMORE 1
+#endif
+
 #ifndef CONFIG_ESP32_IOT_AZURE_HUB_CERT_USE_AZURE_ECC
 /**
  * @brief Use Azure Cloud ECC certificate.
