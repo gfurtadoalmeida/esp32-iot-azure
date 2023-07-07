@@ -1,7 +1,7 @@
 # ESP32 IoT Azure
 
 ![GitHub Build Status](https://github.com/gfurtadoalmeida/esp32-iot-azure/actions/workflows/build.yml/badge.svg) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=bugs)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure)  
-ESP32 library to access [Azure IoT Services](https://azure.microsoft.com/en-us/solutions/iot), in an easier and cleaner way.  
+ESP32 library to access [Azure IoT Services](https://azure.microsoft.com/en-us/solutions/iot), using the same [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos) interface, in an easier and cleaner way.  
 Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html) and connect!  
 
 ## Characteristics
@@ -96,7 +96,7 @@ void app_main(void)
 
     azure_iot_sdk_deinit();
 
-    ESP_LOGI(TAG, "hostname: %.*s", hostname.length, (char *)hostname.buffer);
-    ESP_LOGI(TAG, "device_id: %.*s", device_id.length, (char *)device_id.buffer);
+    ESP_LOGI(TAG, "hostname: %.*s", (int)hostname.length, (char *)hostname.buffer);
+    ESP_LOGI(TAG, "device_id: %.*s", (int)device_id.length, (char *)device_id.buffer);
 }
 ```
