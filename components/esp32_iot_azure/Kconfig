@@ -231,13 +231,13 @@ menu "ESP32 IoT Azure"
         config ESP32_IOT_AZURE_TRANSPORT_BACKOFF_MAX_DELAY_MS
             int "Max back-off delay (ms)"
             range 1000 60000
-            default 1000
+            default 2000
             help
                 The maximum back-off delay, in milliseconds, for
                 retrying failed operation with the server.
 
         config ESP32_IOT_AZURE_TRANSPORT_BACKOFF_RETRY_MAX_ATTEMPTS
-            int "Retry atteampts"
+            int "Retry attempts"
             range 1 10
             default 5
             help
@@ -246,14 +246,14 @@ menu "ESP32 IoT Azure"
         config ESP32_IOT_AZURE_TRANSPORT_SEND_TIMEOUT_MS
             int "Send timeout (ms)"
             range 100 60000
-            default 1000
+            default 5000
             help
                 Send timeout, in milliseconds.
 
         config ESP32_IOT_AZURE_TRANSPORT_RECEIVE_TIMEOUT_MS
             int "Receive timeout (ms)"
             range 100 60000
-            default 1000
+            default 5000
             help
                 Receive timeout, in milliseconds.
 
