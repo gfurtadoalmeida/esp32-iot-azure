@@ -101,7 +101,7 @@ AzureIoTResult_t azure_iot_hub_connect(azure_iot_hub_context_t *context)
     if (transport_connect(context->transport,
                           (const char *)context->iot_client._internal.pucHostname,
                           CONFIG_ESP32_IOT_AZURE_HUB_SERVER_PORT,
-                          CONFIG_ESP32_IOT_AZURE_IOT_CONNECT_TIMEOUT_MS) != TRANSPORT_STATUS_SUCCESS)
+                          CONFIG_ESP32_IOT_AZURE_HUB_CONNECT_TIMEOUT_MS) != TRANSPORT_STATUS_SUCCESS)
     {
         CMP_LOGE(TAG_AZ_IOT, "failure connecting transport");
         return eAzureIoTErrorFailed;
@@ -110,7 +110,7 @@ AzureIoTResult_t azure_iot_hub_connect(azure_iot_hub_context_t *context)
     AzureIoTResult_t result = AzureIoTHubClient_Connect(&context->iot_client,
                                                         false,
                                                         &session_present,
-                                                        CONFIG_ESP32_IOT_AZURE_IOT_CONNECT_TIMEOUT_MS);
+                                                        CONFIG_ESP32_IOT_AZURE_HUB_CONNECT_TIMEOUT_MS);
     if (result != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_IOT, "failure connecting to hub: %d", result);

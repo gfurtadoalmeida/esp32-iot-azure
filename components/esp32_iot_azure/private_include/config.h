@@ -45,11 +45,11 @@ extern "C"
 #define CONFIG_ESP32_IOT_AZURE_HUB_SERVER_PORT 8883U
 #endif
 
-#ifndef CONFIG_ESP32_IOT_AZURE_IOT_CONNECT_TIMEOUT_MS
+#ifndef CONFIG_ESP32_IOT_AZURE_HUB_CONNECT_TIMEOUT_MS
 /**
  * @brief Azure IoT Hub server connection timeout, in milliseconds.
  */
-#define CONFIG_ESP32_IOT_AZURE_IOT_CONNECT_TIMEOUT_MS 5000U
+#define CONFIG_ESP32_IOT_AZURE_HUB_CONNECT_TIMEOUT_MS 10000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_HUB_LOOP_TIMEOUT_MS
@@ -63,7 +63,7 @@ extern "C"
 /**
  * @brief Azure IoT Hub subscription timeout, in milliseconds.
  */
-#define CONFIG_ESP32_IOT_AZURE_HUB_SUBSCRIBE_TIMEOUT_MS 5000U
+#define CONFIG_ESP32_IOT_AZURE_HUB_SUBSCRIBE_TIMEOUT_MS 10000U
 #endif
 
    // ===========================
@@ -152,14 +152,14 @@ extern "C"
 /**
  * @brief Azure DPS server connection timeout, in milliseconds.
  */
-#define CONFIG_ESP32_IOT_AZURE_DPS_CONNECT_TIMEOUT_MS 5000U
+#define CONFIG_ESP32_IOT_AZURE_DPS_CONNECT_TIMEOUT_MS 10000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_DPS_REGISTRATION_TIMEOUT_MS
 /**
  * @brief Azure DPS server registration timeout, in milliseconds.
  */
-#define CONFIG_ESP32_IOT_AZURE_DPS_REGISTRATION_TIMEOUT_MS 5000U
+#define CONFIG_ESP32_IOT_AZURE_DPS_REGISTRATION_TIMEOUT_MS 10000U
 #endif
 
    // ===================
@@ -229,21 +229,21 @@ extern "C"
  * @brief Transport maximum back-off delay, in milliseconds, for retrying failed operation
  *  with the server.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_BACKOFF_MAX_DELAY_MS 1000U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_BACKOFF_MAX_DELAY_MS 2000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_SEND_TIMEOUT_MS
 /**
  * @brief Transport send timeout, in milliseconds.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_SEND_TIMEOUT_MS 1000U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_SEND_TIMEOUT_MS 5000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_RECEIVE_TIMEOUT_MS
 /**
  * @brief Transport receive timeout, in milliseconds.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_RECEIVE_TIMEOUT_MS 1000U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_RECEIVE_TIMEOUT_MS 5000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_BACKOFF_RETRY_MAX_ATTEMPTS
@@ -261,21 +261,21 @@ extern "C"
 /**
  * @brief Connection timeout, in milliseconds.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_CONNECT_TIMEOUT_MS 5000U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_CONNECT_TIMEOUT_MS 10000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS
 /**
  * @brief Maximum receive retry timeout, in milliseconds, for HTTP operations.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS 50U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_RECV_RETRY_TIMEOUT_MS 1000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS
 /**
  * @brief Maximum send retry timeout, in milliseconds, for HTTP operations.
  */
-#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS 50U
+#define CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_SEND_RETRY_TIMEOUT_MS 1000U
 #endif
 
 #ifndef CONFIG_ESP32_IOT_AZURE_TRANSPORT_HTTP_MAX_RESPONSE_HEADERS_SIZE_BYTES
