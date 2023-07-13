@@ -93,7 +93,7 @@ extern "C"
     } buffer_t;
 
 /**
- * @brief Create an @ref buffer_t from a literal.
+ * @brief Create a @ref buffer_t from a literal.
  * @note The length will exclude the `NULL` terminator.
  * @param text Text literal.
  * @example buffer_t buffer = BUFFER_FROM_CONST("my_value");
@@ -105,7 +105,25 @@ extern "C"
     }
 
 /**
- * @brief Create an @ref buffer_t with a fixed size.
+ * @brief Create a @ref buffer_t from a fixed size array.
+ * @param fixed_size_array Fixed size uint8_t array.
+ * @example
+ * uint8_t array[50] = {0};
+ * buffer_t buffer = BUFFER_WITH_FIXED_LENGTH(array);
+ */
+#define BUFFER_FROM_FIXED_ARRAY(fixed_size_array) \
+    {                                             \
+        .length = sizeof(fixed_size_array),       \
+        .buffer = fixed_size_array                \
+    }
+
+#ifndef __cplusplus
+// C++ compound literal semantic differs from C,
+// giving undefined behavior, besides not being
+// accepted by GCC; only enable for C code.
+
+/**
+ * @brief Create a @ref buffer_t with a fixed size.
  * @param buffer_length Length of the buffer being allocated on stack.
  * @example buffer_t buffer = BUFFER_WITH_FIXED_LENGTH(128);
  */
@@ -114,6 +132,7 @@ extern "C"
         .length = buffer_length,                 \
         .buffer = (uint8_t[buffer_length]) { 0 } \
     }
+#endif
 
     // ==================
     // CLIENT CERTIFICATE
