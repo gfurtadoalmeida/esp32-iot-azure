@@ -246,14 +246,14 @@ menu "ESP32 IoT Azure"
         config ESP32_IOT_AZURE_TRANSPORT_SEND_TIMEOUT_MS
             int "Send timeout (ms)"
             range 100 60000
-            default 5000
+            default 10000
             help
                 Send timeout, in milliseconds.
 
         config ESP32_IOT_AZURE_TRANSPORT_RECEIVE_TIMEOUT_MS
             int "Receive timeout (ms)"
             range 100 60000
-            default 5000
+            default 10000
             help
                 Receive timeout, in milliseconds.
 
