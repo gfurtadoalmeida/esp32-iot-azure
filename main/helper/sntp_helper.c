@@ -6,7 +6,7 @@
 
 static const char TAG_HELPER_SNTP[] = "HELPER_SNTP";
 
-static volatile bool s_got_time = false;
+static bool s_got_time = false;
 
 static void handle_sntp_event(const struct timeval *time_received);
 

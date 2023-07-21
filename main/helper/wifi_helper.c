@@ -15,8 +15,8 @@
 
 static const char TAG_HELPER_WIFI[] = "HELPER_WIFI";
 
-static volatile bool s_wifi_response_gotten = false;
-static volatile bool s_wifi_connected = false;
+static bool s_wifi_response_gotten = false;
+static bool s_wifi_connected = false;
 static esp_netif_t *s_netif = NULL;
 
 static void handle_wifi_event(void const *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data);

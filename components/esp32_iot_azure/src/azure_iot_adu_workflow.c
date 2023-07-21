@@ -38,7 +38,7 @@ struct azure_adu_workflow_t
     AzureIoTADUClientDeviceProperties_t *device_properties;
     buffer_t *scratch_buffer;
     uint32_t property_version;
-    volatile bool has_update;
+    bool has_update;
 };
 
 azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context, buffer_t *operation_buffer)
@@ -133,6 +133,12 @@ AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
                                                   azure_adu_workflow_download_progress_callback_t callback,
                                                   void *callback_context)
 {
+    if (!context->has_update)
+    {
+        ESP_LOGE(TAG_AZ_ADU_WKF, "no update to accept");
+        return eAzureIoTErrorFailed;
+    }
+
     if (download_buffer == NULL || download_buffer->buffer == NULL)
     {
         ESP_LOGE(TAG_AZ_ADU_WKF, "download_buffer null");
