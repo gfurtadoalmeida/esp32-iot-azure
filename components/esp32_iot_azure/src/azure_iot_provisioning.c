@@ -121,11 +121,6 @@ AzureIoTResult_t azure_dps_register(azure_dps_context_t *context)
                                                      CONFIG_ESP32_IOT_AZURE_DPS_REGISTRATION_TIMEOUT_MS);
     } while (result == eAzureIoTErrorPending);
 
-    if (result != eAzureIoTSuccess)
-    {
-        CMP_LOGE(TAG_AZ_DPS, "failure registering device: %d", result);
-    }
-
     transport_disconnect(context->transport);
 
     return result;
