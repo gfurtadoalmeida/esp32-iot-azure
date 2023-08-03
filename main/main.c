@@ -98,5 +98,9 @@ static void initialize_infra()
         abort();
     }
 
-    helper_sntp_wait_for_sync();
+    if (!helper_sntp_wait_for_sync())
+    {
+        ESP_LOGE(TAG, "failure getting sntp time");
+        abort();
+    }
 }

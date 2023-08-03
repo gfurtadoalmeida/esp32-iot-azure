@@ -6,20 +6,20 @@ Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp
 
 ## Characteristics
 
-* ESP-IDF: [v5.0.2](https://docs.espressif.com/projects/esp-idf/en/v5.0.2/esp32/index.html)
+* ESP-IDF: [v5.1](https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32/index.html)
 * Written in **C** using:
-   * [ESP-IDF Framework](https://github.com/espressif/esp-idf)
-   * [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
-   * [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c)
-* APIs: 
-   * All functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
-   * [Custom extensions](/components/esp32_iot_azure/include/esp32_iot_azure/extension/)
+  * [ESP-IDF Framework](https://github.com/espressif/esp-idf)
+  * [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
+  * [Azure SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c)
+* APIs:
+  * All functions from [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
+  * [Custom extensions](/components/esp32_iot_azure/include/esp32_iot_azure/extension/)
 * Features supported ([IoT Hub](https://learn.microsoft.com/en-us/azure/iot-hub/)/[IoT Central](https://learn.microsoft.com/en-us/azure/iot-central/)):
-    * [Device Provisioning Service (DPS)](https://learn.microsoft.com/en-us/azure/iot-dps/)
-    * [Device Update](https://learn.microsoft.com/en-us/azure/iot-hub-device-update/)
-    * [Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/)
-    * [IoT Plug and Play](https://learn.microsoft.com/en-us/azure/iot-develop/overview-iot-plug-and-play)
-* Transport: 
+  * [Device Provisioning Service (DPS)](https://learn.microsoft.com/en-us/azure/iot-dps/)
+  * [Device Update](https://learn.microsoft.com/en-us/azure/iot-hub-device-update/)
+  * [Digital Twins](https://learn.microsoft.com/en-us/azure/digital-twins/)
+  * [IoT Plug and Play](https://learn.microsoft.com/en-us/azure/iot-develop/overview-iot-plug-and-play)
+* Transport:
   * Socket: [esp_tls](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/esp_tls.html) with built-in connection retries and updated Azure certificates.
   * HTTP: [FreeRTOS coreHTTP](https://github.com/FreeRTOS/coreHTTP)
   * MQTT: [FreeRTOS coreMQTT](https://github.com/FreeRTOS/coreMQTT)

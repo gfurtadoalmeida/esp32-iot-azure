@@ -17,8 +17,9 @@ extern "C"
     /**
      * @brief Wait until the SNTP service receives the
      * correct time.
+     * @return Success or failure.
      */
-    void helper_sntp_wait_for_sync();
+    bool helper_sntp_wait_for_sync();
 
     /**
      * @brief Free SNTP service resources.

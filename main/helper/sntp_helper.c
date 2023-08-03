@@ -1,51 +1,41 @@
 #include "sntp_helper.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_sntp.h"
 #include "esp_log.h"
-
-static const char TAG_HELPER_SNTP[] = "HELPER_SNTP";
-
-static bool s_got_time = false;
-
-static void handle_sntp_event(const struct timeval *time_received);
+#include "esp_netif_sntp.h"
+#include "time.h"
 
 bool helper_sntp_init()
 {
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, "pool.ntp.org");
-    sntp_setservername(1, "pool.ntp.br");
-    sntp_set_sync_mode(SNTP_SYNC_MODE_IMMED);
-
     setenv("TZ", "<-03>3", 1);
     tzset();
 
-    sntp_set_time_sync_notification_cb(&handle_sntp_event);
-    sntp_init();
+    esp_sntp_config_t config = {
+        .smooth_sync = false,
+        .server_from_dhcp = false,
+        .wait_for_sync = true,
+        .start = true,
+        .sync_cb = NULL,
+        .renew_servers_after_new_IP = false,
+        .ip_event_to_renew = IP_EVENT_STA_GOT_IP,
+        .index_of_first_server = 0,
+        .num_of_servers = 2,
+        .servers = ESP_SNTP_SERVER_LIST("pool.ntp.org", "pool.ntp.br")};
+
+    esp_netif_sntp_init(&config);
+    esp_netif_sntp_start();
 
     return true;
 }
 
-void helper_sntp_wait_for_sync()
+bool helper_sntp_wait_for_sync()
 {
-    while (!s_got_time)
-    {
-        ESP_LOGI(TAG_HELPER_SNTP, "waiting for time");
-
-        vTaskDelay(pdMS_TO_TICKS(500));
-    }
+    return esp_netif_sntp_sync_wait(portMAX_DELAY) == ESP_OK;
 }
 
 bool helper_sntp_deinit()
 {
-    sntp_stop();
+    esp_netif_sntp_deinit();
 
     return true;
-}
-
-static void handle_sntp_event(const struct timeval *time_received)
-{
-    ESP_LOGI(TAG_HELPER_SNTP, "got time: %lld", time_received->tv_sec);
-
-    s_got_time = true;
 }
