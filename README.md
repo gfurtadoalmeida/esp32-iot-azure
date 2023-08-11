@@ -28,7 +28,7 @@ Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp
 
 ## Documentation
 
-* Everything is on the [wiki](https://github.com/gfurtadoalmeida/esp32-project-template/wiki).
+* Everything is on the [wiki](https://github.com/gfurtadoalmeida/esp32-iot-azure/wiki).
 * Examples:
   * Azure IoT Hub: [examples/iot_hub](/main/examples/iot_hub)
   * Azure Device Provisioning Service: [examples/provisioning](/main/examples/provisioning)
