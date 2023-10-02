@@ -12,12 +12,6 @@ AzureIoTHTTPResult_t azure_http_download_resource(azure_http_context_t *context,
                                                   void *callback_context,
                                                   uint32_t *resource_size)
 {
-    if (callback == NULL)
-    {
-        CMP_LOGE(TAG_AZ_HTTP_EXT, "download callback null");
-        return eAzureIoTHTTPInvalidParameter;
-    }
-
     AzureIoTHTTPResult_t http_result = eAzureIoTHTTPSuccess;
     int32_t total_size = 0;
     uint32_t current_offset = 0;
@@ -58,13 +52,13 @@ AzureIoTHTTPResult_t azure_http_download_resource(azure_http_context_t *context,
 
         if (http_result == eAzureIoTHTTPSuccess)
         {
-            if (!callback((uint8_t *)data_buffer_payload_pointer,
-                          data_buffer_payload_length,
-                          current_offset,
-                          total_size,
-                          callback_context))
+            if (callback != NULL && !callback((uint8_t *)data_buffer_payload_pointer,
+                                              data_buffer_payload_length,
+                                              current_offset,
+                                              total_size,
+                                              callback_context))
             {
-                CMP_LOGE(TAG_AZ_HTTP_EXT, "failure calling callback");
+                CMP_LOGE(TAG_AZ_HTTP_EXT, "failure calling donwload callback");
                 return eAzureIoTHTTPError;
             }
 

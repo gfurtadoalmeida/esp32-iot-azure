@@ -13,7 +13,7 @@ extern "C"
     /**
      * @brief Callback to be invoked when a resource chunck is downloaded.
      * @param[in] chunck Chunck pointer.
-     * @param[in] chunck_length Downloaded chunck length returned by \p data.
+     * @param[in] chunck_length Downloaded chunck length returned by \p chunck.
      * @param[in] start_offset Resource starting point where the chunck was donwloaded.
      * @param[in] resource_size Resource total size.
      * @param[in] callback_context Context passed back to the caller.
@@ -32,7 +32,7 @@ extern "C"
      * @param[in,out] data_buffer The buffer into which the response header and payload will be placed.
      * @param[in] data_buffer_length The length of \p data_buffer.
      * @param[in] chunck_size How many bytes should be read per range request.
-     * @param[in] callback Callback invoked when a resource chunck is downloaded.
+     * @param[in] callback Optional callback invoked when a resource chunck is downloaded.
      * @param[in] callback_context Pointer to a context to pass to the callback.
      * @param[out] resource_size Pointer to where to store the resource total size.
      * @return @ref AzureIoTResult_t with the result of the operation.
