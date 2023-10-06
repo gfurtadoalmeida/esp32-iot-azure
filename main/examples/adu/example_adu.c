@@ -295,7 +295,7 @@ static AzureIoTResult_t device_change_state(example_context_t *context,
     AZ_CHECK_BEGIN()
     AZ_CHECK(AzureIoTJSONReader_Init(&json_reader, message->pvMessagePayload, message->ulPayloadLength))
 
-    if (AzureIoTHubClientProperties_GetPropertiesVersion(iot_client, &json_reader, message->xMessageType, version))
+    if (AzureIoTHubClientProperties_GetPropertiesVersion(iot_client, &json_reader, message->xMessageType, version) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_ADU, "failure getting property version");
     }

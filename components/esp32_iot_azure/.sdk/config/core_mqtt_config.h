@@ -23,7 +23,7 @@ extern "C"
  * macro sets the limit on how many simultaneous PUBLISH states an MQTT
  * context maintains.
  */
-#define MQTT_STATE_ARRAY_MAX_COUNT CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_STATE_ARRAY_MAX_COUNT
+#define MQTT_STATE_ARRAY_MAX_COUNT (CONFIG_ESP32_IOT_AZURE_TRANSPORT_MQTT_STATE_ARRAY_MAX_COUNT)
 
 #ifdef __cplusplus
 }
