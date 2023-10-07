@@ -64,7 +64,7 @@ AzureIoTHTTPResult_t azure_http_download_resource(azure_http_context_t *context,
 
             current_offset += data_buffer_payload_length;
         }
-        else if (http_result == eAzureIoTHTTPNoResponse)
+        else if (http_result == eAzureIoTHTTPPartialResponse || http_result == eAzureIoTHTTPNoResponse || http_result == eAzureIoTHTTPNetworkError)
         {
             CMP_LOGW(TAG_AZ_HTTP_EXT, "reconnecting");
 
