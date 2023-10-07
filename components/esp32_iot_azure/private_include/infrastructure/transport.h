@@ -2,13 +2,19 @@
 #define __ESP32_IOT_AZURE_INFRA_TRANSPORT_H__
 
 #include <stdint.h>
-#include "esp_transport.h"
+#include <stddef.h>
 #include "esp32_iot_azure/azure_iot_common.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+    /**
+     * @typedef transport_t
+     * @brief Transport context.
+     */
+    typedef struct transport_t transport_t;
 
     /**
      * @brief Certificate format for @ref tls_certificate_t.
@@ -40,85 +46,85 @@ extern "C"
 
     /**
      * @brief Creates a raw TCP transport.
-     * @note The transport handle must be released by @ref transport_free.
-     * @return @ref esp_transport_handle_t on success or null on failure.
+     * @note The transport context must be released by @ref transport_free.
+     * @return @ref transport_t on success or null on failure.
      */
-    esp_transport_handle_t transport_create_tcp();
+    transport_t *transport_create_tcp();
 
     /**
      * @brief Creates a TLS transport.
-     * @note The transport handle must be released by @ref transport_free.
+     * @note The transport context must be released by @ref transport_free.
      * @param[in] certificate Server certificate.
-     * @return @ref esp_transport_handle_t on success or null on failure.
+     * @return @ref transport_t on success or null on failure.
      */
-    esp_transport_handle_t transport_create_tls(const tls_certificate_t *certificate);
+    transport_t *transport_create_tls(const tls_certificate_t *certificate);
 
     /**
      * @brief Creates a TLS transport configured with Azure IoT root certificate.
-     * @note The transport handle must be released by @ref transport_free.
-     * @return @ref esp_transport_handle_t on success or null on failure.
+     * @note The transport context must be released by @ref transport_free.
+     * @return @ref transport_t on success or null on failure.
      */
-    esp_transport_handle_t transport_create_azure();
+    transport_t *transport_create_azure();
 
     /**
      * @brief Configures a TLS transport with a client certificate.
      * @note The transport must be a TLS one.
-     * @param[in] transport Transport handle.
+     * @param[in] transport Transport context.
      * @param[in] certificate Client certificate.
      */
-    transport_status_t transport_set_client_certificate(esp_transport_handle_t transport,
+    transport_status_t transport_set_client_certificate(transport_t *transport,
                                                         const client_certificate_t *certificate);
 
     /**
      * @brief Establish a connection to a server.
      * @note The connection must be closed by @ref transport_disconnect.
-     * @param[in] transport Transport handle.
+     * @param[in] transport Transport context.
      * @param[in] hostname Server address. Must be null-terminated.
      * @param[in] port Server port.
      * @param[in] timeout_ms Connection timeout in milliseconds.
      * @return @ref transport_status_t with the result of the operation.
      */
-    transport_status_t transport_connect(esp_transport_handle_t transport,
+    transport_status_t transport_connect(transport_t *transport,
                                          const char *hostname,
                                          uint16_t port,
                                          uint16_t timeout_ms);
     /**
      * @brief Write bytes to a transport.
-     * @param[in] transport Transport handle.
+     * @param[in] transport Transport context.
      * @param[in] buffer Data to write.
      * @param[in] length How many bytes to write.
      * @param[in] timeout_ms Timeout in milliseconds (-1 indicates wait forever)
      * @return Number of bytes written or (-1) if there are any errors.
      */
-    int32_t transport_write(esp_transport_handle_t transport,
+    int32_t transport_write(transport_t *transport,
                             const uint8_t *buffer,
                             size_t length,
                             uint16_t timeout_ms);
 
     /**
      * @brief Read bytes from a transport.
-     * @param[in] transport Transport handle.
+     * @param[in] transport Transport context.
      * @param[out] buffer Buffer to receive data.
      * @param[in] expected_length Maximum number of bytes to read.
      * @param[in] timeout_ms Timeout in milliseconds (-1 indicates wait forever)
      * @return Number of bytes read or (-1) if there are any errors.
      */
-    int32_t transport_read(esp_transport_handle_t transport,
+    int32_t transport_read(transport_t *transport,
                            uint8_t *buffer,
                            size_t expected_length,
                            uint16_t timeout_ms);
 
     /**
      * @brief Close a connection to the server.
-     * @param[in] transport Transport handle.
+     * @param[in] transport Transport context.
      */
-    void transport_disconnect(esp_transport_handle_t transport);
+    void transport_disconnect(transport_t *transport);
 
     /**
      * @brief Cleanup and free the transport memory.
-     * @param[in] transport Transport handle.
+     * @param[in] transport Transport context.
      */
-    void transport_free(esp_transport_handle_t transport);
+    void transport_free(transport_t *transport);
 #endif
 #ifdef __cplusplus
 }

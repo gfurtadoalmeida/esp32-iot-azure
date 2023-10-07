@@ -8,7 +8,7 @@ struct azure_http_context_t
 {
     AzureIoTTransportInterface_t transport_interface;
     AzureIoTHTTP_t http;
-    esp_transport_handle_t transport;
+    transport_t *transport;
     const char *url;
     const char *path;
     uint32_t url_length;

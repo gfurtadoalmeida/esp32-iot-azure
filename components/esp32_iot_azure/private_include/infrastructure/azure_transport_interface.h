@@ -16,7 +16,7 @@ extern "C"
      * @param[in] transport Transport that will be used.
      * @param[out] interface Azure transport interface to be configured.
      */
-    void azure_transport_interface_init(esp_transport_handle_t transport,
+    void azure_transport_interface_init(transport_t *transport,
                                         AzureIoTTransportInterface_t *interface);
 
     /**

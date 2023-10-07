@@ -1,10 +1,11 @@
 #include "infrastructure/azure_transport_interface.h"
 #include <stdint.h>
+#include <stdlib.h>
 #include "config.h"
 
 struct NetworkContext
 {
-    esp_transport_handle_t transport;
+    transport_t *transport;
 };
 
 static int32_t azure_transport_send(struct NetworkContext *pxNetworkContext,
@@ -27,7 +28,7 @@ static int32_t azure_transport_receive(struct NetworkContext *pxNetworkContext,
                           CONFIG_ESP32_IOT_AZURE_TRANSPORT_RECEIVE_TIMEOUT_MS);
 }
 
-void azure_transport_interface_init(esp_transport_handle_t transport,
+void azure_transport_interface_init(transport_t *transport,
                                     AzureIoTTransportInterface_t *interface)
 {
     interface->pxNetworkContext = (struct NetworkContext *)malloc(sizeof(struct NetworkContext));

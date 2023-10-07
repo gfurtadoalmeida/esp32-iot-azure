@@ -1,8 +1,10 @@
+#include <stdbool.h>
 #include "infrastructure/transport.h"
 #include "infrastructure/backoff_algorithm.h"
 #include "infrastructure/azure_iot_certificate.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_transport.h"
 #include "esp_transport_tcp.h"
 #include "esp_transport_ssl.h"
 #include "log.h"
@@ -10,25 +12,34 @@
 
 static const char TAG_TRANSPORT[] = "AZ_TRANSPORT";
 
-esp_transport_handle_t transport_create_tcp()
+struct transport_t
 {
-    return esp_transport_tcp_init();
+    esp_transport_handle_t handle; /** @brief ESP transport handle. */
+};
+
+transport_t *transport_create_tcp()
+{
+    transport_t *transport = (transport_t *)malloc(sizeof(transport_t));
+    transport->handle = esp_transport_tcp_init();
+
+    return transport;
 }
 
-esp_transport_handle_t transport_create_tls(const tls_certificate_t *certificate)
+transport_t *transport_create_tls(const tls_certificate_t *certificate)
 {
-    esp_transport_handle_t transport = esp_transport_ssl_init();
+    transport_t *transport = (transport_t *)malloc(sizeof(transport_t));
+    transport->handle = esp_transport_ssl_init();
 
     switch (certificate->format)
     {
     case TLS_CERT_FORMAT_PEM:
-        esp_transport_ssl_set_cert_data(transport,
+        esp_transport_ssl_set_cert_data(transport->handle,
                                         (const char *)certificate->data,
                                         certificate->length);
         break;
 
     case TLS_CERT_FORMAT_DER:
-        esp_transport_ssl_set_cert_data_der(transport,
+        esp_transport_ssl_set_cert_data_der(transport->handle,
                                             (const char *)certificate->data,
                                             certificate->length);
         break;
@@ -41,12 +52,12 @@ esp_transport_handle_t transport_create_tls(const tls_certificate_t *certificate
     return transport;
 }
 
-esp_transport_handle_t transport_create_azure()
+transport_t *transport_create_azure()
 {
     return transport_create_tls(azure_iot_certificate_get());
 }
 
-transport_status_t transport_set_client_certificate(esp_transport_handle_t transport,
+transport_status_t transport_set_client_certificate(transport_t *transport,
                                                     const client_certificate_t *certificate)
 {
     transport_status_t result = TRANSPORT_STATUS_SUCCESS;
@@ -54,19 +65,19 @@ transport_status_t transport_set_client_certificate(esp_transport_handle_t trans
     switch (certificate->format)
     {
     case CLIENT_CERT_FORMAT_PEM:
-        esp_transport_ssl_set_client_cert_data(transport,
+        esp_transport_ssl_set_client_cert_data(transport->handle,
                                                (const char *)certificate->data,
                                                certificate->data_length);
-        esp_transport_ssl_set_client_key_data(transport,
+        esp_transport_ssl_set_client_key_data(transport->handle,
                                               (const char *)certificate->private_key,
                                               certificate->private_key_length);
         break;
 
     case CLIENT_CERT_FORMAT_DER:
-        esp_transport_ssl_set_client_cert_data_der(transport,
+        esp_transport_ssl_set_client_cert_data_der(transport->handle,
                                                    (const char *)certificate->data,
                                                    certificate->data_length);
-        esp_transport_ssl_set_client_key_data_der(transport,
+        esp_transport_ssl_set_client_key_data_der(transport->handle,
                                                   (const char *)certificate->private_key,
                                                   certificate->private_key_length);
         break;
@@ -80,7 +91,7 @@ transport_status_t transport_set_client_certificate(esp_transport_handle_t trans
     return result;
 }
 
-transport_status_t transport_connect(esp_transport_handle_t transport,
+transport_status_t transport_connect(transport_t *transport,
                                      const char *hostname,
                                      uint16_t port,
                                      uint16_t timeout_ms)
@@ -96,9 +107,9 @@ transport_status_t transport_connect(esp_transport_handle_t transport,
                                  CONFIG_ESP32_IOT_AZURE_TRANSPORT_BACKOFF_RETRY_MAX_ATTEMPTS);
     do
     {
-        if (esp_transport_connect(transport, hostname, port, timeout_ms) == -1)
+        if (esp_transport_connect(transport->handle, hostname, port, timeout_ms) != 0)
         {
-            CMP_LOGW(TAG_TRANSPORT, "failure connecting to %s on %d: %d", hostname, port, esp_transport_get_errno(transport));
+            CMP_LOGW(TAG_TRANSPORT, "failure connecting to %s on %d: %d", hostname, port, esp_transport_get_errno(transport->handle));
 
             backoff_status = backoff_algorithm_get_next(&backoff_context, &next_backoff_ms);
 
@@ -118,42 +129,47 @@ transport_status_t transport_connect(esp_transport_handle_t transport,
     return transport_status;
 }
 
-int32_t transport_write(esp_transport_handle_t transport,
+int32_t transport_write(transport_t *transport,
                         const uint8_t *buffer,
                         size_t length,
                         uint16_t timeout_ms)
 {
-    int32_t result = esp_transport_write(transport, (const char *)buffer, length, timeout_ms);
+    int result = esp_transport_write(transport->handle, (const char *)buffer, length, timeout_ms);
 
-    if (result == -1)
+    if (result < 0)
     {
-        CMP_LOGE(TAG_TRANSPORT, "failure writing: %d", esp_transport_get_errno(transport));
+        CMP_LOGE(TAG_TRANSPORT, "failure writing: %d", esp_transport_get_errno(transport->handle));
     }
 
     return result;
 }
 
-int32_t transport_read(esp_transport_handle_t transport,
+int32_t transport_read(transport_t *transport,
                        uint8_t *buffer,
                        size_t expected_length,
                        uint16_t timeout_ms)
 {
-    int32_t result = esp_transport_read(transport, (char *)buffer, expected_length, timeout_ms);
+    int result = esp_transport_read(transport->handle, (char *)buffer, expected_length, timeout_ms);
 
-    if (result == -1)
+    if (result < 0)
     {
-        CMP_LOGE(TAG_TRANSPORT, "failure reading: %d", esp_transport_get_errno(transport));
+        CMP_LOGE(TAG_TRANSPORT, "failure reading: %d", esp_transport_get_errno(transport->handle));
     }
 
     return result;
 }
 
-void transport_disconnect(esp_transport_handle_t transport)
+void transport_disconnect(transport_t *transport)
 {
-    esp_transport_close(transport);
+    if (esp_transport_close(transport->handle) < 0)
+    {
+        CMP_LOGE(TAG_TRANSPORT, "failure disconnecting: %d", esp_transport_get_errno(transport->handle));
+    }
 }
 
-void transport_free(esp_transport_handle_t transport)
+void transport_free(transport_t *transport)
 {
-    esp_transport_destroy(transport);
+    esp_transport_destroy(transport->handle);
+
+    free(transport);
 }
