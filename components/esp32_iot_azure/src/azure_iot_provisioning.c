@@ -16,7 +16,7 @@ struct azure_dps_context_t
     AzureIoTProvisioningClient_t dps_client;
     AzureIoTTransportInterface_t transport_interface;
     AzureIoTProvisioningClientOptions_t dps_client_options;
-    esp_transport_handle_t transport;
+    transport_t *transport;
     buffer_t *mqtt_buffer;
 };
 
