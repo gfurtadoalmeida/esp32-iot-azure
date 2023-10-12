@@ -51,6 +51,9 @@ if(CONFIG_ESP32_IOT_AZURE_HUB_FEATURES_DU_ENABLED)
     )
 endif()
 
+idf_build_get_property(project_ver PROJECT_VER)
+idf_build_get_property(project_name PROJECT_NAME)
+
 idf_component_register(
     SRCS
         ${srcsCOMP}
@@ -77,3 +80,8 @@ idf_component_register(
         tcp_transport
         app_update
 )
+
+# ESP-IDF does not add PROJECT_VER and PROJECT_NAME
+# as compile definition by default.
+add_compile_definitions(PROJECT_VER=${project_ver})
+add_compile_definitions(PROJECT_NAME=${project_name})

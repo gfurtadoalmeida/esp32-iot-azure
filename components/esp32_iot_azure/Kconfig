@@ -194,23 +194,41 @@ menu "ESP32 IoT Azure"
 
                         Pattern: ^[a-zA-Z0-9.-]+$
 
-                config ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
-                    string "Update name"
-                    default "Azure-Library-Tester"
+                config ESP32_IOT_AZURE_DU_UPDATE_ID_NAME_USE_PROJECT_NAME
+                    bool "Get the update name from project name"
+                    default y
                     help
-                        Identifier for a class of updates. It will often be a device
-                        class or model name. Example: Windows 11.
+                        If this is enabled, then config item PROJECT_NAME will be used
+                        for the variable ESP32_IOT_AZURE_DU_UPDATE_ID_NAME.
 
-                        Pattern: ^[a-zA-Z0-9.-]+$
+                if ESP32_IOT_AZURE_DU_UPDATE_ID_NAME_USE_PROJECT_NAME = n
+                    config ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
+                        string "Update name"
+                        default "ESP32-IoT-Azure"
+                        help
+                            Identifier for a class of updates. It will often be a device
+                            class or model name. Example: Windows 11.
 
-                config ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
-                    string "Update version"
-                    default "1.0"
+                            Pattern: ^[a-zA-Z0-9.-]+$
+                endif
+
+                config ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION_USE_PROJECT_VERSION
+                    bool "Get the update version from project version"
+                    default y
                     help
-                        Two- to four-part dot-separated numerical version numbers. Each part must be a
-                        number between 0 and 2147483647 and leading zeroes will be dropped.
+                        If this is enabled, then config item PROJECT_VER will be used
+                        for the variable ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION.
 
-                        Examples: "1.0", "2021.11.8"
+                if ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION_USE_PROJECT_VERSION = n
+                    config ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
+                        string "Update version"
+                        default "1.0"
+                        help
+                            Two- to four-part dot-separated numerical version numbers. Each part must be a
+                            number between 0 and 2147483647 and leading zeroes will be dropped.
+
+                            Examples: "1.0", "2021.11.8"1
+                endif
 
             endmenu
 

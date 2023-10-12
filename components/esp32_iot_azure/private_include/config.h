@@ -14,6 +14,13 @@ extern "C"
    */
 
    // =============
+   // UTILS
+   // =============
+
+   #define _STR(x) #x
+   #define STR(x) _STR(x)
+
+   // =============
    // AZURE IOT HUB
    // =============
 
@@ -194,22 +201,54 @@ extern "C"
 #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_PROVIDER "Contoso"
 #endif
 
-#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
+#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME_USE_PROJECT_NAME
 /**
- * @brief Azure DU identifier for a class of updates.
- * It will often be a device class or model name. Example: Windows 11.
+ * @brief Get the update name from project name.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME "Azure-Library-Tester"
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME_USE_PROJECT_NAME 0
 #endif
 
-#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
+#if CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME_USE_PROJECT_NAME == 1
+   /**
+    * @brief Azure DU identifier for a class of updates.
+    * It will often be a device class or model name. Example: Windows 11.
+    */
+   #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME STR(PROJECT_NAME)
+#else
+   #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
+   /**
+    * @brief Azure DU identifier for a class of updates.
+    * It will often be a device class or model name. Example: Windows 11.
+    */
+   #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME "ESP32-IoT-Azure"
+   #endif
+#endif
+
+#ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION_USE_PROJECT_VERSION
 /**
- * @brief Azure DU, two- to four-part dot-separated numerical
- * version numbers.
- * @note Each part must be a number between 0 and 2147483647
- * and leading zeroes will be dropped. Examples: "1.0", "2021.11.8".
+ * @brief Get the update version from project version.
  */
-#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION "1.0"
+#define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION_USE_PROJECT_VERSION 0
+#endif
+
+#if CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION_USE_PROJECT_VERSION == 1
+    /**
+    * @brief Azure DU, two- to four-part dot-separated numerical
+    * version numbers.
+    * @note Each part must be a number between 0 and 2147483647
+    * and leading zeroes will be dropped. Examples: "1.0", "2021.11.8".
+    */
+   #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION STR(PROJECT_VER)
+#else
+   #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
+   /**
+    * @brief Azure DU, two- to four-part dot-separated numerical
+    * version numbers.
+    * @note Each part must be a number between 0 and 2147483647
+    * and leading zeroes will be dropped. Examples: "1.0", "2021.11.8".
+    */
+   #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION "1.0"
+   #endif
 #endif
 
    // ==================
