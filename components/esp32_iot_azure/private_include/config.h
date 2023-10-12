@@ -14,13 +14,6 @@ extern "C"
    */
 
    // =============
-   // UTILS
-   // =============
-
-   #define _STR(x) #x
-   #define STR(x) _STR(x)
-
-   // =============
    // AZURE IOT HUB
    // =============
 
@@ -213,7 +206,7 @@ extern "C"
     * @brief Azure DU identifier for a class of updates.
     * It will often be a device class or model name. Example: Windows 11.
     */
-   #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME STR(PROJECT_NAME)
+   #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME PROJECT_NAME
 #else
    #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_NAME
    /**
@@ -238,7 +231,7 @@ extern "C"
     * @note Each part must be a number between 0 and 2147483647
     * and leading zeroes will be dropped. Examples: "1.0", "2021.11.8".
     */
-   #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION STR(PROJECT_VER)
+   #define CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION PROJECT_VER
 #else
    #ifndef CONFIG_ESP32_IOT_AZURE_DU_UPDATE_ID_VERSION
    /**

@@ -83,5 +83,9 @@ idf_component_register(
 
 # ESP-IDF does not add PROJECT_VER and PROJECT_NAME
 # as compile definition by default.
-add_compile_definitions(PROJECT_VER=${project_ver})
-add_compile_definitions(PROJECT_NAME=${project_name})
+set_property(TARGET ${COMPONENT_LIB}
+             APPEND PROPERTY
+             COMPILE_DEFINITIONS "PROJECT_VER=\"${project_ver}\"")
+set_property(TARGET ${COMPONENT_LIB}
+             APPEND PROPERTY
+             COMPILE_DEFINITIONS "PROJECT_NAME=\"${project_name}\"")
