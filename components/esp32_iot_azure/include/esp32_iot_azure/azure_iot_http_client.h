@@ -56,6 +56,7 @@ extern "C"
 
     /**
      * @brief Send a size request.
+     * @note The server must understand the HEAD HTTP method and return the resource size in the Content-Length header.
      * @param[in] context HTTP context.
      * @param[out] data_buffer The buffer where the response will be placed.
      * @param[in] data_buffer_length The size of \p data_buffer.

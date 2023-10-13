@@ -56,6 +56,7 @@ AzureIoTResult_t azure_adu_file_download(parsed_file_url_t *parsed_url,
                                          void *callback_context,
                                          uint32_t *file_size)
 {
+    AzureIoTResult_t result = eAzureIoTErrorFailed;
     azure_http_context_t *http = azure_http_create((const char *)parsed_url->hostname,
                                                    parsed_url->hostname_length - 1,
                                                    (const char *)parsed_url->path,
@@ -67,15 +68,22 @@ AzureIoTResult_t azure_adu_file_download(parsed_file_url_t *parsed_url,
         return eAzureIoTErrorFailed;
     }
 
-    AzureIoTResult_t result = azure_http_download_resource(http,
-                                                           (char *)data_buffer,
-                                                           data_buffer_length,
-                                                           chunck_size,
-                                                           callback,
-                                                           callback_context,
-                                                           file_size) == eAzureIoTHTTPSuccess
-                                  ? eAzureIoTSuccess
-                                  : eAzureIoTErrorFailed;
+    if (azure_http_get_resource_size(http, (char *)data_buffer, data_buffer_length, file_size) != eAzureIoTHTTPSuccess)
+    {
+        CMP_LOGE(TAG_AZ_ADU_EXT, "failure getting image size: %s", parsed_url->hostname);
+    }
+    else
+    {
+        result = azure_http_download_resource(http,
+                                              (char *)data_buffer,
+                                              data_buffer_length,
+                                              chunck_size,
+                                              callback,
+                                              callback_context,
+                                              *file_size) == eAzureIoTHTTPSuccess
+                     ? eAzureIoTSuccess
+                     : eAzureIoTErrorFailed;
+    }
 
     azure_http_disconnect(http);
     azure_http_free(http);
