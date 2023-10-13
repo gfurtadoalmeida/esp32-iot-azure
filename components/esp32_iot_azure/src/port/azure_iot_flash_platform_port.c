@@ -1,6 +1,5 @@
 #include <string.h>
 #include "azure_iot_flash_platform.h"
-#include "esp_ota_ops.h"
 #include "esp_system.h"
 #include "mbedtls/base64.h"
 #include "mbedtls/md.h"
@@ -37,7 +36,8 @@ AzureIoTResult_t AzureIoTPlatform_Init(AzureADUImage_t *const pxAduImage)
     pxAduImage->image_size = 0;
 
     CMP_CHECK(TAG_FLASH_PORT, (pxAduImage->partition != NULL), "failure getting next OTA partition", eAzureIoTErrorFailed)
-    CMP_CHECK(TAG_FLASH_PORT, (esp_partition_erase_range(pxAduImage->partition, 0, pxAduImage->partition->size) == ESP_OK), "failure erasing OTA partition", eAzureIoTErrorFailed)
+
+    CMP_CHECK(TAG_FLASH_PORT, (esp_ota_begin(pxAduImage->partition, OTA_SIZE_UNKNOWN, &pxAduImage->ota) == ESP_OK), "failure starting OTA", eAzureIoTErrorFailed)
 
     return eAzureIoTSuccess;
 }
@@ -47,7 +47,7 @@ AzureIoTResult_t AzureIoTPlatform_WriteBlock(AzureADUImage_t *const pxAduImage,
                                              uint8_t *const pData,
                                              uint32_t ulBlockSize)
 {
-    esp_err_t result = esp_partition_write(pxAduImage->partition, (size_t)offset, pData, (size_t)ulBlockSize);
+    esp_err_t result = esp_ota_write_with_offset(pxAduImage->ota, pData, (size_t)ulBlockSize, offset);
 
     if (result != ESP_OK)
     {
@@ -71,31 +71,41 @@ AzureIoTResult_t AzureIoTPlatform_VerifyImage(AzureADUImage_t *const pxAduImage,
     if (pxAduImage->image_size == 0)
     {
         CMP_LOGE(TAG_FLASH_PORT, "invalid image: no content");
-        return eAzureIoTErrorInvalidArgument;
+        goto ERROR;
     }
 
     if (base64_decode(pucSHA256Hash, (unsigned int)ulSHA256HashLength, decoded_hash, sizeof(decoded_hash), &base64_decoded_length) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_FLASH_PORT, "failure decoding base64 SHA256");
-        return eAzureIoTErrorFailed;
+        goto ERROR;
     }
 
     if (image_calculate_hmac_256(pxAduImage, calculated_hash) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_FLASH_PORT, "failure calculating image hash");
-        return eAzureIoTErrorFailed;
+        goto ERROR;
     }
 
-    if (memcmp(decoded_hash, calculated_hash, AZURE_IOT_SHA_256_SIZE) == 0)
+    if (memcmp(decoded_hash, calculated_hash, AZURE_IOT_SHA_256_SIZE) != 0)
     {
-        return eAzureIoTSuccess;
+        CMP_LOGE(TAG_FLASH_PORT, "hashes does not match");
+        CMP_LOGE(TAG_FLASH_PORT, "hash wanted: ");
+        CMP_LOG_BUFFER_HEX(TAG_FLASH_PORT, decoded_hash, sizeof(decoded_hash));
+        CMP_LOGE(TAG_FLASH_PORT, "hash calculated: ");
+        CMP_LOG_BUFFER_HEX(TAG_FLASH_PORT, calculated_hash, sizeof(calculated_hash));
+        goto ERROR;
     }
 
-    CMP_LOGE(TAG_FLASH_PORT, "failure verifying image: hashes does not match");
-    CMP_LOGE(TAG_FLASH_PORT, "hash wanted: ");
-    CMP_LOG_BUFFER_HEX(TAG_FLASH_PORT, decoded_hash, sizeof(decoded_hash));
-    CMP_LOGI(TAG_FLASH_PORT, "hash calculated: ");
-    CMP_LOG_BUFFER_HEX(TAG_FLASH_PORT, calculated_hash, sizeof(calculated_hash));
+    if (esp_ota_end(pxAduImage->ota) != ESP_OK)
+    {
+        CMP_LOGE(TAG_FLASH_PORT, "failure ending OTA");
+        goto ERROR;
+    }
+
+    return eAzureIoTSuccess;
+
+ERROR:
+    esp_ota_abort(pxAduImage->ota);
 
     return eAzureIoTErrorFailed;
 }
@@ -148,7 +158,7 @@ static AzureIoTResult_t image_calculate_hmac_256(const AzureADUImage_t *adu_imag
     mbedtls_md_setup(&context, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 0);
     mbedtls_md_starts(&context);
 
-    CMP_LOGI(TAG_FLASH_PORT, "calculating hash for image with size: %lu", adu_image->image_size);
+    CMP_LOGD(TAG_FLASH_PORT, "calculating hash for image with size: %lu", adu_image->image_size);
 
     for (size_t offset = 0; offset < adu_image->image_size; offset += sizeof(read_buffer))
     {
@@ -176,7 +186,7 @@ static AzureIoTResult_t image_calculate_hmac_256(const AzureADUImage_t *adu_imag
     mbedtls_md_finish(&context, output_buffer);
     mbedtls_md_free(&context);
 
-    CMP_LOGI(TAG_FLASH_PORT, "image hash calculated");
+    CMP_LOGD(TAG_FLASH_PORT, "image hash calculated");
 
     return result;
 }

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "esp_partition.h"
+#include "esp_ota_ops.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -15,8 +16,9 @@ extern "C"
      */
     typedef struct AzureADUImageContext
     {
-        const esp_partition_t *partition; /** @brief Partition context for ESP. */
-        uint32_t image_size;              /** @brief The total size of the image to write. */
+        const esp_partition_t *partition; /** @brief ESP partition context. */
+        esp_ota_handle_t ota;             /** @brief ESP OTA context */
+        uint32_t image_size;              /** @brief Image size to write. */
     } AzureADUImageContext_t;
 
     /**
