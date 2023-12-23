@@ -24,7 +24,7 @@ azure_dps_context_t *azure_dps_create(buffer_t *mqtt_buffer)
 {
     if (mqtt_buffer == NULL || mqtt_buffer->buffer == NULL)
     {
-        ESP_LOGE(TAG_AZ_DPS, "mqtt_buffer null");
+        CMP_LOGE(TAG_AZ_DPS, "mqtt_buffer null");
         return NULL;
     }
 
