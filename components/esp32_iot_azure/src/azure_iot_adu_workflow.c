@@ -45,7 +45,7 @@ azure_adu_workflow_t *azure_adu_workflow_create(azure_adu_context_t *adu_context
 {
     if (operation_buffer == NULL || operation_buffer->buffer == NULL)
     {
-        ESP_LOGE(TAG_AZ_ADU_WKF, "operation_buffer null");
+        CMP_LOGE(TAG_AZ_ADU_WKF, "operation_buffer null");
         return NULL;
     }
     azure_adu_workflow_t *context = (azure_adu_workflow_t *)malloc(sizeof(azure_adu_workflow_t));
@@ -135,19 +135,19 @@ AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
 {
     if (!context->has_update)
     {
-        ESP_LOGE(TAG_AZ_ADU_WKF, "no update to accept");
+        CMP_LOGE(TAG_AZ_ADU_WKF, "no update to accept");
         return eAzureIoTErrorFailed;
     }
 
     if (download_buffer == NULL || download_buffer->buffer == NULL)
     {
-        ESP_LOGE(TAG_AZ_ADU_WKF, "download_buffer null");
+        CMP_LOGE(TAG_AZ_ADU_WKF, "download_buffer null");
         return eAzureIoTErrorInvalidArgument;
     }
 
     if (download_buffer->length < chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES)
     {
-        ESP_LOGE(TAG_AZ_ADU_WKF, "not enough memory on download_buffer: has %lu needs %u", download_buffer->length, chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES);
+        CMP_LOGE(TAG_AZ_ADU_WKF, "not enough memory on download_buffer: has %lu needs %u", download_buffer->length, chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES);
         return eAzureIoTErrorInvalidArgument;
     }
 

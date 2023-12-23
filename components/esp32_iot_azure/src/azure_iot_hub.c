@@ -22,7 +22,7 @@ azure_iot_hub_context_t *azure_iot_hub_create(buffer_t *mqtt_buffer)
 {
     if (mqtt_buffer == NULL || mqtt_buffer->buffer == NULL)
     {
-        ESP_LOGE(TAG_AZ_IOT, "mqtt_buffer null");
+        CMP_LOGE(TAG_AZ_IOT, "mqtt_buffer null");
         return NULL;
     }
 
