@@ -48,6 +48,14 @@ body:
     validations:
       required: true
   - type: input
+    id: idf-version
+    attributes:
+      label: IDF version.
+      description: On which IDF version does this issue occur on?
+      placeholder: ex. v3.2-dev-1148-g96cd3b75c
+    validations:
+      required: true
+  - type: input
     id: chip-revision
     attributes:
       label: Espressif SoC revision.
