@@ -54,6 +54,7 @@ jobs:
     - name: Create Zip
       shell: bash
       run: |
+        cp LICENSE components/esp32_iot_azure
         cd components
         zip -r ../${{env.ZIP_NAME}} esp32_iot_azure
 
