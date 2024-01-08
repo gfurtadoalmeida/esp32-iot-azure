@@ -123,7 +123,7 @@ AzureIoTResult_t AzureIoTPlatform_EnableImage(AzureADUImage_t *const pxAduImage)
     return eAzureIoTSuccess;
 }
 
-__attribute__((noreturn)) AzureIoTResult_t AzureIoTPlatform_ResetDevice(AzureADUImage_t *const pxAduImage)
+__attribute__((noreturn)) AzureIoTResult_t AzureIoTPlatform_ResetDevice(AzureADUImage_t *const)
 {
     // This functions restart the device, therefore never returning.
     esp_restart();
