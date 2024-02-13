@@ -2,7 +2,7 @@
 
 ## 1. Clone the Repository
 
-Clone this repository **_recursively_** and copy the folder ["components/esp32_iot_azure"](../../blob/master/components/esp32_iot_azure/) to the components folder of your ESP-IDF project.
+Clone this repository **_recursively_** and copy the folder ["components/esp32_iot_azure"](../../components/esp32_iot_azure/) to the components folder of your ESP-IDF project.
 
 ## 2. Configure
 
