@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.24)
 
 set(EXTRA_COMPONENT_DIRS "../components")
 set(TEST_COMPONENTS "esp32_iot_azure" CACHE STRING "List of components to test")
