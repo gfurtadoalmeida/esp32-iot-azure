@@ -227,7 +227,7 @@ menu "ESP32 IoT Azure"
                             Two- to four-part dot-separated numerical version numbers. Each part must be a
                             number between 0 and 2147483647 and leading zeroes will be dropped.
 
-                            Examples: "1.0", "2021.11.8"1
+                            Examples: "1.0", "2021.11.8"
                 endif
 
             endmenu
