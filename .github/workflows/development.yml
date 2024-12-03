@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 env:
-  ESP_DOCKER_IMAGE: gfurtadoalmeida/esp32-docker-sonar:v5.1
+  ESP_DOCKER_IMAGE: gfurtadoalmeida/esp32-docker-sonar:v5.3
 
 jobs:
   build:
@@ -29,7 +29,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0
         submodules: recursive
 
     - name: Docker Login
