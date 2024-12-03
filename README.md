@@ -1,12 +1,13 @@
 # ESP32 IoT Azure
 
-![GitHub Build Status](https://github.com/gfurtadoalmeida/esp32-iot-azure/actions/workflows/release.yml/badge.svg) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=bugs)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=esp32_iot_azure)  
+[![GitHub Release Status][git-bagdge-release]][git-release] [![Bugs][sonar-badge-bugs]][sonar-home] [![Code Smells][sonar-badge-smells]][sonar-home] [![Security Rating][sonar-badge-security]][sonar-home] [![Quality Gate Status][sonar-badge-quality]][sonar-home]  
+
 ESP32 library to access [Azure IoT Services](https://azure.microsoft.com/en-us/solutions/iot), using the [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos) interface, in an easier and cleaner way.  
 Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html) and connect!  
 
 ## Characteristics
 
-* ESP-IDF: [v5.1](https://docs.espressif.com/projects/esp-idf/en/v5.1/esp32/index.html)
+* ESP-IDF: [v5.3](https://docs.espressif.com/projects/esp-idf/en/v5.3/esp32/index.html)
 * Written in **C** using:
   * [ESP-IDF Framework](https://github.com/espressif/esp-idf)
   * [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)
@@ -100,3 +101,15 @@ void app_main(void)
     ESP_LOGI(TAG, "device_id: %.*s", (int)device_id.length, (char *)device_id.buffer);
 }
 ```
+
+## Contributing
+
+To contribute to this project make sure to read our [CONTRIBUTING.md](/docs/CONTRIBUTING.md) file.
+
+[git-bagdge-release]: https://github.com/gfurtadoalmeida/esp32-iot-azure/actions/workflows/release.yml/badge.svg
+[git-release]: https://github.com/gfurtadoalmeida/esp32-iot-azure/releases
+[sonar-badge-bugs]: https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=bugs
+[sonar-badge-quality]: https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=alert_status
+[sonar-badge-security]: https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=security_rating
+[sonar-badge-smells]: https://sonarcloud.io/api/project_badges/measure?project=esp32_iot_azure&metric=code_smells
+[sonar-home]: https://sonarcloud.io/project/overview?id=esp32_iot_azure
