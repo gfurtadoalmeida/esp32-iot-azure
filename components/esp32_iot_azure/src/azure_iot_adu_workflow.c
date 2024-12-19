@@ -14,7 +14,7 @@ static AzureIoTResult_t azure_adu_workflow_cancel_update(azure_adu_workflow_t *c
 static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre_requisites(const azure_adu_workflow_t *context);
 static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context,
                                                                      buffer_t *download_buffer,
-                                                                     uint16_t chunck_size,
+                                                                     uint16_t chunk_size,
                                                                      azure_adu_workflow_download_progress_callback_t callback,
                                                                      void *callback_context);
 static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflow_t *context);
@@ -129,7 +129,7 @@ AzureIoTResult_t azure_adu_workflow_process_update_request(azure_adu_workflow_t 
 
 AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
                                                   buffer_t *download_buffer,
-                                                  uint16_t chunck_size,
+                                                  uint16_t chunk_size,
                                                   azure_adu_workflow_download_progress_callback_t callback,
                                                   void *callback_context)
 {
@@ -145,9 +145,9 @@ AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
         return eAzureIoTErrorInvalidArgument;
     }
 
-    if (download_buffer->length < chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES)
+    if (download_buffer->length < chunk_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES)
     {
-        CMP_LOGE(TAG_AZ_ADU_WKF, "not enough memory on download_buffer: has %lu needs %u", download_buffer->length, chunck_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES);
+        CMP_LOGE(TAG_AZ_ADU_WKF, "not enough memory on download_buffer: has %lu needs %u", download_buffer->length, chunk_size + ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES);
         return eAzureIoTErrorInvalidArgument;
     }
 
@@ -179,7 +179,7 @@ AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
 
     if ((result = azure_adu_workflow_download_and_enable_image(context,
                                                                download_buffer,
-                                                               chunck_size,
+                                                               chunk_size,
                                                                callback,
                                                                callback_context)) != eAzureIoTSuccess)
     {
@@ -290,7 +290,7 @@ static AzureIoTADURequestDecision_t azure_adu_workflow_validate_installation_pre
 
 static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_workflow_t *context,
                                                                      buffer_t *download_buffer,
-                                                                     uint16_t chunck_size,
+                                                                     uint16_t chunk_size,
                                                                      azure_adu_workflow_download_progress_callback_t callback,
                                                                      void *callback_context)
 {
@@ -321,7 +321,7 @@ static AzureIoTResult_t azure_adu_workflow_download_and_enable_image(azure_adu_w
     if ((result = azure_adu_file_download(&parsed_url,
                                           download_buffer->buffer,
                                           download_buffer->length,
-                                          chunck_size,
+                                          chunk_size,
                                           &download_callback_write_to_flash,
                                           &download_context,
                                           &image.image_size)) != eAzureIoTSuccess)
@@ -385,8 +385,8 @@ static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflo
     return eAzureIoTSuccess;
 }
 
-static bool download_callback_write_to_flash(uint8_t *chunck,
-                                             uint32_t chunck_length,
+static bool download_callback_write_to_flash(uint8_t *chunk,
+                                             uint32_t chunk_length,
                                              uint32_t start_offset,
                                              uint32_t resource_size,
                                              void *callback_context)
@@ -395,8 +395,8 @@ static bool download_callback_write_to_flash(uint8_t *chunck,
 
     if (AzureIoTPlatform_WriteBlock(context->image,
                                     start_offset,
-                                    chunck,
-                                    chunck_length) != eAzureIoTSuccess)
+                                    chunk,
+                                    chunk_length) != eAzureIoTSuccess)
     {
         CMP_LOGE(TAG_AZ_ADU_WKF, "failure writing to flash");
         return false;
@@ -404,7 +404,7 @@ static bool download_callback_write_to_flash(uint8_t *chunck,
 
     if (context->callback != NULL)
     {
-        context->callback(start_offset + chunck_length, resource_size, context->callback_context);
+        context->callback(start_offset + chunk_length, resource_size, context->callback_context);
     }
 
     return true;

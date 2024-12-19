@@ -51,7 +51,7 @@ AzureIoTResult_t azure_adu_file_parse_url(AzureIoTADUUpdateManifestFileUrl_t *fi
 AzureIoTResult_t azure_adu_file_download(parsed_file_url_t *parsed_url,
                                          uint8_t *data_buffer,
                                          uint32_t data_buffer_length,
-                                         uint16_t chunck_size,
+                                         uint16_t chunk_size,
                                          azure_http_download_callback_t callback,
                                          void *callback_context,
                                          uint32_t *file_size)
@@ -77,7 +77,7 @@ AzureIoTResult_t azure_adu_file_download(parsed_file_url_t *parsed_url,
         result = azure_http_download_resource(http,
                                               (char *)data_buffer,
                                               data_buffer_length,
-                                              chunck_size,
+                                              chunk_size,
                                               callback,
                                               callback_context,
                                               *file_size) == eAzureIoTHTTPSuccess

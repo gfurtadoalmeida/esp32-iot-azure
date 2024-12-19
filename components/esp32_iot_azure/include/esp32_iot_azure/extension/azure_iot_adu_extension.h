@@ -10,6 +10,9 @@ extern "C"
 {
 #endif
 
+    /**
+     * @brief URL of a parsed @ref AzureIoTADUUpdateManifestFileUrl_t.
+     */
     typedef struct
     {
         uint8_t *hostname;        /** @brief Pointer to the point in the buffer where the hostname starts. */
@@ -36,8 +39,8 @@ extern "C"
      * @param[in] parsed_url Parsed url of the file to be downloaded.
      * @param[in,out] data_buffer The buffer into which the response header and payload will be placed.
      * @param[in] data_buffer_length The length of \p data_buffer.
-     * @param[in] chunck_size How many bytes should be read per range request.
-     * @param[in] callback Callback invoked when a resource chunck is downloaded.
+     * @param[in] chunk_size How many bytes should be read per range request.
+     * @param[in] callback Callback invoked when a resource chunk is downloaded.
      * @param[in] callback_context Pointer to a context to pass to the callback.
      * @param[in] file_size Pointer to where to store the file total size.
      * @return @ref AzureIoTResult_t with the result of the operation.
@@ -45,7 +48,7 @@ extern "C"
     AzureIoTResult_t azure_adu_file_download(parsed_file_url_t *parsed_url,
                                              uint8_t *data_buffer,
                                              uint32_t data_buffer_length,
-                                             uint16_t chunck_size,
+                                             uint16_t chunk_size,
                                              azure_http_download_callback_t callback,
                                              void *callback_context,
                                              uint32_t *file_size);

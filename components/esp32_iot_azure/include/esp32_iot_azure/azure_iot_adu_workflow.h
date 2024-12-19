@@ -77,19 +77,19 @@ extern "C"
 
   /**
    * @brief Accept and download a pending update.
-   * @note The update is downloaded in blocks, and \p chunck_size sets the block size.
+   * @note The update is downloaded in blocks, and \p chunk_size sets the block size.
    * @details It needs extra bytes on the \p download_buffer to hold the HTTP response headers.
    * @param[in] context Workflow context.
    * @param[in] download_buffer Buffer used for the download operation. Must have at least
-   * ( \p chunck_size + @ref ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES ) bytes.
-   * @param[in] chunck_size How many bytes should be read per request.
+   * ( \p chunk_size + @ref ADU_WORKFLOW_DOWNLOAD_BUFFER_EXTRA_BYTES ) bytes.
+   * @param[in] chunk_size How many bytes should be read per request.
    * @param[in] callback Callback to be invoked on download progress.
    * @param[in] callback_context Pointer to a context to pass to the callback.
    * @return @ref AzureIoTResult_t with the result of the operation.
    */
   AzureIoTResult_t azure_adu_workflow_accept_update(azure_adu_workflow_t *context,
                                                     buffer_t *download_buffer,
-                                                    uint16_t chunck_size,
+                                                    uint16_t chunk_size,
                                                     azure_adu_workflow_download_progress_callback_t callback,
                                                     void *callback_context);
 
