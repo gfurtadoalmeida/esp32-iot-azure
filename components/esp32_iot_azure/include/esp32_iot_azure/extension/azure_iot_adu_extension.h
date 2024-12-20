@@ -11,6 +11,7 @@ extern "C"
 #endif
 
     /**
+     * @typedef parsed_file_url_t
      * @brief URL of a parsed @ref AzureIoTADUUpdateManifestFileUrl_t.
      */
     typedef struct

@@ -79,7 +79,7 @@ extern "C"
      * @brief Establish a connection to a server.
      * @note The connection must be closed by @ref transport_disconnect.
      * @param[in] transport Transport context.
-     * @param[in] hostname Server address. Must be null-terminated.
+     * @param[in] hostname Server address. Must be null-terminated and remain in memory as long as the connection is active.
      * @param[in] port Server port.
      * @param[in] timeout_ms Connection timeout in milliseconds.
      * @return @ref transport_status_t with the result of the operation.
