@@ -62,6 +62,7 @@ jobs:
       with:
         allowUpdates: true
         artifacts: "${{env.ZIP_NAME}}"
+        generateReleaseNotes: true
         makeLatest: true
         name: ESP32 IoT Azure ${{github.ref_name}}
         removeArtifacts: false
