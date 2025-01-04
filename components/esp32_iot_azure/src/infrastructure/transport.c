@@ -19,7 +19,7 @@ struct transport_t
 {
     esp_transport_handle_t handle; /** @brief ESP transport handle. */
     const char *hostname;          /** @brief Server address. Must be null-terminated. */
-    uint16_t port;                 /** @brief Server port */
+    uint16_t port;                 /** @brief Server port. */
     uint16_t timeout_ms;           /** @brief Connection timeout in milliseconds. */
 };
 
