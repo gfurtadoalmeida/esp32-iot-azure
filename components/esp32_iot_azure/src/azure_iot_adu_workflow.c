@@ -353,17 +353,17 @@ static AzureIoTResult_t azure_adu_workflow_send_update_results(azure_adu_workflo
         {
             .lResultCode = 200,
             .lExtendedResultCode = 200,
-            .pucResultDetails = (uint8_t *)"device updated",
+            .pucResultDetails = (const uint8_t *)"device updated",
             .ulResultDetailsLength = sizeof("device updated") - 1,
             .ulStepResultsCount = context->update_request.xUpdateManifest.xInstructions.ulStepsCount};
 
     // The order of the step results must match the order of the steps
     // in the the update manifest instructions.
-    for (int32_t step_index = 0; step_index < update_results.ulStepResultsCount; step_index++)
+    for (int32_t step_index = 0; step_index < update_results.ulStepResultsCount && step_index < _az_IOT_ADU_CLIENT_MAX_INSTRUCTIONS_STEPS; step_index++)
     {
         update_results.pxStepResults[step_index].ulResultCode = 200;
         update_results.pxStepResults[step_index].ulExtendedResultCode = 200;
-        update_results.pxStepResults[step_index].pucResultDetails = (uint8_t *)"device updated";
+        update_results.pxStepResults[step_index].pucResultDetails = (const uint8_t *)"device updated";
         update_results.pxStepResults[step_index].ulResultDetailsLength = sizeof("device updated") - 1;
     }
 

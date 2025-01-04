@@ -5,7 +5,7 @@ AzureIoTResult_t AzureIoTMessage_PropertiesAppendComponentName(AzureIoTMessagePr
                                                                uint32_t component_name_length)
 {
     return AzureIoTMessage_PropertiesAppend(message_properties,
-                                            (uint8_t *)"$.sub",
+                                            (const uint8_t *)"$.sub",
                                             sizeof("$.sub") - 1,
                                             component_name,
                                             component_name_length);
@@ -16,7 +16,7 @@ AzureIoTResult_t AzureIoTMessage_PropertiesAppendContentType(AzureIoTMessageProp
                                                              uint32_t content_type_length)
 {
     return AzureIoTMessage_PropertiesAppend(message_properties,
-                                            (uint8_t *)"$.ct",
+                                            (const uint8_t *)"$.ct",
                                             sizeof("$.ct") - 1,
                                             content_type,
                                             content_type_length);
@@ -27,7 +27,7 @@ AzureIoTResult_t AzureIoTMessage_PropertiesAppendContentEncoding(AzureIoTMessage
                                                                  uint32_t content_encoding_length)
 {
     return AzureIoTMessage_PropertiesAppend(message_properties,
-                                            (uint8_t *)"$.ce",
+                                            (const uint8_t *)"$.ce",
                                             sizeof("$.ce") - 1,
                                             content_encoding,
                                             content_encoding_length);
