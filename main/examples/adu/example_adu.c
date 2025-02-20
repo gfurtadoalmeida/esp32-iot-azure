@@ -33,7 +33,7 @@ static example_context_t EXAMPLE_CONTEXT = {
     .restart_command_called = false};
 ;
 
-static void callback_cloud_properties_subscription(const AzureIoTHubClientPropertiesResponse_t *message, void *callback_context);
+static void callback_cloud_properties_subscription(AzureIoTHubClientPropertiesResponse_t *message, void *callback_context);
 
 static AzureIoTResult_t device_report_initial_state(example_context_t *context);
 static AzureIoTResult_t device_change_state(example_context_t *context, const AzureIoTHubClientPropertiesResponse_t *message, uint32_t *version);
@@ -190,7 +190,7 @@ CLEAN_UP:
 // SUBSCRIPTION CALLBACKS
 //
 
-static void callback_cloud_properties_subscription(const AzureIoTHubClientPropertiesResponse_t *message, void *callback_context)
+static void callback_cloud_properties_subscription(AzureIoTHubClientPropertiesResponse_t *message, void *callback_context)
 {
     example_context_t *context = (example_context_t *)callback_context;
     uint32_t version = 0;
