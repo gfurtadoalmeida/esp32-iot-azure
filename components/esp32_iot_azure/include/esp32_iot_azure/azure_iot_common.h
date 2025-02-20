@@ -15,24 +15,28 @@ extern "C"
 /**
  * @brief IoT Hub hostname max length.
  * @note Does not include null termination.
+ * @note [Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules#microsoftdevices)
  */
-#define AZURE_CONST_HOSTNAME_MAX_LENGTH 128U
+#define AZURE_CONST_HOSTNAME_MAX_LENGTH (50 + sizeof(".azure-devices.net") - 1)
 
 /**
  * @brief IoT device id max length.
  * @note Does not include null termination.
+ * @note [Documentation](https://learn.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry#device-identity-properties)
  */
 #define AZURE_CONST_DEVICE_ID_MAX_LENGTH 128U
 
 /**
  * @brief IoT device registration id max length.
  * @note Does not include null termination.
+ * @note [Documentation](https://learn.microsoft.com/en-us/azure/iot-dps/concepts-service#individual-enrollment)
  */
 #define AZURE_CONST_REGISTRATION_ID_MAX_LENGTH 128U
 
 /**
  * @brief IoT device symmetric key max length.
  * @note Does not include null termination.
+ * @note [Documentation](https://learn.microsoft.com/en-us/azure/iot-dps/concepts-symmetric-key-attestation?tabs=windows#symmetric-key-creation)
  */
 #define AZURE_CONST_SYMMETRIC_KEY_MAX_LENGTH 128U
 
@@ -101,8 +105,7 @@ extern "C"
 #define BUFFER_FROM_LITERAL(text)   \
     {                               \
         .length = sizeof(text) - 1, \
-        .buffer = (uint8_t *)text   \
-    }
+        .buffer = (uint8_t *)text}
 
 /**
  * @brief Create a @ref buffer_t from a fixed size array.
@@ -114,8 +117,7 @@ extern "C"
 #define BUFFER_FROM_FIXED_ARRAY(fixed_size_array) \
     {                                             \
         .length = sizeof(fixed_size_array),       \
-        .buffer = fixed_size_array                \
-    }
+        .buffer = fixed_size_array}
 
 #ifndef __cplusplus
 // C++ compound literal semantic differs from C,
