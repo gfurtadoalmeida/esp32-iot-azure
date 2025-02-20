@@ -7,7 +7,7 @@ Just clone, configure using [menuconfig](https://docs.espressif.com/projects/esp
 
 ## Characteristics
 
-* ESP-IDF: [v5.3](https://docs.espressif.com/projects/esp-idf/en/v5.3/esp32/index.html)
+* ESP-IDF: [v5.4](https://docs.espressif.com/projects/esp-idf/en/v5.4/esp32/index.html)
 * Written in **C** using:
   * [ESP-IDF Framework](https://github.com/espressif/esp-idf)
   * [Azure IoT Middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos)

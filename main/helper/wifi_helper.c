@@ -19,7 +19,7 @@ static bool s_wifi_response_gotten = false;
 static bool s_wifi_connected = false;
 static esp_netif_t *s_netif = NULL;
 
-static void handle_wifi_event(void const *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+static void handle_wifi_event(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 
 bool helper_wifi_init()
 {
@@ -82,7 +82,7 @@ bool helper_wifi_deinit()
     return true;
 }
 
-static void handle_wifi_event(void const *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+static void handle_wifi_event(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
     ESP_LOGI(TAG_HELPER_WIFI, "wifi event");
 
