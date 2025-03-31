@@ -1,0 +1,71 @@
+name: CBMC starter kit release
+on:
+  push:
+    tags:
+      - starterkit-*
+env:
+  AWS_ROLE: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/PublisherTokenReader
+  AWS_REGION: us-west-2
+
+jobs:
+  Release:
+    name: CBMC starter kit release
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Get version
+        run: |
+          # The environment variable GITHUB_REF is refs/tags/starterkit-*
+          echo "SETUP_VERSION=$(python3 -c "import configparser; config = configparser.ConfigParser(); config.read('setup.cfg'); print(config['metadata']['version'])")" >> $GITHUB_ENV
+          echo "SOURCE_VERSION=$(python3 -c "import src.cbmc_starter_kit.version; print(src.cbmc_starter_kit.version.NUMBER)")" >> $GITHUB_ENV
+          echo "TAG_VERSION=$(echo ${{ github.ref }} | cut -d "/" -f 3 | cut -d "-" -f 2)" >> $GITHUB_ENV
+      - name: Version check
+        run: |
+          if [[ ${{ env.SETUP_VERSION }} != ${{ env.TAG_VERSION }} ]] || [[ ${{ env.SOURCE_VERSION }} != ${{ env.TAG_VERSION }} ]]; then
+            echo "Setup and source versions ${{env.SETUP_VERSION}} and ${{env.SOURCE_VERSION}} did not match tag version ${{env.TAG_VERSION}}"
+            exit 1
+          fi
+      - name: Authenticate GitHub workflow to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Fetch secrets
+        run: |
+          github_token="$(aws secretsmanager get-secret-value --secret-id RELEASE_CI_ACCESS_TOKEN | jq -r '.SecretString')"
+          echo "::add-mask::$github_token"
+          echo "GITHUB_TOKEN=$github_token" >> $GITHUB_ENV
+      - name: Create release
+        uses: actions/create-release@v1
+        with:
+          tag_name: starterkit-${{ env.TAG_VERSION }}
+          release_name: starterkit-${{ env.TAG_VERSION }}
+          body: |
+            This is the CBMC Starter Kit version ${{ env.TAG_VERSION }}.
+
+            The [CBMC starter kit](https://model-checking.github.io/cbmc-starter-kit/) makes it easy to add [CBMC](https://github.com/diffblue/cbmc) verification to a software project. See the [starter kit tutorial](https://model-checking.github.io/cbmc-training/starter-kit/overview/index.html) for an example of how to use the starter kit.
+
+            On MacOS, you can install with brew.  Install with
+            ```
+              brew tap aws/tap
+              brew install cbmc-starter-kit
+            ```
+            and upgrade to the latest version with
+            ```
+              brew upgrade cbmc-starter-kit
+            ```
+
+            On all machines, you can install with pip.  Install with
+            ```
+              python3 -m pip install cbmc-starter-kit
+            ```
+            and upgrade to the latest version with
+            ```
+              python3 -m pip install --upgrade cbmc-starter-kit
+            ```
+          draft: false
+          prerelease: false

@@ -1,0 +1,199 @@
+# See following documentations for more information -
+
+# Creation and maintenance of personal taps:
+# https://docs.brew.sh/How-to-Create-and-Maintain-a-Tap
+
+# More information about bottles:
+# https://docs.brew.sh/Bottles
+
+# Create a tap with automatic tests and bottle creation workflows:
+# https://brew.sh/2020/11/18/homebrew-tap-with-bottles-uploaded-to-github-releases/
+
+# This workflow can be used to perform certain tasks from main repository rather
+# than a Tap -
+#     - Formula Syntax Check
+#     - Run brew test-bot for testing and bottle creation
+#       (and upload bottles to release which triggered this workflow)
+#     - Add commit on top of PR created by brew bump-formla-pr to add generate
+#       bottle DSL to formula
+
+# USAGE:
+#   Copy this workflow to .github/workflows of your repository and update
+#   following variables in env below -
+#     - FORMULA
+#     - TAP
+#     - BOT_USER
+#     - BOT_EMAIL
+#     - BOT_TOKEN
+
+# NOTE:
+#   In case any other changes are required in the formula such as -
+#     - Updating python dependencies
+#     - Updating brew dependencies
+#     - Updating test
+#     - Updating Install block etc
+#   Make sure to merge those changes before this workflow gets triggered as this
+#   workflow will bump the formula and also create bottles right away
+#   automatically.
+
+
+name: Release to brew
+on:
+  release:
+    types: [created]
+
+env:
+  FORMULA: cbmc-starter-kit
+  TAP: aws/tap
+  BOT_USER: cbmc-starter-kit-release-ci
+  RELEASE_TAG: ${GITHUB_REF/refs\/tags\/} # GITHUB_REF = refs/tags/STRING-MAJOR.MINOR
+  VERSION: $(echo $GITHUB_REF | cut -d "/" -f 3 | cut -d "-" -f 2)
+  AWS_ROLE: arn:aws:iam::${{secrets.AWS_ACCOUNT}}:role/PublisherTokenReader
+  AWS_REGION: us-west-2
+
+jobs:
+  homebrew-pr:
+    name: Homebrew Bump Formula PR
+    runs-on: macos-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Authenticate GitHub workflow to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Fetch secrets
+        run: |
+          bot_email=$(aws secretsmanager get-secret-value --secret-id BOT_EMAIL | jq -r '.SecretString')
+          echo "::add-mask::$bot_email"
+          echo "BOT_EMAIL=$bot_email" >> $GITHUB_ENV
+          homebrew_github_api_token=$(aws secretsmanager get-secret-value --secret-id RELEASE_CI_ACCESS_TOKEN | jq -r '.SecretString')
+          echo "::add-mask::$homebrew_github_api_token"
+          echo "HOMEBREW_GITHUB_API_TOKEN=$homebrew_github_api_token" >> $GITHUB_ENV
+
+      - name: Configure git user name and email
+        run: |
+          git config --global user.name ${{ env.BOT_USER }}
+          git config --global user.email ${{ env.BOT_EMAIL }}
+
+      - name: Create homebrew PR
+        run: |
+          brew tap ${{ env.TAP }}
+          brew update-reset
+          brew bump-formula-pr --tag "${{ env.RELEASE_TAG }}" --revision "${{ github.sha }}" ${{ env.TAP }}/${{ env.FORMULA }} --force
+
+  build-bottle:
+    needs: homebrew-pr
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Authenticate GitHub workflow to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Fetch secrets
+        run: |
+          fork_repo="https://$(aws secretsmanager get-secret-value --secret-id RELEASE_CI_ACCESS_TOKEN | jq -r '.SecretString')@github.com/${{ env.BOT_USER }}/homebrew-$(echo ${{ env.TAP }} |cut -d / -f 2).git"
+          echo "::add-mask::$fork_repo"
+          echo "FORK_REPO=$fork_repo" >> $GITHUB_ENV
+          github_token="$(aws secretsmanager get-secret-value --secret-id RELEASE_CI_ACCESS_TOKEN | jq -r '.SecretString')"
+          echo "::add-mask::$github_token"
+          echo "GITHUB_TOKEN=$github_token" >> $GITHUB_ENV
+
+      - name: Set up Python
+        # The GitHub action actions/setup-python@v4 installs CPython 3.10
+        run: |
+          brew install --overwrite python@3.10
+
+      - name: Checkout PR
+        run: |
+          brew tap ${{ env.TAP }}
+          brew update-reset
+          cd $(brew --repo ${{ env.TAP }})
+          git remote add fork-repo ${{ env.FORK_REPO }}
+          git fetch fork-repo
+          git checkout -B bump-${{ env.FORMULA }}-${{ env.VERSION }} fork-repo/bump-${{ env.FORMULA }}-${{ env.VERSION }}
+
+      - name: Tap Syntax
+        run: |
+          brew audit --online --git --skip-style ${{ env.TAP }}/${{ env.FORMULA }}
+          brew style ${{ env.TAP }}/${{ env.FORMULA }}
+
+      - name: Build bottle
+        run: |
+          brew test-bot --tap ${{ env.TAP }} --testing-formulae ${{ env.TAP }}/${{ env.FORMULA }} --only-formulae --root-url=https://github.com/${{ github.repository }}/releases/download/${{ env.RELEASE_TAG }}
+
+      - name: Get Package Path
+        id: get_package_path
+        run: |
+          echo "bottle_name=$(ls *.tar.gz)" >> $GITHUB_OUTPUT
+
+      - name: Upload bottles as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bottle-${{ matrix.os }}
+          path: '*.bottle.*'
+
+      - name: Upload release binary
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.get_package_path.outputs.bottle_name }}
+
+  update-pr:
+    needs: build-bottle
+    runs-on: macos-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: bottle-*
+
+    - name: Authenticate GitHub workflow to AWS
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ env.AWS_ROLE }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Fetch secrets
+      run: |
+        bot_email="$(aws secretsmanager get-secret-value --secret-id BOT_EMAIL | jq -r '.SecretString')"
+        echo "::add-mask::$bot_email"
+        echo "BOT_EMAIL=$bot_email" >> $GITHUB_ENV
+        fork_repo="https://$(aws secretsmanager get-secret-value --secret-id RELEASE_CI_ACCESS_TOKEN | jq -r '.SecretString')@github.com/${{ env.BOT_USER }}/homebrew-$(echo ${{ env.TAP }} |cut -d / -f 2).git"
+        echo "::add-mask::$fork_repo"
+        echo "FORK_REPO=$fork_repo" >> $GITHUB_ENV
+
+    - name: Configure git user name and email
+      run: |
+        git config --global user.name ${{ env.BOT_USER }}
+        git config --global user.email ${{ env.BOT_EMAIL }}
+
+    - name: Checkout PR
+      run: |
+        brew tap ${{ env.TAP }}
+        brew update-reset
+        cd $(brew --repo ${{ env.TAP }})
+        git remote add fork-repo ${{ env.FORK_REPO }}
+        git fetch fork-repo
+        git checkout -B bump-${{ env.FORMULA }}-${{ env.VERSION }} fork-repo/bump-${{ env.FORMULA }}-${{ env.VERSION }}
+
+    - name: Generate and merge bottle DSL
+      run: |
+        brew bottle --merge --write $(ls bottle-*/*.json)
+        cd $(brew --repo ${{ env.TAP }})
+        git push fork-repo bump-${{ env.FORMULA }}-${{ env.VERSION }}

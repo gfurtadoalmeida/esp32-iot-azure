@@ -1,7 +1,3 @@
-# Azure SDK
-
-components/esp32_iot_azure/.sdk/azure-iot-middleware-freertos
-
 # ESP-IDF project files
 **/build
 **/sdkconfig

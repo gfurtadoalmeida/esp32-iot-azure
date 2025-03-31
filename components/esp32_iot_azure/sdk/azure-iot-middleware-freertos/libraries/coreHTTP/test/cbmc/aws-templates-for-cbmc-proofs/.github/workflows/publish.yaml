@@ -1,0 +1,30 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT
+
+name: Publish cbmc-starter-kit documentation
+on:
+  push:
+    branches:
+      - 'documentation'
+
+jobs:
+  publish:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install mdbook
+        run: brew install mdbook
+
+      - name: Build documentation
+        run: cd docs && mdbook build && touch book/.nojekyll
+
+      - name: Publish documentation
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
+        with:
+          branch: gh-pages
+          folder: docs/book/
+
+# This conditional might be useful on the publish step in the future
+#       if: ${{ github.event_name == 'push' && startsWith('refs/heads/master', github.ref) }}

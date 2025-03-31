@@ -1,0 +1,338 @@
+#!/usr/bin/env python3
+#
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# A copy of the License is located at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# or in the "license" file accompanying this file. This file is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+
+
+import argparse
+import asyncio
+import dataclasses
+import importlib
+import logging
+import math
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import uuid
+
+DESCRIPTION = "Execute e2e and unit tests for Litani"
+
+
+def get_args():
+    pars = argparse.ArgumentParser(description=DESCRIPTION)
+    for arg in [{
+            "flags": ["--output-dir"],
+            "help": "output dir for test results",
+            "default": pathlib.Path(__file__).resolve().parent / "output",
+            "type": pathlib.Path
+        }, {
+            "flags": ["--fast"],
+            "help": "run fast tests only",
+            "action": "store_true"
+        }]:
+        flags = arg.pop("flags")
+        pars.add_argument(*flags, **arg)
+    return pars.parse_args()
+
+
+async def run_cmd(cmd):
+    proc = await asyncio.create_subprocess_exec(
+        str(cmd[0]), *[str(arg) for arg in cmd[1:]])
+    await proc.wait()
+    if proc.returncode:
+        logging.error(
+            "Failed to run command '%s'", " ".join([str(c) for c in cmd]))
+        sys.exit(1)
+
+
+def is_slow_test(module_file):
+    try:
+        return importlib.import_module(str(module_file.stem)).SLOW
+    except AttributeError:
+        logging.error("Variable SLOW is missing from: %s", module_file.name)
+        sys.exit(1)
+
+
+def has_phony_add_jobs(module_file):
+    try:
+        return importlib.import_module(str(module_file.stem)).PHONY_ADD_JOBS
+    except AttributeError:
+        pass
+    return False
+
+
+async def litani_add(litani, **kwargs):
+    cmd = [litani, "add-job"]
+    for arg, value in kwargs.items():
+        switch = re.sub("_", "-", arg)
+        cmd.append(f"--{switch}")
+        if isinstance(value, list):
+            cmd.extend(value)
+        else:
+            cmd.append(value)
+    await run_cmd(cmd)
+
+
+def collapse(string):
+    return re.sub(r"\s+", " ", string)
+
+
+
+@dataclasses.dataclass
+class TestFileMethodChecker:
+    test_file: pathlib.Path
+
+    def __call__(self, meth_name):
+        pat = f"def {meth_name}("   # ) <- for syntax highlighting
+        with open(self.test_file) as handle:
+            for line in handle:
+                if line.strip().startswith(pat):
+                    return True
+        return False
+
+
+def enqueue_job(queue, **kwargs):
+    queue.put_nowait(kwargs)
+
+
+
+def add_e2e_tests(test_dir, output_dir, fast, queue, litani):
+    e2e_test_dir = test_dir / "e2e"
+    # 4 jobs per test (init, add-jobs, run-build, check-run)
+    # skip __init__.py and __pycache__
+    sys.path.insert(1, str(e2e_test_dir / "tests"))
+
+    for test_file in (e2e_test_dir / "tests").iterdir():
+        if test_file.name in ["__init__.py", "__pycache__"]:
+            continue
+
+        test_has_method = TestFileMethodChecker(test_file)
+
+        if fast and is_slow_test(test_file):
+            continue
+
+        run_dir = output_dir / "e2e_outputs" / str(uuid.uuid4())
+
+        timeout=10 if fast else 0
+
+        enqueue_job(
+            queue,
+            command=collapse(f"""
+                {e2e_test_dir / 'run'}
+                --test-file {test_file}
+                --litani {litani}
+                --run-dir {run_dir}
+                --operation init"""),
+            pipeline=f"e2e_{test_file.stem}",
+            ci_stage="test",
+            description=f"{test_file.stem}: init",
+            outputs=run_dir / ".litani_cache_dir",
+            cwd=run_dir,
+            timeout=timeout)
+
+        add_jobs_output = str(uuid.uuid4())
+        add_jobs_kwargs = {
+            "phony_outputs": [add_jobs_output],
+        }
+        jobs_output = f"{run_dir}/output/jobs"
+        if has_phony_add_jobs(test_file):
+            add_jobs_kwargs["phony_outputs"].append(jobs_output)
+        else:
+            add_jobs_kwargs["outputs"] = [jobs_output]
+
+        enqueue_job(
+            queue,
+            command=collapse(f"""
+                {e2e_test_dir / 'run'}
+                --test-file {test_file}
+                --litani {litani}
+                --run-dir {run_dir}
+                --operation add-jobs"""),
+            pipeline=f"e2e_{test_file.stem}",
+            ci_stage="test",
+            description=f"{test_file.stem}: add jobs",
+            inputs=run_dir / ".litani_cache_dir",
+            cwd=run_dir,
+            timeout=timeout,
+            **add_jobs_kwargs)
+
+        run_build_dependencies = [add_jobs_output]
+        if test_has_method("transform_jobs"):
+            transform_jobs_output = str(uuid.uuid4())
+            enqueue_job(
+                queue,
+                command=collapse(f"""
+                    {e2e_test_dir / 'run'}
+                    --test-file {test_file}
+                    --litani {litani}
+                    --run-dir {run_dir}
+                    --operation transform-jobs"""),
+                pipeline=f"e2e_{test_file.stem}",
+                ci_stage="test",
+                description=f"{test_file.stem}: transform jobs",
+                inputs=add_jobs_output,
+                phony_outputs=transform_jobs_output,
+                cwd=run_dir)
+            run_build_dependencies.append(transform_jobs_output)
+
+        if test_has_method("check_get_jobs"):
+            get_jobs_output = str(uuid.uuid4())
+            enqueue_job(
+                queue,
+                command=collapse(f"""
+                    {e2e_test_dir / 'run'}
+                    --test-file {test_file}
+                    --litani {litani}
+                    --run-dir {run_dir}
+                    --operation get-jobs"""),
+                pipeline=f"e2e_{test_file.stem}",
+                ci_stage="test",
+                description=f"{test_file.stem}: get jobs",
+                inputs=add_jobs_output,
+                phony_outputs=get_jobs_output,
+                cwd=run_dir)
+            run_build_dependencies.append(get_jobs_output)
+
+        if test_has_method("get_set_jobs_args"):
+            set_jobs_output = str(uuid.uuid4())
+            enqueue_job(
+                queue,
+                command=collapse(f"""
+                    {e2e_test_dir / 'run'}
+                    --test-file {test_file}
+                    --litani {litani}
+                    --run-dir {run_dir}
+                    --operation set-jobs"""),
+                pipeline=f"e2e_{test_file.stem}",
+                ci_stage="test",
+                description=f"{test_file.stem}: set jobs",
+                inputs=add_jobs_output,
+                phony_outputs=set_jobs_output,
+                cwd=run_dir)
+            run_build_dependencies.append(set_jobs_output)
+
+        enqueue_job(
+            queue,
+            command=collapse(f"""
+                {e2e_test_dir / 'run'}
+                --test-file {test_file}
+                --litani {litani}
+                --run-dir {run_dir}
+                --operation run-build"""),
+            pipeline=f"e2e_{test_file.stem}",
+            ci_stage="test",
+            description=f"{test_file.stem}: run build",
+            inputs=run_build_dependencies,
+            outputs=f"{run_dir}/output/run.json",
+            cwd=run_dir,
+            timeout=timeout)
+
+        enqueue_job(
+            queue,
+            command=collapse(f"""
+                {e2e_test_dir / 'run'}
+                --test-file {test_file}
+                --litani {litani}
+                --run-dir {run_dir}
+                --operation check-run"""),
+            pipeline=f"e2e_{test_file.stem}",
+            ci_stage="report",
+            description=f"{test_file.stem}: check run",
+            inputs=f"{run_dir}/output/run.json",
+            cwd=run_dir,
+            timeout=timeout)
+
+
+def add_unit_tests(test_dir, root_dir, queue):
+    for fyle in (test_dir / "unit").iterdir():
+        if fyle.name in ["__init__.py", "__pycache__"]:
+            continue
+        enqueue_job(
+            queue,
+            command=f"python3 -m unittest test.unit.{fyle.stem}",
+            pipeline="Unit tests",
+            ci_stage="test",
+            description=fyle.stem,
+            cwd=root_dir)
+
+
+
+@dataclasses.dataclass
+class Counter:
+    total: int
+    added: int = 0
+    width: int = 0
+
+
+    def __post_init__(self):
+        self.width = int(math.log10(self.total)) + 1
+
+
+    def bump(self):
+        self.added += 1
+        msg = "\r{added:{width}}/{total:{width}} tests added".format(
+            added=self.added, total=self.total, width=self.width)
+        print(msg, end="", file=sys.stderr)
+
+
+
+async def drain_job_queue(queue, counter, litani):
+    while True:
+        args = await queue.get()
+        await litani_add(litani, **args)
+        counter.bump()
+        queue.task_done()
+
+
+def get_pool_size():
+    ret = os.cpu_count()
+    if ret is None or ret < 4:
+        return 1
+    return ret - 2
+
+
+async def main():
+    args = get_args()
+    logging.basicConfig(format="\nrun-tests: %(message)s")
+    test_dir = pathlib.Path(__file__).resolve().parent
+    root = test_dir.parent
+    litani = root / "litani"
+
+    output_dir = args.output_dir.resolve()
+    output_dir.mkdir(exist_ok=True, parents=True)
+    os.chdir(output_dir)
+
+    await run_cmd([
+        litani, "init",
+        "--project", "Litani Test Suite",
+        "--output-prefix", ".",
+        "--output-symlink", "latest"])
+
+    job_queue = asyncio.Queue()
+    add_unit_tests(test_dir, root, job_queue)
+    add_e2e_tests(test_dir, output_dir, args.fast, job_queue, litani)
+
+    counter =  Counter(job_queue.qsize())
+    tasks = []
+    for _ in range(get_pool_size()):
+        task = asyncio.create_task(drain_job_queue(job_queue, counter, litani))
+        tasks.append(task)
+    await job_queue.join()
+    print("", file=sys.stderr)
+    await run_cmd([litani, "run-build", "--fail-on-pipeline-failure"])
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -1,4 +1,4 @@
-set(SDK_PATH ".sdk")
+set(SDK_PATH "sdk")
 
 set(AZURE_IOT_MIDDLEWARE_FREERTOS ${SDK_PATH}/azure-iot-middleware-freertos)
 set(AZURE_IOT_MIDDLEWARE_FREERTOS_CONFIGS ${SDK_PATH}/config)

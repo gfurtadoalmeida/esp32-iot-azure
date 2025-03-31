@@ -1,0 +1,38 @@
+name: Run Litani Tests
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [ release, develop ]
+
+jobs:
+  test-litani:
+    if: "!contains(github.event.pull_request.labels.*.name, 'no-test')"
+    name: Run Litani Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y ninja-build
+          python3 -m pip install jinja2
+
+      - name: Run Unit and e2e tests
+        run: |
+          ./test/run
+          exit $?
+
+  test-build-documentation:
+    name: Test Build Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mandoc scdoc ninja-build
+
+      - name: Test Documentation
+        run: |
+          ./doc/configure
+          ninja
