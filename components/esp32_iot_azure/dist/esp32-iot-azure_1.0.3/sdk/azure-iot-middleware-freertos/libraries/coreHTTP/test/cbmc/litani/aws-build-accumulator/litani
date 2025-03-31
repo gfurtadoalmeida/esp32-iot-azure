@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+#
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# A copy of the License is located at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# or in the "license" file accompanying this file. This file is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+
+
+import argparse
+import asyncio
+import importlib
+import logging
+import pkgutil
+import sys
+
+from lib import litani
+import lib
+
+
+VALIDATE_DATA = False
+
+
+def add_subparsers(subparsers):
+    modules = list(pkgutil.iter_modules(
+        lib.__path__, prefix=f"{lib.__name__}."))
+    for module in modules:
+        imported_module = importlib.import_module(module.name)
+        if hasattr(imported_module, 'add_subparser'):
+            imported_module.add_subparser(subparsers)
+
+
+def get_args():
+    description = "Incrementally build up a dependency graph of jobs to execute"
+
+    pars = argparse.ArgumentParser(description=description)
+    subs = pars.add_subparsers(
+        title="subcommands", dest="subcommand")
+    subs.required = True
+
+    for arg in [{
+            "flags": ["-v", "--verbose"],
+            "action": "store_true",
+            "help": "verbose output",
+        }, {
+            "flags": ["-w", "--very-verbose"],
+            "action": "store_true",
+            "help": "debug output",
+        }, {
+            "flags": ["-V", "--version"],
+            "action": "version",
+            "version": litani.VERSION,
+            "help": "print data format version and exit",
+    }]:
+        flags = arg.pop("flags")
+        pars.add_argument(*flags, **arg)
+
+    add_subparsers(subs)
+
+    all_args = sys.argv[1:]
+    wrapped_command = None
+    if "--" in all_args:
+        sep_idx = all_args.index("--")
+        arg_list = all_args[0:sep_idx]
+        wrapped_command = arg_list[sep_idx+1:]
+        all_args = arg_list
+
+    args = pars.parse_args(all_args)
+    if wrapped_command is not None:
+        args.command = wrapped_command
+
+    return args
+
+
+def set_up_logging(args):
+    if args.very_verbose:
+        level = logging.DEBUG
+    elif args.verbose:
+        level = logging.INFO
+    else:
+        level = logging.WARNING
+    logging.basicConfig(
+        format="litani: %(message)s", level=level)
+
+
+async def main():
+    # pylint: disable=global-statement
+    global VALIDATE_DATA
+
+    args = get_args()
+    set_up_logging(args)
+
+    try:
+        # pylint: disable=unused-import
+        import voluptuous
+        import voluptuous.humanize
+        VALIDATE_DATA = True
+    except ImportError:
+        logging.debug(
+            "Litani requires the python module 'voluptuous' to be installed "
+            "to validate data. Installing voluptuous with pip or your "
+            "system package manager is recommended. Continuing without data "
+            "validation.")
+
+    await args.func(args)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

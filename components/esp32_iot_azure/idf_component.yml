@@ -1,0 +1,7 @@
+name: "esp32_iot_azure"
+version: "1.0.3"
+description: "ESP32 library for Azure IoT services"
+url: "https://github.com/gfurtadoalmeida/esp32-iot-azure"
+repository: "https://github.com/gfurtadoalmeida/esp32-iot-azure.git"
+dependencies:
+  idf: "5.3"

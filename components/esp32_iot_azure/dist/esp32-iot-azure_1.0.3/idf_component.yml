@@ -1,0 +1,6 @@
+dependencies:
+  idf: '5.3'
+description: ESP32 library for Azure IoT services
+repository: https://github.com/gfurtadoalmeida/esp32-iot-azure.git
+url: https://github.com/gfurtadoalmeida/esp32-iot-azure
+version: 1.0.3
