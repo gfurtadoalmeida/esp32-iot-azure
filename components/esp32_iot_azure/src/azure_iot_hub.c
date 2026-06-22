@@ -162,10 +162,12 @@ AzureIoTResult_t azure_iot_hub_unsubscribe_cloud_to_device_message(azure_iot_hub
 {
     return AzureIoTHubClient_UnsubscribeCloudToDeviceMessage(&context->iot_client);
 }
+
 AzureIoTResult_t azure_iot_hub_unsubscribe_command(azure_iot_hub_context_t *context)
 {
     return AzureIoTHubClient_UnsubscribeCommand(&context->iot_client);
 }
+
 AzureIoTResult_t azure_iot_hub_unsubscribe_properties(azure_iot_hub_context_t *context)
 {
     return AzureIoTHubClient_UnsubscribeProperties(&context->iot_client);
