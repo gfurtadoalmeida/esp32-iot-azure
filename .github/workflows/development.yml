@@ -16,6 +16,8 @@ on:
       - 'components/**'
       - 'main/**'
       - 'test/**'
+  schedule:
+    - cron: '0 6 1 * *'
   workflow_dispatch:
 
 concurrency:
@@ -45,7 +47,7 @@ jobs:
       run: docker pull ${{env.ESP_DOCKER_IMAGE}}
 
     - name: Build Push with Sonar
-      if: ${{github.event_name == 'push'}}
+      if: ${{github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'}}
       shell: pwsh
       run: |
         docker run `
