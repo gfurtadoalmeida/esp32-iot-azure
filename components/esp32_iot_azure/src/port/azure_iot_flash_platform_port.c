@@ -12,6 +12,7 @@ static const char TAG_FLASH_PORT[] = "AZ_FLASH_PORT";
 
 static AzureIoTResult_t base64_decode(const uint8_t *encoded, size_t encoded_length, uint8_t *output_buffer, size_t output_buffer_length, size_t *bytes_written);
 static AzureIoTResult_t image_calculate_hmac_256(const AzureADUImage_t *adu_image, uint8_t *output_buffer);
+static AzureIoTResult_t image_verify(const AzureADUImage_t *adu_image, const uint8_t *encoded_hash, uint32_t encoded_hash_length);
 
 int64_t AzureIoTPlatform_GetSingleFlashBootBankSize()
 {
@@ -62,52 +63,16 @@ AzureIoTResult_t AzureIoTPlatform_VerifyImage(AzureADUImage_t *const pxAduImage,
                                               uint8_t *pucSHA256Hash,
                                               uint32_t ulSHA256HashLength)
 {
-    uint8_t decoded_hash[AZURE_IOT_SHA_256_SIZE];
-    uint8_t calculated_hash[AZURE_IOT_SHA_256_SIZE];
-    size_t base64_decoded_length;
-
     CMP_LOGI(TAG_FLASH_PORT, "base64 encoded hash from ADU: %.*s", (int)ulSHA256HashLength, pucSHA256Hash);
 
-    if (pxAduImage->image_size == 0)
+    AzureIoTResult_t result = image_verify(pxAduImage, pucSHA256Hash, ulSHA256HashLength);
+
+    if (result != eAzureIoTSuccess)
     {
-        CMP_LOGE(TAG_FLASH_PORT, "invalid image: no content");
-        goto ERROR;
+        esp_ota_abort(pxAduImage->ota);
     }
 
-    if (base64_decode(pucSHA256Hash, (unsigned int)ulSHA256HashLength, decoded_hash, sizeof(decoded_hash), &base64_decoded_length) != eAzureIoTSuccess)
-    {
-        CMP_LOGE(TAG_FLASH_PORT, "failure decoding base64 SHA256");
-        goto ERROR;
-    }
-
-    if (image_calculate_hmac_256(pxAduImage, calculated_hash) != eAzureIoTSuccess)
-    {
-        CMP_LOGE(TAG_FLASH_PORT, "failure calculating image hash");
-        goto ERROR;
-    }
-
-    if (memcmp(decoded_hash, calculated_hash, AZURE_IOT_SHA_256_SIZE) != 0)
-    {
-        CMP_LOGE(TAG_FLASH_PORT, "hashes does not match");
-        CMP_LOGE(TAG_FLASH_PORT, "hash wanted: ");
-        CMP_LOG_BUFFER_HEX(TAG_FLASH_PORT, decoded_hash, sizeof(decoded_hash));
-        CMP_LOGE(TAG_FLASH_PORT, "hash calculated: ");
-        CMP_LOG_BUFFER_HEX(TAG_FLASH_PORT, calculated_hash, sizeof(calculated_hash));
-        goto ERROR;
-    }
-
-    if (esp_ota_end(pxAduImage->ota) != ESP_OK)
-    {
-        CMP_LOGE(TAG_FLASH_PORT, "failure ending OTA");
-        goto ERROR;
-    }
-
-    return eAzureIoTSuccess;
-
-ERROR:
-    esp_ota_abort(pxAduImage->ota);
-
-    return eAzureIoTErrorFailed;
+    return result;
 }
 
 AzureIoTResult_t AzureIoTPlatform_EnableImage(AzureADUImage_t *const pxAduImage)
@@ -189,4 +154,49 @@ static AzureIoTResult_t image_calculate_hmac_256(const AzureADUImage_t *adu_imag
     CMP_LOGD(TAG_FLASH_PORT, "image hash calculated");
 
     return result;
+}
+
+static AzureIoTResult_t image_verify(const AzureADUImage_t *adu_image,
+                                     const uint8_t *encoded_hash,
+                                     uint32_t encoded_hash_length)
+{
+    uint8_t decoded_hash[AZURE_IOT_SHA_256_SIZE];
+    uint8_t calculated_hash[AZURE_IOT_SHA_256_SIZE];
+    size_t base64_decoded_length;
+
+    if (adu_image->image_size == 0)
+    {
+        CMP_LOGE(TAG_FLASH_PORT, "invalid image: no content");
+        return eAzureIoTErrorFailed;
+    }
+
+    if (base64_decode(encoded_hash, (unsigned int)encoded_hash_length, decoded_hash, sizeof(decoded_hash), &base64_decoded_length) != eAzureIoTSuccess)
+    {
+        CMP_LOGE(TAG_FLASH_PORT, "failure decoding base64 SHA256");
+        return eAzureIoTErrorFailed;
+    }
+
+    if (image_calculate_hmac_256(adu_image, calculated_hash) != eAzureIoTSuccess)
+    {
+        CMP_LOGE(TAG_FLASH_PORT, "failure calculating image hash");
+        return eAzureIoTErrorFailed;
+    }
+
+    if (memcmp(decoded_hash, calculated_hash, AZURE_IOT_SHA_256_SIZE) != 0)
+    {
+        CMP_LOGE(TAG_FLASH_PORT, "hashes does not match");
+        CMP_LOGE(TAG_FLASH_PORT, "hash wanted: ");
+        CMP_LOG_BUFFER_HEX(TAG_FLASH_PORT, decoded_hash, sizeof(decoded_hash));
+        CMP_LOGE(TAG_FLASH_PORT, "hash calculated: ");
+        CMP_LOG_BUFFER_HEX(TAG_FLASH_PORT, calculated_hash, sizeof(calculated_hash));
+        return eAzureIoTErrorFailed;
+    }
+
+    if (esp_ota_end(adu_image->ota) != ESP_OK)
+    {
+        CMP_LOGE(TAG_FLASH_PORT, "failure ending OTA");
+        return eAzureIoTErrorFailed;
+    }
+
+    return eAzureIoTSuccess;
 }

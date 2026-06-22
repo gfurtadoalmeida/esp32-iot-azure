@@ -35,25 +35,18 @@ static AzureIoTResult_t device_report_initial_state(example_context_t *context);
 static AzureIoTResult_t device_change_state(example_context_t *context, const AzureIoTHubClientPropertiesResponse_t *message, uint32_t *version);
 static AzureIoTResult_t device_report_state_changed(example_context_t *context, uint32_t version);
 
-bool example_iot_hub_run(const buffer_t *iot_hub_hostname,
-                         const buffer_t *device_id,
-                         const buffer_t *device_symmetric_key)
+static bool example_iot_hub_setup(azure_iot_hub_context_t *iot,
+                                  example_context_t *example_context,
+                                  const buffer_t *iot_hub_hostname,
+                                  const buffer_t *device_id,
+                                  const buffer_t *device_symmetric_key)
 {
-    bool success = false;
     AzureIoTHubClientOptions_t *iot_client_options = NULL;
-    buffer_t buffer = {
-        .length = 4096,
-        .buffer = (uint8_t *)malloc(4096)};
-
-    azure_iot_hub_context_t *iot = azure_iot_hub_create(&buffer);
-
-    example_context_t *example_context = &EXAMPLE_CONTEXT;
-    example_context->iot_hub = iot;
 
     if (azure_iot_hub_options_init(iot, &iot_client_options) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure initializing options");
-        goto CLEAN_UP;
+        return false;
     }
 
     iot_client_options->pxComponentList = (AzureIoTHubClientComponent_t[2]){
@@ -68,84 +61,104 @@ bool example_iot_hub_run(const buffer_t *iot_hub_hostname,
                            (uint16_t)device_id->length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure initializing");
-        goto CLEAN_UP;
+        return false;
     }
 
     if (azure_iot_hub_auth_set_symmetric_key(iot, device_symmetric_key->buffer, device_symmetric_key->length) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure setting symmetric key");
-        goto CLEAN_UP;
+        return false;
     }
 
     if (azure_iot_hub_connect(iot) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure connecting");
-        goto CLEAN_UP;
+        return false;
     }
 
     if (azure_iot_hub_subscribe_cloud_to_device_message(iot, &callback_cloud_to_device_subscription, example_context) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure subscribing to cloud-to-device messages");
-        goto CLEAN_UP;
+        return false;
     }
 
     if (azure_iot_hub_subscribe_command(iot, &callback_cloud_command_subscription, example_context) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure subscribing to commands");
-        goto CLEAN_UP;
+        return false;
     }
 
     if (azure_iot_hub_subscribe_properties(iot, &callback_cloud_properties_subscription, example_context) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure subscribing to properties");
-        goto CLEAN_UP;
+        return false;
     }
 
     if (azure_iot_hub_request_properties_async(iot) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure requesting device properties document");
-        goto CLEAN_UP;
+        return false;
     }
 
     if (device_report_initial_state(example_context) != eAzureIoTSuccess)
     {
         ESP_LOGE(TAG_EX_IOT, "failure reporting initial state");
-        goto CLEAN_UP;
+        return false;
     }
 
-    buffer_t telemetry_payload = BUFFER_WITH_FIXED_LENGTH(15);
+    return true;
+}
 
-    while (!example_context->restart_command_called)
+bool example_iot_hub_run(const buffer_t *iot_hub_hostname,
+                         const buffer_t *device_id,
+                         const buffer_t *device_symmetric_key)
+{
+    bool success = false;
+    buffer_t buffer = {
+        .length = 4096,
+        .buffer = (uint8_t *)malloc(4096)};
+
+    azure_iot_hub_context_t *iot = azure_iot_hub_create(&buffer);
+
+    example_context_t *example_context = &EXAMPLE_CONTEXT;
+    example_context->iot_hub = iot;
+
+    if (example_iot_hub_setup(iot, example_context, iot_hub_hostname, device_id, device_symmetric_key))
     {
-        telemetry_payload.length = sprintf((char *)telemetry_payload.buffer,
-                                           "{\"" TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME "\":%d}",
-                                           rand() % (28 + 1 - 18) + 18);
+        buffer_t telemetry_payload = BUFFER_WITH_FIXED_LENGTH(15);
 
-        if (azure_iot_hub_send_telemetry_from_component(iot,
-                                                        (uint8_t *)TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME,
-                                                        sizeof_l(TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME),
-                                                        telemetry_payload.buffer,
-                                                        telemetry_payload.length,
-                                                        eAzureIoTHubMessageQoS1,
-                                                        NULL) != eAzureIoTSuccess)
+        while (!example_context->restart_command_called)
         {
-            ESP_LOGE(TAG_EX_IOT, "failure sending telemetry");
+            telemetry_payload.length = sprintf((char *)telemetry_payload.buffer,
+                                               "{\"" TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME "\":%d}",
+                                               rand() % (28 + 1 - 18) + 18);
+
+            if (azure_iot_hub_send_telemetry_from_component(iot,
+                                                            (uint8_t *)TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME,
+                                                            sizeof_l(TEMP_CTRL_CMP_THERMOSTAT_PRP_TLY_TEMPERATURE_NAME),
+                                                            telemetry_payload.buffer,
+                                                            telemetry_payload.length,
+                                                            eAzureIoTHubMessageQoS1,
+                                                            NULL) != eAzureIoTSuccess)
+            {
+                ESP_LOGE(TAG_EX_IOT, "failure sending telemetry");
+            }
+
+            if (azure_iot_hub_process_loop(iot) != eAzureIoTSuccess)
+            {
+                ESP_LOGE(TAG_EX_IOT, "failure processing loop");
+            }
+
+            vTaskDelay(pdMS_TO_TICKS(1000));
         }
 
-        if (azure_iot_hub_process_loop(iot) != eAzureIoTSuccess)
-        {
-            ESP_LOGE(TAG_EX_IOT, "failure processing loop");
-        }
+        azure_iot_hub_unsubscribe_cloud_to_device_message(iot);
+        azure_iot_hub_unsubscribe_command(iot);
+        azure_iot_hub_unsubscribe_properties(iot);
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        success = true;
     }
 
-    azure_iot_hub_unsubscribe_cloud_to_device_message(iot);
-    azure_iot_hub_unsubscribe_command(iot);
-    azure_iot_hub_unsubscribe_properties(iot);
-
-    success = true;
-CLEAN_UP:
     azure_iot_hub_disconnect(iot);
     azure_iot_hub_deinit(iot);
     azure_iot_hub_free(iot);
